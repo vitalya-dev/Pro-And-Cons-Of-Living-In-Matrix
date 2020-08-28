@@ -1,0 +1,121 @@
+REXPaint v1.50
+
+I=0000000 Initializing resources
+W=0000002 Config::init() | Unable to open REXPaint.cfg, creating new default config
+I=0000018 Initializing Rogue Engine X
+I=0000018 |   Starting SDL
+I=0000259 |   Importing icon
+I=0000262 |   Confirmed resource initialization
+I=0000262 |   Loading colors
+I=0000262 |   Initializing font type data
+I=0000262 |   Mapping standard ASCII values
+I=0000262 |   Loading fonts
+I=0000263 |   |   [font set: CP437 12x12]
+I=0000266 |   |   ...cp437_12x12.png
+I=0000268 |   |   ...cp437_12x12.png
+I=0000268 |   |   [font set: CP437 14x14]
+I=0000273 |   |   ...cp437_14x14.png
+I=0000276 |   |   ...cp437_14x14.png
+I=0000276 |   |   [font set: CP437 16x16]
+I=0000281 |   |   ...cp437_16x16.png
+I=0000285 |   |   ...cp437_16x16.png
+I=0000285 |   |   [font set: CP437 18x18]
+I=0000291 |   |   ...cp437_18x18.png
+I=0000296 |   |   ...cp437_18x18.png
+I=0000297 |   |   [font set ignored: CP437 20x20] (resolution exceeds desktop)
+I=0000297 |   |   [font set: CP437 8x8]
+I=0000299 |   |   ...cp437_8x8.png
+I=0000300 |   |   ...cp437_8x8.png
+I=0000300 |   |   [font set: CP437 10x10]
+I=0000303 |   |   ...cp437_10x10.png
+I=0000305 |   |   ...cp437_10x10.png
+I=0000305 |   \---DONE
+I=0000305 |   Setting video mode
+I=0000305 |   |   Calculating dimensions
+I=0000305 |   |   ...charW=12
+I=0000305 |   |   ...charH=12
+I=0000305 |   |   ...wMin=936
+I=0000305 |   |   ...hMin=720
+I=0000305 |   |   ...wWanted=936
+I=0000305 |   |   ...hWanted=720
+I=0000305 |   |   All video modes available
+I=0000305 |   |   Setting software video mode
+I=0000315 |   \---DONE
+I=0000315 |   Setting video mode
+I=0000315 |   |   Calculating dimensions
+I=0000315 |   |   ...charW=12
+I=0000315 |   |   ...charH=12
+I=0000315 |   |   ...wMin=936
+I=0000315 |   |   ...hMin=720
+I=0000315 |   |   ...wWanted=936
+I=0000315 |   |   ...hWanted=720
+I=0000315 |   |   All video modes available
+I=0000315 |   |   Setting software video mode
+I=0000320 |   \---DONE
+I=0000320 |   Initializing audio
+I=0001057 |   Creating console
+I=0001060 \---DONE
+I=0001077 RP::initialize() | Initializing program
+I=0001077 |   Mapping font glyphs
+I=0001077 |   Creating game consoles
+I=0001078 |   CProgram() | Creating CProgram
+I=0001078 |   |   Initializing input domains and commands
+I=0001078 |   |   Loading inline colors
+I=0001078 |   \---DONE
+I=0001078 |   Creating top-level consoles
+I=0001078 |   ...CPaint
+I=0001092 |   Loading palette: Palette
+I=0001097 |   ...CBrowse
+I=0001099 |   ...CCanvas
+I=0001102 |   ...CPicker
+I=0001104 |   ...CFilename
+I=0001104 |   ...CResize
+I=0001104 |   ...CConfirm
+I=0001104 |   ...COptions
+I=0001104 |   ...CCommands
+I=0001105 |   ...CMessage
+I=0001105 |   ...CMessage 2
+I=0001106 |   Http::newsCheck() | Checking version and retrieving news
+I=0001106 \---DONE
+I=0001106 |   Resolving address...
+I=0001106 |   Starting REX loop
+I=0001144 |   Connecting...
+I=0001363 |   Sending content...
+I=0001363 |   Waiting for ACK...
+I=0001879 |   Got 306 bytes: HTTP/1.1 200 OK
+Date: Fri, 28 Aug 2020 04:44:36 GMT
+Server: Apache
+Upgrade: h2,h2c
+Connection: Upgrade
+Vary: Accept-Encoding
+Content-Length: 112
+Content-Type: text/html; charset=UTF-8
+
+version_v1.50:REXPaint v1.50 is out! See the announcement on Grid Sage Forums for the latest version info.</END>
+I=0001879 |   POST succeeded
+I=0001879 |   Closing socket...
+I=0001879 \---DONE
+I=0306141 Setting video mode
+I=0306141 |   Calculating dimensions
+I=0306141 |   ...charW=10
+I=0306141 |   ...charH=10
+I=0306141 |   ...wMin=780
+I=0306141 |   ...hMin=600
+I=0306141 |   ...wWanted=780
+I=0306142 |   ...hWanted=600
+I=0306142 |   All video modes available
+I=0306142 |   Setting software video mode
+I=0306147 \---DONE
+I=0307196 Setting video mode
+I=0307196 |   Calculating dimensions
+I=0307196 |   ...charW=12
+I=0307196 |   ...charH=12
+I=0307196 |   ...wMin=936
+I=0307196 |   ...hMin=720
+I=0307196 |   ...wWanted=936
+I=0307197 |   ...hWanted=720
+I=0307197 |   All video modes available
+I=0307197 |   Setting software video mode
+I=0307203 \---DONE
+I=0575856 Saving config
+I=0575872 exitREXPaint() | Cleaning up program before exit
