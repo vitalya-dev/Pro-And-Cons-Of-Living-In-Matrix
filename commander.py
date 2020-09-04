@@ -7,11 +7,20 @@ pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
+font = pygame.font.Font('data/unispace bd.ttf', 32)
+
+
 
 def button(text):
   btn = pygame.Surface((96, 32))
   btn.fill(pygame.Color('#57ffff'))
+  btn.blit(font.render(text, False, pygame.Color('#000000')), (0, 0))
   return btn
+
+def label(text):
+  label = pygame.Surface((32, 32))
+  label.blit(font.render(text, False, pygame.Color('#fefe03')), (0, 0))
+  return label
 
 
 main_window = pygame.surface.Surface(SCREEN_SIZE).convert()
@@ -21,13 +30,20 @@ pathbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 pathbar.fill(pygame.Color('#fefe03'))
 
 #================================================================#
-help_button = button(help)
-#================================================================#
-
-#================================================================#
 buttonbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 buttonbar.fill(pygame.Color('#000000'))
-buttonbar.blit(help_button, (32, 0))
+
+buttonbar.blit(label('X'), (16 + 8, 0))
+buttonbar.blit(button('Help'), (16 + 32, 0))
+
+buttonbar.blit(label('Y'), (176 + 8, 0))
+buttonbar.blit(button('Menu'), (176 + 32, 0))
+
+buttonbar.blit(label('B'), (336 + 8, 0))
+buttonbar.blit(button('Edit'), (336 + 32, 0))
+
+buttonbar.blit(label('A'), (496 + 8, 0))
+buttonbar.blit(button('View'), (496 + 32, 0))
 #================================================================#
 
 #================================================================#
