@@ -1,3 +1,4 @@
+import os
 import pygame
 from pygame.locals import *
 
@@ -17,32 +18,39 @@ def button(text):
   btn.blit(font.render(text, False, pygame.Color('#000000')), (0, 0))
   return btn
 
-def label(text):
-  label = pygame.Surface((32, 32))
-  label.blit(font.render(text, False, pygame.Color('#fefe03')), (0, 0))
-  return label
+def label(text, color):
+  return font.render(text, False, color)
 
 
+#================================================================#
 main_window = pygame.surface.Surface(SCREEN_SIZE).convert()
 main_window.fill(pygame.Color('#0000a8'))
+#================================================================#
 
+#================================================================#
 pathbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 pathbar.fill(pygame.Color('#fefe03'))
+
+path = os.path.dirname(os.path.abspath(__file__)) + "/"
+if len(path) > 30:
+  path = ".." + path[-28:]
+pathbar.blit(label(path, pygame.Color('#000000')), (16, 0))
+#================================================================#
 
 #================================================================#
 buttonbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 buttonbar.fill(pygame.Color('#000000'))
 
-buttonbar.blit(label('X'), (16 + 8, 0))
+buttonbar.blit(label('X', pygame.Color('#fefe03')), (16 + 8, 0))
 buttonbar.blit(button('Help'), (16 + 32, 0))
 
-buttonbar.blit(label('Y'), (176 + 8, 0))
+buttonbar.blit(label('Y', pygame.Color('#fefe03')), (176 + 8, 0))
 buttonbar.blit(button('Menu'), (176 + 32, 0))
 
-buttonbar.blit(label('B'), (336 + 8, 0))
+buttonbar.blit(label('B', pygame.Color('#fefe03')), (336 + 8, 0))
 buttonbar.blit(button('Edit'), (336 + 32, 0))
 
-buttonbar.blit(label('A'), (496 + 8, 0))
+buttonbar.blit(label('A', pygame.Color('#fefe03')), (496 + 8, 0))
 buttonbar.blit(button('View'), (496 + 32, 0))
 #================================================================#
 
@@ -59,7 +67,7 @@ while True:
     if event.type == QUIT:
       pygame.quit()
       quit()
-    if event.type == KEYDOWN:
+    if event.type == KEYDOWN and event.key == K_ESCAPE:
       pygame.quit()
       quit()
   #RENDER
