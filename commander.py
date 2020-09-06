@@ -6,6 +6,9 @@ from pygame.locals import *
 SCREEN_SIZE = (640, 480)
 #================================================================#
 
+
+
+#================================================================#
 def button(text):
   btn = pygame.Surface((96, 32))
   btn.fill(pygame.Color('#57ffff'))
@@ -14,12 +17,17 @@ def button(text):
 
 def label(text, color):
   return font.render(text, False, color)
+#================================================================#
+
 
 
 #================================================================#
 pygame.init()
 pygame.key.set_repeat(10, 75)
+#================================================================#
 
+
+#================================================================#
 screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
 font = pygame.font.Font('data/unispace bd.ttf', 32)
@@ -84,13 +92,14 @@ class Fpanel(object):
         self.surface = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
         self.selection_bar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
         self.selection_index = 0
+        self.flist = ['..'] + os.listdir(os.curdir)
 
     def render(self):
       self.surface.fill(pygame.Color('#0000a8'))
       self.selection_bar.fill(pygame.Color('#57ffff'))
       self.surface.blit(self.selection_bar, (0, self.selection_index * 32))
       #=================#
-      for i, f in enumerate(os.listdir(os.curdir)):
+      for i, f in enumerate(self.flist):
         if i == self.selection_index: self.surface.blit(label(f, pygame.Color('#000000')), (0, i * 32))
         else:                         self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
       #=================#
@@ -102,19 +111,31 @@ class Fpanel(object):
           self.selection_index += 1
         if e.type == KEYDOWN and e.key == K_UP:
           self.selection_index -= 1
+        if e.type == KEYDOWN and e.key == K_RETURN and os.path.isdir(self.flist[self.selection_index]):
+          os.chdir(self.flist[self.selection_index])
+          self.flist = ['..'] + os.listdir(os.curdir)
+    
+ 
+
+# os.chdir(os.path.dirname(sys.argv[0]))  if event.key == pygame.K_RETURN:
 
 fpanel = Fpanel()
 #================================================================#
 
+
+
+#================================================================#
 while not done:
   dt = clock.tick(60)
   #PROCESS
   events = pygame.event.get()
+  #=================#
   for e in events:
     if e.type == QUIT:
       done = True
     if e.type == KEYDOWN and e.key == K_ESCAPE:
       done = True
+  #=================#
   pathbar.process(events)
   fpanel.process(events)
   buttonbar.process(events)
@@ -125,10 +146,8 @@ while not done:
   screen.blit(buttonbar.render(), (0, SCREEN_SIZE[1] - 32))
   #UPDATE
   pygame.display.update()
-
-
 pygame.quit()
 quit()
-
+#================================================================#
 
 
