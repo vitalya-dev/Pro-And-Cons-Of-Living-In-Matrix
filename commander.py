@@ -9,6 +9,12 @@ SCREEN_SIZE = (640, 480)
 
 
 #================================================================#
+def clamp(val, min, max):
+  if val < min: return min
+  if val > max: return max
+  return val
+
+
 def button(text):
   btn = pygame.Surface((96, 32))
   btn.fill(pygame.Color('#57ffff'))
@@ -109,11 +115,15 @@ class Fpanel(object):
       for e in events:
         if e.type == KEYDOWN and e.key == K_DOWN:
           self.selection_index += 1
-        if e.type == KEYDOWN and e.key == K_UP:
+        elif e.type == KEYDOWN and e.key == K_UP:
           self.selection_index -= 1
-        if e.type == KEYDOWN and e.key == K_RETURN and os.path.isdir(self.flist[self.selection_index]):
+        elif e.type == KEYDOWN and e.key == K_RETURN and os.path.isdir(self.flist[self.selection_index]):
           os.chdir(self.flist[self.selection_index])
           self.flist = ['..'] + os.listdir(os.curdir)
+          self.selection_index = 0
+      #=================#
+      self.selection_index %= len(self.flist)
+
     
  
 
