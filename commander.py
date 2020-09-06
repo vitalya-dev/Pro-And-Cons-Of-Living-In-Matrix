@@ -18,86 +18,117 @@ def label(text, color):
 
 #================================================================#
 pygame.init()
+pygame.key.set_repeat(10, 75)
 
 screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
 font = pygame.font.Font('data/unispace bd.ttf', 32)
+done = False
 #================================================================#
 
 
 #================================================================#
-pathbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
-pathbar.fill(pygame.Color('#fefe03'))
+class Pathbar(object):
+    def __init__(self):
+        self.surface = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 
-path = os.path.abspath(os.curdir) + "/"
-if len(path) > 30:
-  path = ".." + path[-28:]
-pathbar.blit(label(path, pygame.Color('#000000')), (16, 0))
+    def render(self):
+      self.surface.fill(pygame.Color('#fefe03'))
+      #=================#
+      path = os.path.abspath(os.curdir) + "/"
+      if len(path) > 30:
+        path = ".." + path[-28:]
+        self.surface.blit(label(path, pygame.Color('#000000')), (16, 0))
+      #=================#
+      return self.surface
+
+    def process(self, e):
+      pass
+
+pathbar = Pathbar()
 #================================================================#
 
 
 #================================================================#
-buttonbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
-buttonbar.fill(pygame.Color('#000000'))
+class Buttonbar(object):
+    def __init__(self):
+        self.surface = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 
-buttonbar.blit(label('X', pygame.Color('#fefe03')), (16 + 8, 0))
-buttonbar.blit(button('Help'), (16 + 32, 0))
+    def render(self):
+      self.surface.fill(pygame.Color('#000000'))
+      #=================#
+      self.surface.blit(label('X', pygame.Color('#fefe03')), (16 + 8, 0))
+      self.surface.blit(button('Help'), (16 + 32, 0))
 
-buttonbar.blit(label('Y', pygame.Color('#fefe03')), (176 + 8, 0))
-buttonbar.blit(button('Menu'), (176 + 32, 0))
+      self.surface.blit(label('Y', pygame.Color('#fefe03')), (176 + 8, 0))
+      self.surface.blit(button('Menu'), (176 + 32, 0))
 
-buttonbar.blit(label('B', pygame.Color('#fefe03')), (336 + 8, 0))
-buttonbar.blit(button('Edit'), (336 + 32, 0))
+      self.surface.blit(label('B', pygame.Color('#fefe03')), (336 + 8, 0))
+      self.surface.blit(button('Edit'), (336 + 32, 0))
 
-buttonbar.blit(label('A', pygame.Color('#fefe03')), (496 + 8, 0))
-buttonbar.blit(button('View'), (496 + 32, 0))
+      self.surface.blit(label('A', pygame.Color('#fefe03')), (496 + 8, 0))
+      self.surface.blit(button('View'), (496 + 32, 0))
+      #=================#
+      return self.surface
+
+    def process(self, e):
+      pass
+
+buttonbar = Buttonbar()
 #================================================================#
 
 
 #================================================================#
-fpanel = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
-fpanel.fill(pygame.Color('#0000a8'))
+class Fpanel(object):
+    def __init__(self):
+        self.surface = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
+        self.selection_bar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
+        self.selection_index = 0
 
-fpanel_selection = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
-fpanel_selection.fill(pygame.Color('#57ffff'))
+    def render(self):
+      self.surface.fill(pygame.Color('#0000a8'))
+      self.selection_bar.fill(pygame.Color('#57ffff'))
+      self.surface.blit(self.selection_bar, (0, self.selection_index * 32))
+      #=================#
+      for i, f in enumerate(os.listdir(os.curdir)):
+        if i == self.selection_index: self.surface.blit(label(f, pygame.Color('#000000')), (0, i * 32))
+        else:                         self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
+      #=================#
+      return self.surface
 
-for i, f in enumerate(os.listdir(os.curdir)):
-  if i == 0:
-    fpanel.blit(fpanel_selection, (0, i * 32))
-    fpanel.blit(label(f, pygame.Color('#000000')), (0, i * 32))
-  else:
-    fpanel.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
+    def process(self, e):
+      for e in events:
+        if e.type == KEYDOWN and e.key == K_DOWN:
+          self.selection_index += 1
+        if e.type == KEYDOWN and e.key == K_UP:
+          self.selection_index -= 1
+
+fpanel = Fpanel()
 #================================================================#
 
-
-#================================================================#
-main_window = pygame.surface.Surface(SCREEN_SIZE).convert()
-main_window.fill(pygame.Color('#000000'))
-
-main_window.blit(pathbar, (0, 0))
-main_window.blit(fpanel, (0, 32))
-main_window.blit(buttonbar, (0, SCREEN_SIZE[1] - 32))
-#================================================================#
-
-
-while True:
+while not done:
   dt = clock.tick(60)
   #PROCESS
-  for event in pygame.event.get():
-    if event.type == QUIT:
-      pygame.quit()
-      quit()
-    if event.type == KEYDOWN and event.key == K_ESCAPE:
-      pygame.quit()
-      quit()
+  events = pygame.event.get()
+  for e in events:
+    if e.type == QUIT:
+      done = True
+    if e.type == KEYDOWN and e.key == K_ESCAPE:
+      done = True
+  pathbar.process(events)
+  fpanel.process(events)
+  buttonbar.process(events)
   #RENDER
-  screen.fill((0, 0, 0))
-  screen.blit(main_window, (0, 0))
+  screen.fill(pygame.Color('#000000'))
+  screen.blit(pathbar.render(), (0, 0))
+  screen.blit(fpanel.render(), (0, 32))
+  screen.blit(buttonbar.render(), (0, SCREEN_SIZE[1] - 32))
   #UPDATE
   pygame.display.update()
 
 
-
+pygame.quit()
+quit()
 
 
 
