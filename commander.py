@@ -2,15 +2,9 @@ import os
 import pygame
 from pygame.locals import *
 
+#================================================================#
 SCREEN_SIZE = (640, 480)
-
-pygame.init()
-
-screen = pygame.display.set_mode((640, 480))
-clock = pygame.time.Clock()
-font = pygame.font.Font('data/unispace bd.ttf', 32)
-
-
+#================================================================#
 
 def button(text):
   btn = pygame.Surface((96, 32))
@@ -23,19 +17,24 @@ def label(text, color):
 
 
 #================================================================#
-main_window = pygame.surface.Surface(SCREEN_SIZE).convert()
-main_window.fill(pygame.Color('#0000a8'))
+pygame.init()
+
+screen = pygame.display.set_mode((640, 480))
+clock = pygame.time.Clock()
+font = pygame.font.Font('data/unispace bd.ttf', 32)
 #================================================================#
+
 
 #================================================================#
 pathbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
 pathbar.fill(pygame.Color('#fefe03'))
 
-path = os.path.dirname(os.path.abspath(__file__)) + "/"
+path = os.path.abspath(os.curdir) + "/"
 if len(path) > 30:
   path = ".." + path[-28:]
 pathbar.blit(label(path, pygame.Color('#000000')), (16, 0))
 #================================================================#
+
 
 #================================================================#
 buttonbar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
@@ -54,8 +53,29 @@ buttonbar.blit(label('A', pygame.Color('#fefe03')), (496 + 8, 0))
 buttonbar.blit(button('View'), (496 + 32, 0))
 #================================================================#
 
+
 #================================================================#
+fpanel = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
+fpanel.fill(pygame.Color('#0000a8'))
+
+fpanel_selection = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
+fpanel_selection.fill(pygame.Color('#57ffff'))
+
+for i, f in enumerate(os.listdir(os.curdir)):
+  if i == 0:
+    fpanel.blit(fpanel_selection, (0, i * 32))
+    fpanel.blit(label(f, pygame.Color('#000000')), (0, i * 32))
+  else:
+    fpanel.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
+#================================================================#
+
+
+#================================================================#
+main_window = pygame.surface.Surface(SCREEN_SIZE).convert()
+main_window.fill(pygame.Color('#000000'))
+
 main_window.blit(pathbar, (0, 0))
+main_window.blit(fpanel, (0, 32))
 main_window.blit(buttonbar, (0, SCREEN_SIZE[1] - 32))
 #================================================================#
 
