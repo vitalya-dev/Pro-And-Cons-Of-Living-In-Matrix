@@ -103,12 +103,6 @@ class Fpanel(object):
     def render(self):
       self.surface.fill(pygame.Color('#0000a8'))
       self.selection_bar.fill(pygame.Color('#57ffff'))
-      self.surface.blit(self.selection_bar, (0, self.selection_index * 32))
-      #=================#
-      for i, f in enumerate(self.flist):
-        if i == self.selection_index: self.surface.blit(label(f, pygame.Color('#000000')), (0, i * 32))
-        else:                         self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
-      #=================#
       return self.surface
 
     def process(self, e):
@@ -124,14 +118,45 @@ class Fpanel(object):
       #=================#
       self.selection_index %= len(self.flist)
 
+    def __draw(self, surf, i):
+      self.surface.blit(surf, (0, i * 32))
+
+
+class Spanel(Fpanel):
+  def __init__(self):
+    super().__init__()
+    self.scroll_area = [0, 12]
+    self.scroll_index = 0
+  
+  def process(self, e):
+    super().process(e)
+    self.__scroll()
+
+  def render(self):
+    super().render()
+    self.__draw(self.selection_bar, self.scroll_index)
+    #=================#
+    for i, f in enumerate(self.flist[self.scroll_area[0]:]):
+      if i == scroll_index: self.__draw(label(f, pygame.Color('#000000')), i)
+      else:                 self.__draw(label(f, pygame.Color('#57ffff')), i)
+    #=================#
+    return self.surface
+
+
+  def __scroll(self):
+    if self.selection_index < self.scroll_area[0]:
+      self.scroll_area[0] = self.selection_index
+      self.scroll_area[1] = self.scroll_area[0] + 12
+    if self.selection_index > self.scroll_area[1]:
+      self.scroll_area[1] = self.selection_index
+      self.scroll_area[0] = self.scroll_area[1] - 12
+    self.scroll_index = self.selection_index - self.scroll_area[0]
+    
+
+fpanel = Spanel()
+#================================================================#
     
  
-
-# os.chdir(os.path.dirname(sys.argv[0]))  if event.key == pygame.K_RETURN:
-
-fpanel = Fpanel()
-#================================================================#
-
 
 
 #================================================================#
