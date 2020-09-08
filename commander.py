@@ -47,19 +47,18 @@ done = False
 class Pathbar(object):
     def __init__(self):
         self.surface = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
+        self.path = ''
 
     def render(self):
       self.surface.fill(pygame.Color('#fefe03'))
-      #=================#
-      path = os.path.abspath(os.curdir) + "/"
-      if len(path) > 30:
-        path = ".." + path[-28:]
-        self.surface.blit(label(path, pygame.Color('#000000')), (16, 0))
+      self.surface.blit(label(self.path, pygame.Color('#000000')), (16, 0))
       #=================#
       return self.surface
 
     def process(self, e):
-      pass
+      self.path = os.path.abspath(os.curdir)
+      if len(self.path) > 30:
+        self.path = ".." + self.path[-28:]
 
 pathbar = Pathbar()
 #================================================================#
@@ -113,7 +112,6 @@ class Fpanel(object):
         os.chdir(self.flist[self.selection_index])
         self.flist = ['..'] + os.listdir(os.curdir)
         self.selection_index = 0
-    #=================#
     self.selection_index %= len(self.flist)
 
 class SFpanel(Fpanel):
