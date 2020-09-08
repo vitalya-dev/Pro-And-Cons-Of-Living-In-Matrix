@@ -7,14 +7,16 @@ SCREEN_SIZE = (640, 480)
 #================================================================#
 
 
-
 #================================================================#
 def clamp(val, min, max):
   if val < min: return min
   if val > max: return max
   return val
+#================================================================#
 
 
+
+#================================================================#
 def button(text):
   btn = pygame.Surface((96, 32))
   btn.fill(pygame.Color('#57ffff'))
@@ -94,54 +96,53 @@ buttonbar = Buttonbar()
 
 #================================================================#
 class Fpanel(object):
-    def __init__(self):
-        self.surface = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
-        self.selection_bar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
-        self.selection_index = 0
+  def __init__(self):
+    self.surface = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
+    self.selection_bar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
+    self.selection_index = 0
+    self.flist = ['..'] + os.listdir(os.curdir)
+
+  def render(self):
+    self.surface.fill(pygame.Color('#0000a8'))
+    self.selection_bar.fill(pygame.Color('#57ffff'))
+    return self.surface
+
+  def process(self, e):
+    for e in events:
+      if e.type == KEYDOWN and e.key == K_DOWN:
+        self.selection_index += 1
+      elif e.type == KEYDOWN and e.key == K_UP:
+        self.selection_index -= 1
+      elif e.type == KEYDOWN and e.key == K_RETURN and os.path.isdir(self.flist[self.selection_index]):
+        os.chdir(self.flist[self.selection_index])
         self.flist = ['..'] + os.listdir(os.curdir)
+        self.selection_index = 0
+    #=================#
+    self.selection_index %= len(self.flist)
 
-    def render(self):
-      self.surface.fill(pygame.Color('#0000a8'))
-      self.selection_bar.fill(pygame.Color('#57ffff'))
-      return self.surface
-
-    def process(self, e):
-      for e in events:
-        if e.type == KEYDOWN and e.key == K_DOWN:
-          self.selection_index += 1
-        elif e.type == KEYDOWN and e.key == K_UP:
-          self.selection_index -= 1
-        elif e.type == KEYDOWN and e.key == K_RETURN and os.path.isdir(self.flist[self.selection_index]):
-          os.chdir(self.flist[self.selection_index])
-          self.flist = ['..'] + os.listdir(os.curdir)
-          self.selection_index = 0
-      #=================#
-      self.selection_index %= len(self.flist)
-
-    def __draw(self, surf, i):
-      self.surface.blit(surf, (0, i * 32))
+  def draw(self, surf, i):
+    self.surface.blit(surf, (0, i * 32))
 
 
 class Spanel(Fpanel):
   def __init__(self):
-    super().__init__()
+    Fpanel.__init__(self)
     self.scroll_area = [0, 12]
     self.scroll_index = 0
   
   def process(self, e):
-    super().process(e)
+    Fpanel.process(self, e)
     self.__scroll()
 
   def render(self):
-    super().render()
-    self.__draw(self.selection_bar, self.scroll_index)
+    Fpanel.render(self)
+    for i, f in enumerate(self.flist[self.scroll_area[0]:self.scroll_area[1]+1]):
+      Fpanel.draw(self, label(f, pygame.Color('#57ffff')), i)
     #=================#
-    for i, f in enumerate(self.flist[self.scroll_area[0]:]):
-      if i == scroll_index: self.__draw(label(f, pygame.Color('#000000')), i)
-      else:                 self.__draw(label(f, pygame.Color('#57ffff')), i)
+    Fpanel.draw(self, self.selection_bar, self.scroll_index)
+    Fpanel.draw(self, label(self.flist[self.scroll_area[0] + self.scroll_index], pygame.Color('#000000')), self.scroll_index)
     #=================#
     return self.surface
-
 
   def __scroll(self):
     if self.selection_index < self.scroll_area[0]:
@@ -151,7 +152,6 @@ class Spanel(Fpanel):
       self.scroll_area[1] = self.selection_index
       self.scroll_area[0] = self.scroll_area[1] - 12
     self.scroll_index = self.selection_index - self.scroll_area[0]
-    
 
 fpanel = Spanel()
 #================================================================#
