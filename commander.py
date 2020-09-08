@@ -97,15 +97,11 @@ buttonbar = Buttonbar()
 #================================================================#
 class Fpanel(object):
   def __init__(self):
-    self.surface = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
-    self.selection_bar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
     self.selection_index = 0
     self.flist = ['..'] + os.listdir(os.curdir)
 
   def render(self):
-    self.surface.fill(pygame.Color('#0000a8'))
-    self.selection_bar.fill(pygame.Color('#57ffff'))
-    return self.surface
+    pass
 
   def process(self, e):
     for e in events:
@@ -120,29 +116,15 @@ class Fpanel(object):
     #=================#
     self.selection_index %= len(self.flist)
 
-  def draw(self, surf, i):
-    self.surface.blit(surf, (0, i * 32))
-
-
-class Spanel(Fpanel):
+class SFpanel(Fpanel):
   def __init__(self):
-    Fpanel.__init__(self)
+    super().__init__()
     self.scroll_area = [0, 12]
     self.scroll_index = 0
   
   def process(self, e):
-    Fpanel.process(self, e)
+    super().process(e)
     self.__scroll()
-
-  def render(self):
-    Fpanel.render(self)
-    for i, f in enumerate(self.flist[self.scroll_area[0]:self.scroll_area[1]+1]):
-      Fpanel.draw(self, label(f, pygame.Color('#57ffff')), i)
-    #=================#
-    Fpanel.draw(self, self.selection_bar, self.scroll_index)
-    Fpanel.draw(self, label(self.flist[self.scroll_area[0] + self.scroll_index], pygame.Color('#000000')), self.scroll_index)
-    #=================#
-    return self.surface
 
   def __scroll(self):
     if self.selection_index < self.scroll_area[0]:
@@ -153,7 +135,25 @@ class Spanel(Fpanel):
       self.scroll_area[0] = self.scroll_area[1] - 12
     self.scroll_index = self.selection_index - self.scroll_area[0]
 
-fpanel = Spanel()
+class RSFpanel(SFpanel):
+  def __init__(self):
+    super().__init__()
+    self.surface = pygame.surface.Surface((SCREEN_SIZE[0], SCREEN_SIZE[1] - 64)).convert()
+    self.selection_bar = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
+    self.selection_bar.fill(pygame.Color('#57ffff'))
+
+  def render(self):
+    super().render()
+    self.surface.fill(pygame.Color('#0000a8'))
+    for i, f in enumerate(self.flist[self.scroll_area[0]:self.scroll_area[1]+1]):
+      self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
+    
+    self.surface.blit(self.selection_bar, (0, self.scroll_index * 32))
+    self.surface.blit(label(self.flist[self.selection_index], pygame.Color('#000000')), (0, self.scroll_index * 32))
+
+    return self.surface
+
+fpanel = RSFpanel()
 #================================================================#
     
  
