@@ -12,6 +12,14 @@ def clamp(val, min, max):
   if val < min: return min
   if val > max: return max
   return val
+
+def listdir(d, sort):
+    dlist = [f for f in os.listdir(d) if os.path.isdir(f)]
+    flist = [f for f in os.listdir(d) if os.path.isfile(f)]
+    if sort == 'DIRS FIRST':    t_list = dlist + flist
+    elif sort == 'FILES FIRST': t_list = flist + dlist
+    else:                       t_list = []
+    return ['..'] + t_list
 #================================================================#
 
 
@@ -97,7 +105,7 @@ buttonbar = Buttonbar()
 class Fpanel(object):
   def __init__(self):
     self.selection_index = 0
-    self.flist = ['..'] + os.listdir(os.curdir)
+    self.flist = listdir(os.curdir, 'DIRS FIRST')
 
   def render(self):
     pass
@@ -110,9 +118,10 @@ class Fpanel(object):
         self.selection_index -= 1
       elif e.type == KEYDOWN and e.key == K_RETURN and os.path.isdir(self.flist[self.selection_index]):
         os.chdir(self.flist[self.selection_index])
-        self.flist = ['..'] + os.listdir(os.curdir)
+        self.flist = listdir(os.curdir, 'DIRS FIRST')
         self.selection_index = 0
     self.selection_index %= len(self.flist)
+
 
 class SFpanel(Fpanel):
   def __init__(self):
@@ -143,11 +152,14 @@ class RSFpanel(SFpanel):
   def render(self):
     super().render()
     self.surface.fill(pygame.Color('#0000a8'))
-    for i, f in enumerate(self.flist[self.scroll_area[0]:self.scroll_area[1]+1]):
+
+    rlist = self.flist[self.scroll_area[0]:self.scroll_area[1]+1]
+    rlist = list(map(lambda d : d + '/' if os.path.isdir(d) else d,  rlist))
+    for i, f in enumerate(rlist):
       self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
-    
+
     self.surface.blit(self.selection_bar, (0, self.scroll_index * 32))
-    self.surface.blit(label(self.flist[self.selection_index], pygame.Color('#000000')), (0, self.scroll_index * 32))
+    self.surface.blit(label(rlist[self.scroll_index], pygame.Color('#000000')), (0, self.scroll_index * 32))
 
     return self.surface
 
