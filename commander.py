@@ -14,11 +14,11 @@ def clamp(val, min, max):
   return val
 
 def listdir(d, sort):
-    dlist = [f for f in os.listdir(d) if os.path.isdir(f)]
-    flist = [f for f in os.listdir(d) if os.path.isfile(f)]
-    if sort == 'DIRS FIRST':    t_list = dlist + flist
-    elif sort == 'FILES FIRST': t_list = flist + dlist
-    else:                       t_list = []
+    dlist = [f for f in os.listdir(d) if os.path.isdir(f)  ]
+    flist = [f for f in os.listdir(d) if os.path.isfile(f) ]
+    if   sort == 'DIRS FIRST' :    t_list = dlist + flist
+    elif sort == 'FILES FIRST':    t_list = flist + dlist
+    else:                          t_list = []
     return ['..'] + t_list
 #================================================================#
 
@@ -155,6 +155,7 @@ class RSFpanel(SFpanel):
 
     rlist = self.flist[self.scroll_area[0]:self.scroll_area[1]+1]
     rlist = list(map(lambda d : d + '/' if os.path.isdir(d) else d,  rlist))
+    rlist = list(map(lambda d : '...' + d[-29:] if len(d) > 32 else d,  rlist))
     for i, f in enumerate(rlist):
       self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
 
