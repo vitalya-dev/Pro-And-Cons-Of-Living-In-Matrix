@@ -155,7 +155,7 @@ class RSFpanel(SFpanel):
 
     rlist = self.flist[self.scroll_area[0]:self.scroll_area[1]+1]
     rlist = list(map(lambda d : d + '/' if os.path.isdir(d) else d,  rlist))
-    rlist = list(map(lambda d : '...' + d[-29:] if len(d) > 32 else d,  rlist))
+    rlist = list(map(lambda d : '...' + d[-28:] if len(d) > 31 else d,  rlist))
     for i, f in enumerate(rlist):
       self.surface.blit(label(f, pygame.Color('#57ffff')), (0, i * 32))
 
