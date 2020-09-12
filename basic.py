@@ -33,6 +33,20 @@ font = pygame.font.Font('data/unispace bd.ttf', 32)
 done = False
 #================================================================#
 
+================================================================================
+#================================================================#
+class Panel(object):
+    def __init__(self, w, h, c):
+      self.surface = pygame.surface.Surface((SCREEN_SIZE[0], 32)).convert()
+      self.color = pygame.Color('#fefe03')  
+
+    def render(self):
+      self.surface.fill(color)
+      return self.surface
+
+    def process(self, e):
+      pass
+#================================================================#
 
 
 
