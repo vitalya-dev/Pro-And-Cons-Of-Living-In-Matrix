@@ -20,21 +20,17 @@ pygame.key.set_repeat(10, 75)
 screen = pygame.display.set_mode(SCREEN_SIZE)
 clock = pygame.time.Clock()
 font = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
-done = False
 #================================================================#
 
 
 #================================================================#
+def done(v=None):
+  if not hasattr(done, 'val'): done.val = False
+  if v == None: return done.val
+  done.val = v;
+  
 def dim_in_pixels(cols, rows):
   return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
-
-def esc_is_exit():
-  global done
-  for e in events:
-    if e.type == QUIT:
-      done = True
-    if e.type == KEYDOWN and e.key == K_ESCAPE:
-      done = True
 #================================================================#
 
 
@@ -70,22 +66,38 @@ class Window(object):
       self.surface.blit(d['surface'], dim_in_pixels(*d['coord']))
     return self.surface
 
-  def process(self, e):
-    esc_is_exit()
+  def process(self, events):
+    for e in events:
+      if e.type == KEYDOWN: self.on_key_down(e)
+
+  def on_key_down(self, e): pass
+
+class Editor(Window):
+  def __init__(self, cols, rows, color):
+    super().__init__(cols, rows, color)
+    self.text = []
+
+  def render(self):
+    super().render()
+    self.surface.blit(font.render("".join(self.text), False, pygame.Color('#c0c0c0')), (0, 0))
+    return self.surface
+
+  def on_key_down(self, e):
+    if e.key == K_ESCAPE: done(True)
+    if e.key == K_SPACE: self.text += ' '
+    if e.unicode.isalpha(): self.text += e.unicode
+
 #================================================================#
 
-window = Window(MAX_COLS, MAX_ROWS, '#000080')
-for i in range(MAX_ROWS):
-  window.draw(label('*' * MAX_COLS, '#c0c0c0'), (0, i))
+editor = Editor(MAX_COLS, MAX_ROWS, '#000080')
 
-
-while not done:
+while not done():
   dt = clock.tick(60)
   #PROCESS
   events = pygame.event.get()
-  window.process(events)
+  editor.process(events)
   #RENDER
-  screen.blit(window.render(), (0, 0))
+  screen.blit(editor.render(), (0, 0))
   #UPDATE
   pygame.display.update()
 #================================================================#

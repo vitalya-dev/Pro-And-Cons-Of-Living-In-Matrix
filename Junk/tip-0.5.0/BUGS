@@ -1,0 +1,2 @@
+- Editing a blank file crashes tip.
+- If you write out a file, TIP does not yet realize modified needs to be 0.
