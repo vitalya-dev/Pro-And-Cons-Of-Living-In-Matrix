@@ -76,6 +76,7 @@ class Editor(Window):
   def __init__(self, cols, rows, color):
     super().__init__(cols, rows, color)
     self.text = []
+    self.x = 0
 
   def render(self):
     super().render()
@@ -83,9 +84,17 @@ class Editor(Window):
     return self.surface
 
   def on_key_down(self, e):
-    if e.key == K_ESCAPE: done(True)
-    if e.key == K_SPACE: self.text += ' '
-    if e.unicode.isalpha(): self.text += e.unicode
+    if e.key == K_ESCAPE:
+      done(True)
+    if e.key == K_SPACE:
+      self.text += ' '
+      self.x += 1
+    if e.key == K_BACKSPACE and self.x > 0:
+      del(self.text[self.x-1])
+      self.x -= 1
+    if e.unicode.isalpha():
+      self.text += e.unicode
+      self.x += 1
 
 #================================================================#
 
