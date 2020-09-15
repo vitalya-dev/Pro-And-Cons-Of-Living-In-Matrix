@@ -75,26 +75,38 @@ class Window(object):
 class Editor(Window):
   def __init__(self, cols, rows, color):
     super().__init__(cols, rows, color)
-    self.text = []
+    self.text = [[]]
     self.x = 0
+    self.y = 0
 
   def render(self):
     super().render()
-    self.surface.blit(font.render("".join(self.text), False, pygame.Color('#c0c0c0')), (0, 0))
+    for i, line in enumerate(self.text):
+      self.surface.blit(font.render("".join(line), False, pygame.Color('#c0c0c0')), dim_in_pixels(0, i))
     return self.surface
 
   def on_key_down(self, e):
     if e.key == K_ESCAPE:
       done(True)
     if e.key == K_SPACE:
-      self.text += ' '
+      self.text[self.y] += ' '
       self.x += 1
     if e.key == K_BACKSPACE and self.x > 0:
-      del(self.text[self.x-1])
+      del(self.text[self.y][self.x-1])
       self.x -= 1
+    if e.key == K_RETURN:
+      text_0 = self.text[self.y][0:self.x]
+      text_1 = self.text[self.y][self.x:]
+      #=======#
+      self.text[self.y] = text_0
+      self.text.insert(self.y+1, text_1)
+      #=======#
+      self.y += 1
+      self.x = 0
     if e.unicode.isalpha():
-      self.text += e.unicode
+      self.text[self.y] += e.unicode
       self.x += 1
+    print(self.text)
 
 #================================================================#
 
