@@ -90,10 +90,16 @@ class Editor(Window):
       done(True)
     if e.key == K_SPACE:
       self.text[self.y] += ' '
-      self.x += 1
+      cursor_right()
     if e.key == K_BACKSPACE and self.x > 0:
       del(self.text[self.y][self.x-1])
-      self.x -= 1
+      cursor_left()
+    if e.key == K_BACKSPACE and self.x == 0:
+      merge_line(self.y-1, self.y)
+      del(self.text[self.y])
+      #=======#
+      cursor_up()
+      cursor_beg_of_line()
     if e.key == K_RETURN:
       text_0 = self.text[self.y][0:self.x]
       text_1 = self.text[self.y][self.x:]
@@ -101,11 +107,11 @@ class Editor(Window):
       self.text[self.y] = text_0
       self.text.insert(self.y+1, text_1)
       #=======#
-      self.y += 1
-      self.x = 0
+      cursor_down()
+      cursor_end_of_line()
     if e.unicode.isalpha():
       self.text[self.y] += e.unicode
-      self.x += 1
+      cursor_right()
     print(self.text)
 
 #================================================================#
