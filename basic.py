@@ -52,9 +52,13 @@ def label(text, color):
   return font.render(text, False, pygame.Color(color))
 
 def cursor(color):
-  if not hasattr(cursor, 'blink'): cursor.blink = False
+  if not hasattr(cursor, 'blink'): cursor.blink = True
+  if not hasattr(cursor, 'tick'): cursor.tick = pygame.time.get_ticks()
   #==========#
-  cursor.blink = not cursor.blink
+  if (pygame.time.get_ticks() - cursor.tick) > 100:
+    cursor.blink = not cursor.blink
+    cursor.tick = pygame.time.get_ticks()
+  #==========#
   if cursor.blink:
     return font.render("_", False, color)
   else:
@@ -171,6 +175,7 @@ while not done():
   pygame.display.update()
 #================================================================#
 
+print(pygame.time.get_ticks())
 
 pygame.quit()
 quit()
