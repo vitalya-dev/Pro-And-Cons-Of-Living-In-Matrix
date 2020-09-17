@@ -125,11 +125,21 @@ class Editor(Window):
       #=======#
       self.cursor_down()
       self.cursor_beg_of_line()
-    elif e.unicode.isprintable():
+    elif e.key == K_UP:
+      self.cursor_up()
+    elif e.key == K_DOWN:
+      self.cursor_down()
+    elif e.key == K_LEFT and self.x > 0:
+      self.cursor_left()
+    elif e.key == K_LEFT and self.x == 0 and self.y > 0:
+      self.cursor_up()
+      self.cursor_end_of_line()
+    elif e.key == K_RIGHT:
+      self.cursor_right()
+    elif e.unicode != '' and e.unicode.isprintable():
       self.text[self.y] += e.unicode
       self.cursor_right()
 
-    print(self.text)
 
   def cursor_up(self):
     if self.y > 0:
