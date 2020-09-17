@@ -42,16 +42,16 @@ def clamp(val, min, max):
 
 
 #================================================================#
-def button(text):
+def button(text, background, foreground):
   btn = pygame.Surface((96, 32))
-  btn.fill(pygame.Color('#57ffff'))
-  btn.blit(font.render(text, False, pygame.Color('#000000')), (0, 0))
+  btn.fill(background)
+  btn.blit(font.render(text, False, foreground), (0, 0))
   return btn
 
-def label(text, color):
-  return font.render(text, False, pygame.Color(color))
+def label(text, foreground):
+  return font.render(text, False, pygame.Color(foreground))
 
-def cursor(color):
+def cursor(foreground):
   if not hasattr(cursor, 'blink'): cursor.blink = True
   if not hasattr(cursor, 'tick'): cursor.tick = pygame.time.get_ticks()
   #==========#
@@ -60,18 +60,18 @@ def cursor(color):
     cursor.tick = pygame.time.get_ticks()
   #==========#
   if cursor.blink:
-    return font.render("_", False, color)
+    return font.render("_", False, foreground)
   else:
-    return font.render("",  False, color)
+    return font.render("",  False, foreground)
 #================================================================#
 
 
 
 #================================================================#
 class Window(object):
-  def __init__(self, cols, rows, color):
+  def __init__(self, cols, rows, background):
     self.surface = pygame.surface.Surface(dim_in_pixels(cols, rows)).convert()
-    self.color = pygame.Color(color)
+    self.background = pygame.Color(background)
     self.draws = []
 
 
@@ -79,7 +79,7 @@ class Window(object):
     self.draws.append({'surface': s, 'coord': c})
 
   def render(self):
-    self.surface.fill(self.color)
+    self.surface.fill(self.background)
     for d in self.draws:
       self.surface.blit(d['surface'], dim_in_pixels(*d['coord']))
     return self.surface
@@ -91,8 +91,9 @@ class Window(object):
   def on_key_down(self, e): pass
 
 class Editor(Window):
-  def __init__(self, cols, rows, color):
-    super().__init__(cols, rows, color)
+  def __init__(self, cols, rows, background, foreground):
+    super().__init__(cols, rows, background)
+    self.foreground = pygame.Color(foreground)
     self.text = [[]]
     self.x = 0
     self.y = 0
@@ -100,16 +101,13 @@ class Editor(Window):
   def render(self):
     super().render()
     for i, line in enumerate(self.text):
-      self.surface.blit(font.render("".join(line), False, pygame.Color('#c0c0c0')), dim_in_pixels(0, i))
-    self.surface.blit(cursor(pygame.Color('#c0c0c0')), dim_in_pixels(self.x, self.y))
+      self.surface.blit(font.render("".join(line), False, self.foreground), dim_in_pixels(0, i))
+    self.surface.blit(cursor(self.foreground), dim_in_pixels(self.x, self.y))
     return self.surface
 
   def on_key_down(self, e):
     if e.key == K_ESCAPE:
       done(True)
-    elif e.key == K_SPACE:
-      self.text[self.y] += ' '
-      self.cursor_right()
     elif e.key == K_BACKSPACE and self.x > 0:
       del(self.text[self.y][self.x-1])
       self.cursor_left()
@@ -127,7 +125,7 @@ class Editor(Window):
       #=======#
       self.cursor_down()
       self.cursor_beg_of_line()
-    elif e.unicode.isalpha():
+    elif e.unicode.isprintable():
       self.text[self.y] += e.unicode
       self.cursor_right()
 
@@ -162,7 +160,7 @@ class Editor(Window):
 
 #================================================================#
 
-editor = Editor(MAX_COLS, MAX_ROWS, '#000080')
+editor = Editor(MAX_COLS, MAX_ROWS, '#000080', '#c0c0c0')
 
 while not done():
   dt = clock.tick(60)
