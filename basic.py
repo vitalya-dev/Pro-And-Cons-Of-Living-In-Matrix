@@ -111,7 +111,7 @@ class Editor(Window):
     elif e.key == K_BACKSPACE and self.x > 0:
       del(self.text[self.y][self.x-1])
       self.cursor_left()
-    elif e.key == K_BACKSPACE and self.x == 0:
+    elif e.key == K_BACKSPACE and self.x == 0 and self.y > 0:
       self.cursor_up()
       self.cursor_end_of_line()
       #=======#
@@ -127,8 +127,10 @@ class Editor(Window):
       self.cursor_beg_of_line()
     elif e.key == K_UP:
       self.cursor_up()
+      self.x = clamp(self.x, 0, len(self.text[self.y]))
     elif e.key == K_DOWN:
       self.cursor_down()
+      self.x = clamp(self.x, 0, len(self.text[self.y]))
     elif e.key == K_LEFT and self.x > 0:
       self.cursor_left()
     elif e.key == K_LEFT and self.x == 0 and self.y > 0:
@@ -137,9 +139,8 @@ class Editor(Window):
     elif e.key == K_RIGHT:
       self.cursor_right()
     elif e.unicode != '' and e.unicode.isprintable():
-      self.text[self.y] += e.unicode
+      self.text[self.y].insert(self.x, e.unicode)
       self.cursor_right()
-
 
   def cursor_up(self):
     if self.y > 0:
@@ -169,7 +170,6 @@ class Editor(Window):
       del(self.text[y2])
 
 #================================================================#
-
 editor = Editor(MAX_COLS, MAX_ROWS, '#000080', '#c0c0c0')
 
 while not done():
