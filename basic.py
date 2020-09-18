@@ -43,10 +43,7 @@ def clamp(val, min, max):
 
 #================================================================#
 def button(text, background, foreground):
-  btn = pygame.Surface((96, 32))
-  btn.fill(background)
-  btn.blit(font.render(text, False, foreground), (0, 0))
-  return btn
+  return font.render(text, False, pygame.Color(foreground), pygame.Color(background))
 
 def label(text, foreground):
   return font.render(text, False, pygame.Color(foreground))
@@ -72,8 +69,8 @@ class Window(object):
   def __init__(self, cols, rows, background):
     self.surface = pygame.surface.Surface(dim_in_pixels(cols, rows)).convert()
     self.background = pygame.Color(background)
+    self.keys_down = pygame.key.get_pressed()
     self.draws = []
-
 
   def draw(self, s, c):
     self.draws.append({'surface': s, 'coord': c})
@@ -85,6 +82,7 @@ class Window(object):
     return self.surface
 
   def process(self, events):
+    self.keys_down = pygame.key.get_pressed()
     for e in events:
       if e.type == KEYDOWN: self.on_key_down(e)
 
@@ -139,7 +137,7 @@ class Editor(Window):
     elif e.key == K_RIGHT and self.x == len(self.text[self.y]) and self.y < len(self.text) - 1:
       self.cursor_down()
       self.cursor_beg_of_line()
-    elif e.unicode != '' and e.unicode.isprintable():
+    elif e.unicode != '' and e.unicode.isprintable() and not self.keys_down[K_LALT]:
       self.text[self.y].insert(self.x, e.unicode)
       self.cursor_right()
 
@@ -171,15 +169,22 @@ class Editor(Window):
       del(self.text[y2])
 
 #================================================================#
-editor = Editor(MAX_COLS, MAX_ROWS, '#000080', '#c0c0c0')
+editor = Editor(MAX_COLS, MAX_ROWS-1, '#000080', '#c0c0c0')
+
+buttonbar = Window(MAX_COLS, 1, '#000060')
+buttonbar.draw(button('<Alt+X=Exit>', '#000060', '#f0f0f0'), (0, 0))
+buttonbar.draw(button('<Alt+E=Run>',  '#000060', '#f0f0f0'), (13, 0))
+
 
 while not done():
   dt = clock.tick(60)
   #PROCESS
   events = pygame.event.get()
   editor.process(events)
+  print(editor.surface.get_size())
   #RENDER
-  screen.blit(editor.render(), (0, 0))
+  screen.blit(editor.render(),    dim_in_pixels(0, 0))
+  screen.blit(buttonbar.render(), dim_in_pixels(0, MAX_ROWS-1))
   #UPDATE
   pygame.display.update()
 #================================================================#
