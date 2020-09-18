@@ -106,9 +106,7 @@ class Editor(Window):
     return self.surface
 
   def on_key_down(self, e):
-    if e.key == K_ESCAPE:
-      done(True)
-    elif e.key == K_BACKSPACE and self.x > 0:
+    if e.key == K_BACKSPACE and self.x > 0:
       del(self.text[self.y][self.x-1])
       self.cursor_left()
     elif e.key == K_BACKSPACE and self.x == 0 and self.y > 0:
@@ -136,8 +134,11 @@ class Editor(Window):
     elif e.key == K_LEFT and self.x == 0 and self.y > 0:
       self.cursor_up()
       self.cursor_end_of_line()
-    elif e.key == K_RIGHT:
+    elif e.key == K_RIGHT and self.x < len(self.text[self.y]):
       self.cursor_right()
+    elif e.key == K_RIGHT and self.x == len(self.text[self.y]) and self.y < len(self.text) - 1:
+      self.cursor_down()
+      self.cursor_beg_of_line()
     elif e.unicode != '' and e.unicode.isprintable():
       self.text[self.y].insert(self.x, e.unicode)
       self.cursor_right()
