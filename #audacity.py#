@@ -13,6 +13,7 @@ assert len(linspace(0, 2, 6)) == 6
 assert linspace(0, 2, 6)[5] == 2
 assert linspace(0, 2, 6)[0] == 0
 
+
 print(linspace(0, 2, 6))
 
 
