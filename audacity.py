@@ -1,9 +1,30 @@
 import struct
 import wave
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
+import pygame
+from pygame.locals import *
 
+
+#================================================================#
+SCREEN_SIZE = (640, 480)
+FONT_SIZE = 32
+MAX_COLS = (int)(SCREEN_SIZE[0] / (FONT_SIZE / 2))
+MAX_ROWS = (int)(SCREEN_SIZE[1] / FONT_SIZE)
+#================================================================#
+
+
+#================================================================#
+pygame.init()
+pygame.key.set_repeat(10, 75)
+#================================================================#
+
+#================================================================#
+screen = pygame.display.set_mode(SCREEN_SIZE)
+clock = pygame.time.Clock()
+font = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
+#================================================================#
+
+
+#================================================================#
 def linspace(start, stop, num=50):
   delta = stop - start
   div = num - 1
@@ -33,99 +54,70 @@ def read_whole(filename):
     return ret
 
 
-# def __init__(self, filename, read=True, debug=False):
-#     mode = 'r' if read else 'w'
-#     sizes = {1: 'B', 2: 'h', 4: 'i'}
-#     self.wav = wave.open(filename, mode)
-#     ...
-#     self.channels = self.wav.getnchannels()
-#     self.fmt_size = sizes[self.wav.getsampwidth()]
-#     self.fmt = "<" + self.fmt_size * self.channels
+def plot(xs, ys):
+  return pygame.surface.Surface(dim_in_pixels(MAX_COLS, MAX_ROWS)).convert()
 
+def done(v=None):
+  if not hasattr(done, 'val'): done.val = False
+  if v == None: return done.val
+  done.val = v;
   
-assert len(linspace(0, 2, 6)) == 6
-assert linspace(0, 2, 6)[5] == 2
-assert linspace(0, 2, 6)[0] == 0
+def dim_in_pixels(cols, rows):
+  return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
 
-print(linspace(0, 2, 6))
-
-print(len(read_whole("Live Ouside Instrumental 2.wav")))
-#print(len(np.frombuffer(wave.open("Live Ouside Instrumental 2.wav", "r").readframes(-1), "Int16")))
-
-
-#print(read_whole("Live Ouside Instrumental 2.wav"))
-# #w = wave.open("Live Ouside Instrumental 2.wav", "r")
-# data = w.readframes(1)
-
-# print(int.from_bytes(data, "little", signed=True))
-# print(struct.unpack("<h", data))
-# print(numpy.frombuffer(data, "Int16")[0])
-
-# w = wave.open("Live Ouside Instrumental 2.wav", "r")
-
-# rate = w.getframerate()
-# data = numpy.frombuffer(w.readframes(-1), "Int16")
-
-# print(len(data) / rate)
-
-# Time = numpy.linspace(0, len(data) / rate, num=len(data))
-
-# plt.figure(1)
-# plt.title("Signal Wave...")
-# plt.plot(Time, data)
-# plt.show()
-
-# # import matplotlib.pyplot as plt
-# # import numpy as np
-# # import wave
-# # import sys
+def clamp(val, min, max):
+  if val < min: return min
+  if val > max: return max
+  return val
+#================================================================#
 
 
-# # spf = wave.open("Animal_cut.wav", "r")
+#================================================================#
+def button(text, background, foreground):
+  return font.render(text, False, pygame.Color(foreground), pygame.Color(background))
 
-# # # Extract Raw Audio from Wav File
-# # signal = spf.readframes(-1)
-# # signal = np.fromstring(signal, "Int16")
-# # fs = spf.getframerate()
-
-# # # If Stereo
-# # if spf.getnchannels() == 2:
-# #     print("Just mono files")
-# #     sys.exit(0)
+def label(text, foreground):
+  return font.render(text, False, pygame.Color(foreground))
+#================================================================#
 
 
-# # Time = np.linspace(0, len(signal) / fs, num=len(signal))
+#================================================================#
+class Window(object):
+  def __init__(self, cols, rows, background):
+    self.surface = pygame.surface.Surface(dim_in_pixels(cols, rows)).convert()
+    self.background = pygame.Color(background)
+    self.keys_down = pygame.key.get_pressed()
+    self.draws = []
 
-# # plt.figure(1)
-# # plt.title("Signal Wave...")
-# # plt.plot(Time, signal)
-# # plt.show()
+  def draw(self, s, c):
+    self.draws.append({'surface': s, 'coord': c})
+
+  def render(self):
+    self.surface.fill(self.background)
+    for d in self.draws:
+      self.surface.blit(d['surface'], dim_in_pixels(*d['coord']))
+    return self.surface
+
+  def process(self, events):
+    self.keys_down = pygame.key.get_pressed()
+    for e in events:
+      if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
+      if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
+#================================================================#
+
+window = Window(MAX_COLS, MAX_ROWS, '#000080')
+window.draw(plot([1, 2, 3], [1, 2, 3]), (0, 0))
+
+window.on_esc = lambda: done(True)
 
 
-# def read_whole(filename):
-#     wav_r = wave.open(filename, 'r')
-#     ret = []
-#     while wav_r.tell() < wav_r.getnframes():
-#         decoded = struct.unpack("<h", wav_r.readframes(1))
-#         ret.append(decoded)
-#     return ret
-
-# def read_whole(filename):
-#   wav_r = wave.open(filename, 'r')
-#   ret = []
-#   while wav_r.tell() < wav_r.getnframes():
-#     decoded = int.from_bytes(wav_r.readframes(1), "little", signed=True)
-#     ret.append(decoded)
-#   return ret
-
-
-#print(int.from_bytes(data, "little", signed=True))
-
-# def read_whole(filename):
-#   sizes = {1: 'B', 2: 'h', 4: 'i'}
-#   wav_r = wave.open(filename, 'r')
-#   ret = []
-#   while wav_r.tell() < wav_r.getnframes():
-#     decoded = int.from_bytes(wav_r.readframes(1), "little", signed=True)
-#     ret.append(decoded)
-#   return ret
+if __name__ == '__main__':
+  while not done():
+    dt = clock.tick(60)
+    #PROCESS
+    events = pygame.event.get()
+    window.process(events)    
+    #RENDER
+    screen.blit(window.render(), dim_in_pixels(0, 0))
+    #UPDATE
+    pygame.display.update()
