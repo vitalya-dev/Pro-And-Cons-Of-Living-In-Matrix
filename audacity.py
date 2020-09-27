@@ -54,17 +54,15 @@ def read_whole(filename):
     return ret
 
 
-def plot(xs, ys):
-  return pygame.surface.Surface(dim_in_pixels(MAX_COLS, MAX_ROWS)).convert()
+def dim_in_pixels(cols, rows):
+  return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
+
 
 def done(v=None):
   if not hasattr(done, 'val'): done.val = False
   if v == None: return done.val
   done.val = v;
   
-def dim_in_pixels(cols, rows):
-  return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
-
 def clamp(val, min, max):
   if val < min: return min
   if val > max: return max
@@ -78,6 +76,16 @@ def button(text, background, foreground):
 
 def label(text, foreground):
   return font.render(text, False, pygame.Color(foreground))
+
+def plot(xs, ys):
+  surface = pygame.surface.Surface(dim_in_pixels(MAX_COLS, MAX_ROWS)).convert()
+  #=============#
+  scale_factor = (1/2 * MAX_ROWS) / max(abs(max(ys)), abs(min(ys)))
+  normalize = lambda x, y: dim_in_pixels(x, MAX_ROWS / 2 - y * scale_factor)
+  for i in range(0, len(xs)):
+    pygame.draw.line(surface, pygame.Color('green'), normalize(xs[i], 0), normalize(xs[i], ys[i]), 1)
+  #=============#
+  return surface
 #================================================================#
 
 
@@ -106,7 +114,10 @@ class Window(object):
 #================================================================#
 
 window = Window(MAX_COLS, MAX_ROWS, '#000080')
-window.draw(plot([1, 2, 3], [1, 2, 3]), (0, 0))
+
+data = read_whole("Live Ouside Instrumental 2.wav")
+
+window.draw(plot(linspace(0, MAX_COLS, len(data)), data), (0, 0))
 
 window.on_esc = lambda: done(True)
 
