@@ -1,3 +1,4 @@
+import threading
 import struct
 import wave
 import pygame
@@ -110,13 +111,14 @@ class Plot(object):
   def plot(self, ys):
     surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
     surface.fill(self.background)
-    #=============#
+    threading.Thread(target=self._plot_thread, args=(surface, ys,)).start()
+    return surface
+
+  def _plot_thread(self, surface, ys):
     normalize = self._normalize(ys)
     for x, y in zip(linspace(0, self.cols, len(ys)), ys):
       pygame.draw.line(surface, self.foreground, normalize(x, 0), normalize(x, y), 1)
-    #=============#
-    return surface
-
+    
   def _normalize(self, ys):
     scale_factor = (1/2 * self.rows) / max(abs(max(ys)), abs(min(ys)))
     return lambda x, y: dim_in_pixels(x, self.rows / 2 - y * scale_factor)
