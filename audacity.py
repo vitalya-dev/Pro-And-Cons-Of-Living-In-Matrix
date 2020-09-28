@@ -31,7 +31,7 @@ def linspace(start, stop, num=50):
   step = delta / div
   return [start + i * step for i in range(num)]
 
-def read_whole(filename):
+def read_wav(filename):
     SIZES = {1: 'B', 2: 'h', 4: 'i'}
     CHUNK_SIZE_4096 = 4096
     CHUNK_SIZE_1 = 1
@@ -76,20 +76,8 @@ def button(text, background, foreground):
 
 def label(text, foreground):
   return font.render(text, False, pygame.Color(foreground))
-
-def plot(xs, ys):
-  surface = pygame.surface.Surface(dim_in_pixels(MAX_COLS, MAX_ROWS)).convert()
-  #=============#
-  scale_factor = (1/2 * MAX_ROWS) / max(abs(max(ys)), abs(min(ys)))
-  normalize = lambda x, y: dim_in_pixels(x, MAX_ROWS / 2 - y * scale_factor)
-  for i in range(0, len(xs)):
-    pygame.draw.line(surface, pygame.Color('green'), normalize(xs[i], 0), normalize(xs[i], ys[i]), 1)
-  #=============#
-  return surface
 #================================================================#
 
-
-#================================================================#
 class Window(object):
   def __init__(self, cols, rows, background):
     self.surface = pygame.surface.Surface(dim_in_pixels(cols, rows)).convert()
@@ -111,18 +99,34 @@ class Window(object):
     for e in events:
       if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
       if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
+
+class Plot(object):
+  def __init__(self, cols, rows, background, foreground):
+    self.cols = cols
+    self.rows = rows
+    self.background = pygame.Color(background)
+    self.foreground = pygame.Color(foreground)
+
+  def plot(self, ys):
+    surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
+    surface.fill(self.background)
+    #=============#
+    normalize = self._normalize(ys)
+    for x, y in zip(linspace(0, self.cols, len(ys)), ys):
+      pygame.draw.line(surface, self.foreground, normalize(x, 0), normalize(x, y), 1)
+    #=============#
+    return surface
+
+  def _normalize(self, ys):
+    scale_factor = (1/2 * self.rows) / max(abs(max(ys)), abs(min(ys)))
+    return lambda x, y: dim_in_pixels(x, self.rows / 2 - y * scale_factor)
 #================================================================#
 
-window = Window(MAX_COLS, MAX_ROWS, '#000080')
-
-data = read_whole("Live Ouside Instrumental 2.wav")
-
-window.draw(plot(linspace(0, MAX_COLS, len(data)), data), (0, 0))
-
-window.on_esc = lambda: done(True)
-
-
 if __name__ == '__main__':
+  window = Window(MAX_COLS, MAX_ROWS, '#000080')
+  window.on_esc = lambda: done(True)
+  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', 'green').plot(read_wav("Live Ouside Instrumental 2.wav")), (0, 0))
+
   while not done():
     dt = clock.tick(60)
     #PROCESS
