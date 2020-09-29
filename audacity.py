@@ -33,26 +33,14 @@ def linspace(start, stop, num=50):
   return [start + i * step for i in range(num)]
 
 def read_wav(filename):
-    SIZES = {1: 'B', 2: 'h', 4: 'i'}
-    CHUNK_SIZE_4096 = 4096
-    CHUNK_SIZE_1 = 1
-    #======================#
     wav_r = wave.open(filename, 'r')
     #======================#
-    channels  = wav_r.getnchannels()
     sampwidth = wav_r.getsampwidth()
+    nframes   = wav_r.getnframes()
     #======================#
-    fmt_1 = "<" + SIZES[wav_r.getsampwidth()] * channels * CHUNK_SIZE_4096
-    fmt_2 = "<" + SIZES[wav_r.getsampwidth()] * channels * CHUNK_SIZE_1
-    #======================#
-    ret = []
-    while wav_r.tell() < wav_r.getnframes():
-      if wav_r.getnframes() - wav_r.tell() >= CHUNK_SIZE_4096:
-        decoded = struct.unpack(fmt_1, wav_r.readframes(CHUNK_SIZE_4096))
-      else:
-        decoded = struct.unpack(fmt_2, wav_r.readframes(CHUNK_SIZE_1))
-      for i in decoded: ret.append(i)
-    return ret
+    SIZES = {1: 'B', 2: 'h', 4: 'i'}
+    print(wav_r.readframes(2))
+    return struct.unpack("<" + SIZES[sampwidth] * nframes, wav_r.readframes(nframes))
 
 
 def dim_in_pixels(cols, rows):
@@ -63,7 +51,7 @@ def done(v=None):
   if not hasattr(done, 'val'): done.val = False
   if v == None: return done.val
   done.val = v;
-  
+
 def clamp(val, min, max):
   if val < min: return min
   if val > max: return max
@@ -124,17 +112,5 @@ class Plot(object):
     return lambda x, y: dim_in_pixels(x, self.rows / 2 - y * scale_factor)
 #================================================================#
 
-if __name__ == '__main__':
-  window = Window(MAX_COLS, MAX_ROWS, '#000080')
-  window.on_esc = lambda: done(True)
-  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', 'green').plot(read_wav("Live Ouside Instrumental 2.wav")), (0, 0))
+print(len(read_wav("Live Ouside Instrumental.wav")))
 
-  while not done():
-    dt = clock.tick(60)
-    #PROCESS
-    events = pygame.event.get()
-    window.process(events)    
-    #RENDER
-    screen.blit(window.render(), dim_in_pixels(0, 0))
-    #UPDATE
-    pygame.display.update()
