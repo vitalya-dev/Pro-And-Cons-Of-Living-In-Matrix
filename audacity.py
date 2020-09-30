@@ -37,15 +37,16 @@ def read_wav(filename):
     #======================#
     sampwidth = wav_r.getsampwidth()
     nframes   = wav_r.getnframes()
+    nchannels = wav_r.getnchannels()
     #======================#
-    SIZES = {1: 'B', 2: 'h', 4: 'i'}
-    print(wav_r.readframes(2))
-    return struct.unpack("<" + SIZES[sampwidth] * nframes, wav_r.readframes(nframes))
+    data = struct.unpack(
+      '<{0}{1}'.format(nframes * nchannels, {1: 'B', 2: 'h', 4: 'i'}[sampwidth]), wav_r.readframes(nframes)
+    )
+    return data if nchannels == 1 else [j for i, j in enumerate(data) if i % 2 == 0]
 
 
 def dim_in_pixels(cols, rows):
   return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
-
 
 def done(v=None):
   if not hasattr(done, 'val'): done.val = False
@@ -112,5 +113,5 @@ class Plot(object):
     return lambda x, y: dim_in_pixels(x, self.rows / 2 - y * scale_factor)
 #================================================================#
 
-print(len(read_wav("Live Ouside Instrumental.wav")))
+print(read_wav("Live Ouside Instrumental 3.wav")[:8])
 
