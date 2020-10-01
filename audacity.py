@@ -113,5 +113,19 @@ class Plot(object):
     return lambda x, y: dim_in_pixels(x, self.rows / 2 - y * scale_factor)
 #================================================================#
 
-print(read_wav("Live Ouside Instrumental 3.wav")[:8])
+if __name__ == '__main__':
+  window = Window(MAX_COLS, MAX_ROWS, '#000080')
+  window.on_esc = lambda: done(True)
+  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', 'green').plot(read_wav("Live Ouside Instrumental 2.wav")), (0, 0))
+
+  while not done():
+    dt = clock.tick(60)
+    #PROCESS
+    events = pygame.event.get()
+    window.process(events)
+    #RENDER
+    screen.blit(window.render(), dim_in_pixels(0, 0))
+    #UPDATE
+    pygame.display.update()
+
 
