@@ -45,8 +45,13 @@ def read_wav(filename):
     return data if nchannels == 1 else [j for i, j in enumerate(data) if i % 2 == 0]
 
 
-def dim_in_pixels(cols, rows):
-  return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
+def dim_in_pixels(cols=None, rows=None):
+  if cols == None:
+    return rows * FONT_SIZE
+  elif rows == None:
+    return cols * (int)(FONT_SIZE / 2)
+  else:
+    return (cols * (int)(FONT_SIZE / 2), rows * FONT_SIZE)
 
 def done(v=None):
   if not hasattr(done, 'val'): done.val = False
@@ -57,6 +62,10 @@ def clamp(val, min, max):
   if val < min: return min
   if val > max: return max
   return val
+
+def average(l):
+  return sum(l) / len(l)
+
 #================================================================#
 
 
@@ -103,20 +112,25 @@ class Plot(object):
     threading.Thread(target=self._plot_thread, args=(surface, ys,)).start()
     return surface
 
-  def _plot_thread(self, surface, ys):
-    normalize = self._normalize(ys)
-    for x, y in zip(linspace(0, self.cols, len(ys)), ys):
-      pygame.draw.line(surface, self.foreground, normalize(x, 0), normalize(x, y), 1)
-    
-  def _normalize(self, ys):
-    scale_factor = (1/2 * self.rows) / max(abs(max(ys)), abs(min(ys)))
-    return lambda x, y: dim_in_pixels(x, self.rows / 2 - y * scale_factor)
+  def _plot_thread(self, surface, data):
+    data = self._scale_x(data)
+    data = self._scale_y(data)
+    for x, y in zip(linspace(0, self.cols, len(data)), data):
+      pygame.draw.line(surface, self.foreground, dim_in_pixels(x, self.rows / 2), dim_in_pixels(x, (self.rows - y) / 2), 1)
+
+  def _scale_x(self, data):
+    scale = int(len(data) / (self.cols * 500))
+    return [average(data[x:x+scale]) for x in range(0, len(data), scale)]
+
+  def _scale_y(self, data):
+    scale = self.rows / max(abs(max(data)), abs(min(data)))
+    return [y * scale for y in data]
 #================================================================#
 
 if __name__ == '__main__':
   window = Window(MAX_COLS, MAX_ROWS, '#000080')
   window.on_esc = lambda: done(True)
-  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', 'green').plot(read_wav("Live Ouside Instrumental 2.wav")), (0, 0))
+  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', 'green').plot(read_wav("Live Ouside Instrumental.wav")), (0, 0))
 
   while not done():
     dt = clock.tick(60)
