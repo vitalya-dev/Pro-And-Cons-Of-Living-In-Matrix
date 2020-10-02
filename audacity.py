@@ -35,15 +35,17 @@ def linspace(start, stop, num=50):
 def read_wav(filename):
     wav_r = wave.open(filename, 'r')
     #======================#
-    sampwidth = wav_r.getsampwidth()
-    nframes   = wav_r.getnframes()
-    nchannels = wav_r.getnchannels()
+    sampwidth =  wav_r.getsampwidth()
+    nframes   =  wav_r.getnframes()
+    nchannels =  wav_r.getnchannels()
     #======================#
-    data = struct.unpack(
-      '<{0}{1}'.format(nframes * nchannels, {1: 'B', 2: 'h', 4: 'i'}[sampwidth]), wav_r.readframes(nframes)
-    )
-    return data if nchannels == 1 else [j for i, j in enumerate(data) if i % 2 == 0]
-
+    while wav_r.getnframes() - wav_r.tell():
+      chunk_size = int(nframes / 10) if wav_r.getnframes() - wav_r.tell() >= int(nframes / 10) else wav_r.getnframes() - wav_r.tell()
+      data = struct.unpack(
+        '<{0}{1}'.format(chunk_size * nchannels, {1: 'B', 2: 'h', 4: 'i'}[sampwidth]), wav_r.readframes(chunk_size)
+      )
+      yield data if nchannels == 1 else [j for i, j in enumerate(data) if i % 2 == 0]
+    
 
 def dim_in_pixels(cols=None, rows=None):
   if cols == None:
@@ -66,15 +68,28 @@ def clamp(val, min, max):
 def average(l):
   return sum(l) / len(l)
 
+def maxabs(l):
+  return max(l) if max(l) > abs(min(l)) else min(l)
 #================================================================#
 
 
 #================================================================#
 def button(text, background, foreground):
-  return font.render(text, False, pygame.Color(foreground), pygame.Color(background))
+  background = pygame.Color(background) if type(background) == type('') else background
+  foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
+  return font.render(text, False, foreground, background)
 
 def label(text, foreground):
-  return font.render(text, False, pygame.Color(foreground))
+  foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
+  return font.render(text, False, foreground)
+
+def loading(foreground):
+  foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
+  if not hasattr(loading, 'tick'): loading.tick = 0
+  loading.tick +=1
+  return font.render('Loading' + '.' * loading.tick, False, foreground)
+#================================================================#
+
 #================================================================#
 
 class Window(object):
@@ -106,21 +121,28 @@ class Plot(object):
     self.background = pygame.Color(background)
     self.foreground = pygame.Color(foreground)
 
-  def plot(self, ys):
+  def plot(self, data):
     surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
     surface.fill(self.background)
-    threading.Thread(target=self._plot_thread, args=(surface, ys,)).start()
+    threading.Thread(target=self._plot_thread, args=(surface, data,)).start()
     return surface
 
-  def _plot_thread(self, surface, data):
+  def _plot_thread(self, surface, data_loader):
+    data = []
+    for chunk in data_loader:
+      surface.blit(loading(self.foreground), dim_in_pixels(0, self.rows / 2))
+      data += chunk
+    surface.fill(self.background)
+
     data = self._scale_x(data)
     data = self._scale_y(data)
     for x, y in zip(linspace(0, self.cols, len(data)), data):
       pygame.draw.line(surface, self.foreground, dim_in_pixels(x, self.rows / 2), dim_in_pixels(x, (self.rows - y) / 2), 1)
+    
 
   def _scale_x(self, data):
     scale = int(len(data) / (self.cols * 500))
-    return [average(data[x:x+scale]) for x in range(0, len(data), scale)]
+    return [average(data[x:x+scale]) for x in range(0, len(data), scale)] if scale > 1 else data
 
   def _scale_y(self, data):
     scale = self.rows / max(abs(max(data)), abs(min(data)))
