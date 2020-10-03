@@ -1,0 +1,33 @@
+This archive contains ex/vi 3.7 of 6/7/85, its manual pages, and the
+termcap library, originally from the 2.11BSD distribution. All of them
+were to some extent changed by me to support newer POSIX compatible
+Unix systems.
+
+A larger addition is the ability to handle 8 bit character sets. It
+is enabled by default, although it may produce subtle changes in ex's
+behaviour I did not discover yet.
+
+Some changes were made to get closer to the POSIX.2 guidelines for
+ex and vi.
+
+Adjustable values for compilation can be found in the files Makefile and
+config.h.
+
+The following systems are known to compile this code:
+
+Linux		2.2, 2.4; glibc 2.2, 2.1, libc4; diet libc; uClib
+FreeBSD		3.1, 4.5
+Solaris		9; 8; 2.6, 2.5.1
+Open UNIX	8.0.0
+UnixWare	7.1.1, 7.0.1, 2.1.2
+AIX		5.1, 4.3
+HP-UX		B.11.11, B.11.00, B.10.20
+
+Compilation reports from other systems are highly welcome, whether
+successful or not (in the latter case add a detailed description).
+
+Gunnar Ritter						9/24/03
+Freiburg i. Br.
+Germany
+<Gunnar.Ritter@pluto.uni-freiburg.de>
+<http://ex-vi.berlios.de>

@@ -84,10 +84,9 @@ def label(text, foreground):
   return font.render(text, False, foreground)
 
 def loading(foreground):
-  foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
   if not hasattr(loading, 'tick'): loading.tick = 0
   loading.tick +=1
-  return font.render('Loading' + '.' * loading.tick, False, foreground)
+  return label('Loading' + '.' * loading.tick, foreground)
 #================================================================#
 
 #================================================================#
@@ -128,17 +127,20 @@ class Plot(object):
     return surface
 
   def _plot_thread(self, surface, data_loader):
-    data = []
-    for chunk in data_loader:
-      surface.blit(loading(self.foreground), dim_in_pixels(0, self.rows / 2))
-      data += chunk
-    surface.fill(self.background)
-
+    data = self._loading(data_loader, lambda:surface.blit(loading(self.foreground), dim_in_pixels(0, self.rows / 2)))
     data = self._scale_x(data)
     data = self._scale_y(data)
+
+    surface.fill(self.background)
     for x, y in zip(linspace(0, self.cols, len(data)), data):
       pygame.draw.line(surface, self.foreground, dim_in_pixels(x, self.rows / 2), dim_in_pixels(x, (self.rows - y) / 2), 1)
     
+  def _loading(self, data_loader, notify=None):
+    data = []
+    for chunk in data_loader:
+      data += chunk
+      if notify: notify()
+    return data
 
   def _scale_x(self, data):
     scale = int(len(data) / (self.cols * 500))
