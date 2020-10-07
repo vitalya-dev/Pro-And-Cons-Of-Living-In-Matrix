@@ -95,13 +95,20 @@ class Plot(object):
     self.rows = rows
     self.background = pygame.Color(background)
     self.foreground = pygame.Color(foreground)
+    self._time = 0
 
-  def plot(self, data):
-    print(data)
+  def plot(self, notes):
     surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
     surface.fill(self.background)
-    pygame.draw.rect(surface, self.foreground, (100, 100, 100, 25), 0)
+    for note in notes:
+      self._draw(note, surface)
     return surface
+
+  def _draw(self, note, surface):
+    self._time += note.time
+    print(note)
+    if note.type == 'note_off': pygame.draw.rect(surface, self.foreground, ((self._time - note.time) * 150, (note.note - 50) * 15, 25, 12), 0)
+
 #================================================================#
 
 
