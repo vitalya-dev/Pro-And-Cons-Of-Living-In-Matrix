@@ -38,6 +38,12 @@ font = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
 def notes(midifile):
   return [message for message in mido.MidiFile(midifile) if message.type == 'note_on' or message.type == 'note_off']
 
+def messages_to_abstime(messages):
+  now = 0
+  for msg in messages:
+    now += msg.time
+    yield msg.copy(time=now)
+
 def playback():
   if not hasattr(playback, 'start'): playback.start = time.time()
   return time.time() - playback.start
@@ -95,20 +101,24 @@ class Plot(object):
     self.rows = rows
     self.background = pygame.Color(background)
     self.foreground = pygame.Color(foreground)
-    self._time = 0
 
   def plot(self, notes):
     surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
     surface.fill(self.background)
-    for note in notes:
-      self._draw(note, surface)
+    self._draw(notes, surface)
     return surface
 
-  def _draw(self, note, surface):
-    self._time += note.time
-    print(note)
-    if note.type == 'note_off': pygame.draw.rect(surface, self.foreground, ((self._time - note.time) * 150, (note.note - 50) * 15, 25, 12), 0)
-
+  def _draw(self, notes, surface):
+    
+    note_ons  = {}
+    for note in messages_to_abstime(notes):
+      if note.type == 'note_on':
+        if note.note not in note_ons: note_ons[note.note] = []
+        note_ons[note.note].append(note)
+      if note.type == 'note_off':
+        note_on = note_ons[note.note].pop()
+        print(note.time - note_on.time)
+        pygame.draw.rect(surface, self.foreground, (note_on.time * 600, (note.note - 50) * 51, (note.time - note_on.time) * 600 - 1, 50), 0)
 #================================================================#
 
 
