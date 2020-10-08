@@ -67,6 +67,10 @@ def done(v=None):
   if not hasattr(done, 'val'): done.val = False
   if v == None: return done.val
   done.val = v;
+
+def average(l):
+  return sum(l) / len(l)
+
 #================================================================#
 
 
@@ -109,16 +113,25 @@ class Plot(object):
     return surface
 
   def _draw(self, notes, surface):
-    
+    abs_notes = list(messages_to_abstime(notes))
+    scale_x = SCREEN_SIZE[0] / abs_notes[-1].time
+    average_note = average([note.note for note in abs_notes])
+    note_height = 50
+
     note_ons  = {}
-    for note in messages_to_abstime(notes):
+    for note in abs_notes:
       if note.type == 'note_on':
         if note.note not in note_ons: note_ons[note.note] = []
         note_ons[note.note].append(note)
       if note.type == 'note_off':
         note_on = note_ons[note.note].pop()
-        print(note.time - note_on.time)
-        pygame.draw.rect(surface, self.foreground, (note_on.time * 600, (note.note - 50) * 51, (note.time - note_on.time) * 600 - 1, 50), 0)
+        #=====================#
+        left   = note_on.time * scale_x
+        top    = (average_note - note.note) * note_height + SCREEN_SIZE[1] / 2
+        width  = (note.time - note_on.time) * scale_x - 1
+        height = note_height
+        #=====================#
+        pygame.draw.rect(surface, self.foreground, (left, top, width, height), 0)
 #================================================================#
 
 
