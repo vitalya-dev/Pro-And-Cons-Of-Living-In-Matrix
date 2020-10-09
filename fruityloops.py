@@ -105,6 +105,21 @@ class Window(object):
       if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
 
 
+class Beat(object):
+  def __init__(self, cols, rows, beat_ons, beat_offs):
+    self.cols  = cols
+    self.rows  = rows
+    self.scale = dim_in_pixels(cols=cols) / beat_offs[-1].time
+    self.average_beat = average([beat_on.note for beat_on in beat_ons])
+    self.beat_height = 50
+
+  def rect(self, beat_on, beat_off):
+    left  = beat_on.time * self.scale
+    top   = (self.average_beat  - beat_on.note) * self.beat_height + dim_in_pixels(rows=self.rows) / 2
+    width = (beat_off.time - beat_on.time) * self.scale - 1
+    #=============#
+    return pygame.Rect(left, top, width, self.beat_height)
+  
 class Plot(object):
   def __init__(self, cols, rows, background, foreground):
     self.cols = cols
@@ -119,26 +134,15 @@ class Plot(object):
     return surface
 
   def _draw(self, messages, surface):
-    note_ons =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
-    note_offs = [message for message in messages_to_abstime(messages) if message.type == 'note_off']
-    #================================================================#
-    scale_x = SCREEN_SIZE[0] / note_offs[-1].time
-    average_note = average([note_on.note for note_on in note_ons])
-    note_height = 50
-    #================================================================#
-    for note_on in note_ons:
-      i, note_off = find(note_offs, lambda x: x.note == note_on.note)
-      if note_off:
-        left   = note_on.time * scale_x
-        top    = (average_note - note_on.note) * note_height + SCREEN_SIZE[1] / 2
-        width  = (note_off.time - note_on.time) * scale_x - 1
-        height = note_height
-        pygame.draw.rect(surface, self.foreground, (left, top, width, height), 0)
-        #=======================#
-        del(note_offs[i])
-
-        
-    
+    beat_ons  = [message for message in messages_to_abstime(messages) if message.type == 'note_on']
+    beat_offs = [message for message in messages_to_abstime(messages) if message.type == 'note_off']
+    beat      = Beat(self.cols, self.rows, beat_ons, beat_offs)
+    #=============#
+    for beat_on in beat_ons:
+      i, beat_off = find(beat_offs, lambda x: x.note == beat_on.note)
+      if beat_off:
+        pygame.draw.rect(surface, self.foreground, beat.rect(beat_on, beat_off), 0)
+        del(beat_offs[i])
 #================================================================#
 
 
