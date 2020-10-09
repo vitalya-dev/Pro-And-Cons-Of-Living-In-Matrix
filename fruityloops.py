@@ -44,6 +44,13 @@ def messages_to_abstime(messages):
     now += msg.time
     yield msg.copy(time=now)
 
+def find(lst, l):
+  for i, j in enumerate(lst):
+    if l(j): return (i, j)
+  return (None, None)
+      
+  
+
 def playback():
   if not hasattr(playback, 'start'): playback.start = time.time()
   return time.time() - playback.start
@@ -70,7 +77,6 @@ def done(v=None):
 
 def average(l):
   return sum(l) / len(l)
-
 #================================================================#
 
 
@@ -106,32 +112,33 @@ class Plot(object):
     self.background = pygame.Color(background)
     self.foreground = pygame.Color(foreground)
 
-  def plot(self, notes):
+  def plot(self, messages):
     surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
     surface.fill(self.background)
-    self._draw(notes, surface)
+    self._draw(messages, surface)
     return surface
 
-  def _draw(self, notes, surface):
-    abs_notes = list(messages_to_abstime(notes))
-    scale_x = SCREEN_SIZE[0] / abs_notes[-1].time
-    average_note = average([note.note for note in abs_notes])
+  def _draw(self, messages, surface):
+    note_ons =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
+    note_offs = [message for message in messages_to_abstime(messages) if message.type == 'note_off']
+    #================================================================#
+    scale_x = SCREEN_SIZE[0] / note_offs[-1].time
+    average_note = average([note_on.note for note_on in note_ons])
     note_height = 50
-
-    note_ons  = {}
-    for note in abs_notes:
-      if note.type == 'note_on':
-        if note.note not in note_ons: note_ons[note.note] = []
-        note_ons[note.note].append(note)
-      if note.type == 'note_off':
-        note_on = note_ons[note.note].pop()
-        #=====================#
+    #================================================================#
+    for note_on in note_ons:
+      i, note_off = find(note_offs, lambda x: x.note == note_on.note)
+      if note_off:
         left   = note_on.time * scale_x
-        top    = (average_note - note.note) * note_height + SCREEN_SIZE[1] / 2
-        width  = (note.time - note_on.time) * scale_x - 1
+        top    = (average_note - note_on.note) * note_height + SCREEN_SIZE[1] / 2
+        width  = (note_off.time - note_on.time) * scale_x - 1
         height = note_height
-        #=====================#
         pygame.draw.rect(surface, self.foreground, (left, top, width, height), 0)
+        #=======================#
+        del(note_offs[i])
+
+        
+    
 #================================================================#
 
 
