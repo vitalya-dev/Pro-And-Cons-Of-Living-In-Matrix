@@ -4,6 +4,7 @@ Play MIDI file on output port.
 Run with (for example):
     ./play_midi_file.py 'SH-201 MIDI 1' 'test.mid'
 """
+import threading
 import time
 import sys
 import mido
@@ -49,8 +50,6 @@ def find(lst, l):
     if l(j): return (i, j)
   return (None, None)
       
-  
-
 def playback():
   if not hasattr(playback, 'start'): playback.start = time.time()
   return time.time() - playback.start
@@ -79,6 +78,17 @@ def average(l):
   return sum(l) / len(l)
 #================================================================#
 
+
+#================================================================#
+def button(text, background, foreground):
+  background = pygame.Color(background) if type(background) == type('') else background
+  foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
+  return font.render(text, False, foreground, background)
+
+def label(text, foreground):
+  foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
+  return font.render(text, False, foreground)
+#================================================================#
 
 
 #================================================================#
@@ -146,11 +156,18 @@ class Plot(object):
 #================================================================#
 
 
+def play(messages):
+  with mido.open_output(None) as output:
+    for message in messages * 10:
+      if timing(message) > 0.0: time.sleep(timing())
+      output.send(message)
+
 if __name__ == '__main__':
   window = Window(MAX_COLS, MAX_ROWS, '#000080')
   window.on_esc = lambda: done(True)
-  
-  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', 'green').plot(notes('Breath.mid')), (0, 0))
+
+  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', '#55FF55').plot(notes('Breath.mid')), (0, 0))
+  threading.Thread(target=play, args=(notes('Breath.mid'),)).start()
 
   while not done():
     dt = clock.tick(60)
@@ -161,4 +178,5 @@ if __name__ == '__main__':
     screen.blit(window.render(), dim_in_pixels(0, 0))
     #UPDATE
     pygame.display.update()
+
 
