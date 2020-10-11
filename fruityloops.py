@@ -47,8 +47,8 @@ def messages_to_abstime(messages):
 
 def find(lst, l):
   for i, j in enumerate(lst):
-    if l(j): return (i, j)
-  return (None, None)
+    if l(j): return i
+  return -1
       
 def playback():
   if not hasattr(playback, 'start'): playback.start = time.time()
@@ -128,13 +128,11 @@ class Window(object):
       if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
 
 
-class Beat(object):
-  def __init__(self, cols, rows, beat_ons, beat_offs):
-    self.cols  = cols
-    self.rows  = rows
-    self.scale = dim_in_pixels(cols=cols) / beat_offs[-1].time
-    self.beat_height = 50
-    self.average_note = int(average([beat_on.note for beat_on in beat_ons]))
+class Beats(object):
+  def __init__(self, messages):
+    self.beat_ons  =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
+    self.beat_offs  = [message for message in messages_to_abstime(messages) if message.type == 'note_off']
+    self.average_note = int(average([beat_on.note for beat_on in self.beat_ons]))
     self.note_to_key = {
       self.average_note:   'F',
       self.average_note-1: 'D',
@@ -145,12 +143,15 @@ class Beat(object):
       self.average_note+3: 'L'
     }
 
-  def rect(self, beat_on, beat_off):
-    left  = beat_on.time * self.scale
-    top   = (self.average_note  - beat_on.note) * self.beat_height + dim_in_pixels(rows=self.rows) / 2
-    width = (beat_off.time - beat_on.time) * self.scale - 1
-    #=============#
-    return pygame.Rect(left, top, width, self.beat_height)
+  def __iter__(self):
+    beat_offs = self.beat_offs[:]
+    for beat_on in self.beat_ons:
+      i = find(beat_offs, lambda x: x.note == beat_on.note)
+      if i >= 0:
+        yield (beat_on, beat_offs.pop(i))
+        
+  def time(self):
+    return self.beat_offs[-1].time
 
   def key(self, beat):
     return self.note_to_key[beat.note]
@@ -167,6 +168,7 @@ class Plot(object):
     self.background = pygame.Color(background)
     self.foreground = pygame.Color(foreground)
 
+
   def plot(self, messages):
     surface = pygame.surface.Surface(dim_in_pixels(self.cols, self.rows)).convert()
     surface.fill(self.background)
@@ -174,21 +176,17 @@ class Plot(object):
     return surface
 
   def _draw(self, messages, surface):
-    beat_ons  = [message for message in messages_to_abstime(messages) if message.type == 'note_on']
-    beat_offs = [message for message in messages_to_abstime(messages) if message.type == 'note_off']
-    beat      = Beat(self.cols, self.rows, beat_ons, beat_offs)
-    #=============#
-    for beat_on in beat_ons:
-      i, beat_off = find(beat_offs, lambda x: x.note == beat_on.note)
-      if beat_off:
-        #========#
-        beat_key     = beat.key(beat_on)
-        beat_size    = beat.rect(beat_on, beat_off).size
-        beat_topleft = beat.rect(beat_on, beat_off).topleft
-        #========#
-        surface.blit(label(beat_key, self.foreground, self.background, beat_size), beat_topleft)
-        #========#
-        del(beat_offs[i])
+    beats = Beats(messages)
+    #=================#
+    scale_x = dim_in_pixels(cols=self.cols) / beats.time()
+    for beat in beats:
+      beat_height = 50
+      beat_width  = (beat[1].time - beat[0].time) * scale_x - 1
+      beat_left   = beat[0].time * scale_x
+      beat_top    = (beats.average_note - beat[0].note) * beat_height + dim_in_pixels(rows=self.rows) / 2 - beat_height
+      beat_key    = beats.key(beat[0])
+      #=========#
+      surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
 #================================================================#
 
 
