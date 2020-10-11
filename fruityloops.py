@@ -129,8 +129,9 @@ class Window(object):
 
 class MidiKeys(object):
   def __init__(self, messages):
-    self.beats  = Beats(messages)
-    self.output = mido.open_output(None)
+    self.messages = messages
+    self.beats    = Beats(messages)
+    self.output   = mido.open_output(None)
 
   def process(self, events):
     keys_down = pygame.key.get_pressed()
@@ -204,12 +205,6 @@ class Plot(object):
       surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
 #================================================================#
 
-
-def play(messages):
-  with mido.open_output(None) as output:
-    for message in messages * 1:
-      if timing(message) > 0.0: time.sleep(timing())
-      output.send(message)
 
 if __name__ == '__main__':
   window    = Window(MAX_COLS, MAX_ROWS, '#000080')
