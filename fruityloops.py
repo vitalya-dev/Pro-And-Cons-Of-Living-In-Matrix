@@ -133,15 +133,32 @@ class Beat(object):
     self.cols  = cols
     self.rows  = rows
     self.scale = dim_in_pixels(cols=cols) / beat_offs[-1].time
-    self.average_beat = average([beat_on.note for beat_on in beat_ons])
     self.beat_height = 50
+    self.average_note = int(average([beat_on.note for beat_on in beat_ons]))
+    self.note_to_key = {
+      self.average_note:   'F',
+      self.average_note-1: 'D',
+      self.average_note-2: 'S',
+      self.average_note-3: 'A',
+      self.average_note+1: 'J',
+      self.average_note+2: 'K',
+      self.average_note+3: 'L'
+    }
 
   def rect(self, beat_on, beat_off):
     left  = beat_on.time * self.scale
-    top   = (self.average_beat  - beat_on.note) * self.beat_height + dim_in_pixels(rows=self.rows) / 2
+    top   = (self.average_note  - beat_on.note) * self.beat_height + dim_in_pixels(rows=self.rows) / 2
     width = (beat_off.time - beat_on.time) * self.scale - 1
     #=============#
     return pygame.Rect(left, top, width, self.beat_height)
+
+  def key(self, beat):
+    return self.note_to_key[beat.note]
+
+  def note(self, key):
+    key_to_note = {key:note for note, key in self.note_to_key.items()}
+    return key_to_note[key]
+
   
 class Plot(object):
   def __init__(self, cols, rows, background, foreground):
@@ -164,7 +181,13 @@ class Plot(object):
     for beat_on in beat_ons:
       i, beat_off = find(beat_offs, lambda x: x.note == beat_on.note)
       if beat_off:
-        surface.blit(label('S', self.foreground, self.background, beat.rect(beat_on, beat_off).size), beat.rect(beat_on, beat_off).topleft)
+        #========#
+        beat_key     = beat.key(beat_on)
+        beat_size    = beat.rect(beat_on, beat_off).size
+        beat_topleft = beat.rect(beat_on, beat_off).topleft
+        #========#
+        surface.blit(label(beat_key, self.foreground, self.background, beat_size), beat_topleft)
+        #========#
         del(beat_offs[i])
 #================================================================#
 
