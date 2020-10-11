@@ -23,7 +23,6 @@ MAX_ROWS = (int)(SCREEN_SIZE[1] / FONT_SIZE)
 
 #================================================================#
 pygame.init()
-pygame.key.set_repeat(10, 75)
 #================================================================#
 
 #================================================================#
@@ -128,6 +127,19 @@ class Window(object):
       if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
 
 
+class MidiKeys(object):
+  def __init__(self, messages):
+    self.beats  = Beats(messages)
+    self.output = mido.open_output(None)
+
+  def process(self, events):
+    keys_down = pygame.key.get_pressed()
+    for e in events:
+      if e.type == KEYDOWN:
+        self.output.send(mido.Message('note_on', note=self.beats.note(e.key)))
+      if e.type == KEYUP:
+        self.output.send(mido.Message('note_off', note=self.beats.note(e.key)))
+
 class Beats(object):
   def __init__(self, messages):
     self.beat_ons  =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
@@ -157,8 +169,11 @@ class Beats(object):
     return self.note_to_key[beat.note]
 
   def note(self, key):
+    key = chr(key) if type(key) == type(int()) else key
+    key = key.upper()
+    #=================#
     key_to_note = {key:note for note, key in self.note_to_key.items()}
-    return key_to_note[key]
+    return key_to_note[key] if key in key_to_note else None
 
   
 class Plot(object):
@@ -197,17 +212,18 @@ def play(messages):
       output.send(message)
 
 if __name__ == '__main__':
-  window = Window(MAX_COLS, MAX_ROWS, '#000080')
-  window.on_esc = lambda: done(True)
+  window    = Window(MAX_COLS, MAX_ROWS, '#000080')
+  midi_keys = MidiKeys(notes('Breath.mid'))
 
+  window.on_esc = lambda: done(True)
   window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', '#55FF55').plot(notes('Breath.mid')), (0, 0))
-  threading.Thread(target=play, args=(notes('Breath.mid'),)).start()
 
   while not done():
     dt = clock.tick(60)
     #PROCESS
     events = pygame.event.get()
     window.process(events)
+    midi_keys.process(events)
     #RENDER
     screen.blit(window.render(), dim_in_pixels(0, 0))
     #UPDATE
