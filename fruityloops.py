@@ -76,6 +76,11 @@ def done(v=None):
 
 def average(l):
   return sum(l) / len(l)
+
+def subtract(a, b):
+  from operator import sub
+  if type(a) == type(b) == type(tuple()):
+    return tuple(map(sub, a, b))
 #================================================================#
 
 
@@ -85,9 +90,17 @@ def button(text, background, foreground):
   foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
   return font.render(text, False, foreground, background)
 
-def label(text, foreground):
+def label(text, background, foreground, size=None):
+  background = pygame.Color(background) if type(background) == type('') else background
   foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
-  return font.render(text, False, foreground)
+  #==============#
+  font_surface = font.render(text, False, foreground)
+  if size == None: rect = font_surface.get_size()
+  label_surface = pygame.surface.Surface(size).convert()
+  #==============#
+  label_surface.fill(background)
+  label_surface.blit(font_surface, subtract(label_surface.get_rect().center, font_surface.get_rect().center))
+  return label_surface
 #================================================================#
 
 
@@ -151,14 +164,14 @@ class Plot(object):
     for beat_on in beat_ons:
       i, beat_off = find(beat_offs, lambda x: x.note == beat_on.note)
       if beat_off:
-        pygame.draw.rect(surface, self.foreground, beat.rect(beat_on, beat_off), 0)
+        surface.blit(label('S', self.foreground, self.background, beat.rect(beat_on, beat_off).size), beat.rect(beat_on, beat_off).topleft)
         del(beat_offs[i])
 #================================================================#
 
 
 def play(messages):
   with mido.open_output(None) as output:
-    for message in messages * 10:
+    for message in messages * 1:
       if timing(message) > 0.0: time.sleep(timing())
       output.send(message)
 
