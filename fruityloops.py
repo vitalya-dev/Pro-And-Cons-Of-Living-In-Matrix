@@ -126,10 +126,25 @@ class Window(object):
       if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
       if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
 
+class MidiWindow(Window):
+  def __init__(self, messages, cols, rows, background, foreground):
+    super().__init__(cols, rows, background)
+    self.foregroud = pygame.Color(foreground)
+    self.beats  = Beats(messages)
+    
 
-class MidiKeys(object):
+  def process(self, events):
+    super().process(events)
+    for e in events:
+      if e.type == KEYDOWN:
+        self.output.append(mido.Message('note_on', note=self.beats.note(e.key), time=0))
+        
+          
+  def _draw(self, beat_on, beat_off):
+    
+
+class MidiPiano(object):
   def __init__(self, messages):
-    self.messages = messages
     self.beats    = Beats(messages)
     self.output   = mido.open_output(None)
 
@@ -174,6 +189,7 @@ class Beats(object):
     key = key.upper()
     #=================#
     key_to_note = {key:note for note, key in self.note_to_key.items()}
+    #=================#
     return key_to_note[key] if key in key_to_note else None
 
   
@@ -207,20 +223,20 @@ class Plot(object):
 
 
 if __name__ == '__main__':
-  window    = Window(MAX_COLS, MAX_ROWS, '#000080')
-  midi_keys = MidiKeys(notes('Breath.mid'))
+  midi_window    = MidiWindow(notes('Breath.mid'), MAX_COLS, MAX_ROWS, '#000080')
+  midi_keys = MidiPiano(notes('Breath.mid'))
 
-  window.on_esc = lambda: done(True)
-  window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', '#55FF55').plot(notes('Breath.mid')), (0, 0))
+  midi_window.on_esc = lambda: done(True)
+  midi_window.draw(Plot(MAX_COLS, MAX_ROWS, '#000080', '#55FF55').plot(notes('Breath.mid')), (0, 0))
 
   while not done():
     dt = clock.tick(60)
     #PROCESS
     events = pygame.event.get()
-    window.process(events)
+    midi_window.process(events)
     midi_keys.process(events)
     #RENDER
-    screen.blit(window.render(), dim_in_pixels(0, 0))
+    screen.blit(midi_window.render(), dim_in_pixels(0, 0))
     #UPDATE
     pygame.display.update()
 
