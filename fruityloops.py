@@ -107,6 +107,9 @@ def label(text, background, foreground, size=None):
 class Window(object):
   def __init__(self, cols, rows, background):
     self.surface = pygame.surface.Surface(dim_in_pixels(cols, rows)).convert()
+    self.buffer  = pygame.surface.Surface(dim_in_pixels(cols, rows), pygame.SRCALPHA, 32).convert_alpha()
+    self.cols = cols
+    self.rows = rows
     self.background = pygame.Color(background)
     self.keys_down = pygame.key.get_pressed()
     self.draws = []
@@ -118,6 +121,7 @@ class Window(object):
     self.surface.fill(self.background)
     for d in self.draws:
       self.surface.blit(d['surface'], dim_in_pixels(*d['coord']))
+    self.surface.blit(self.buffer, (0, 0))
     return self.surface
 
   def process(self, events):
@@ -129,19 +133,28 @@ class Window(object):
 class MidiWindow(Window):
   def __init__(self, messages, cols, rows, background, foreground):
     super().__init__(cols, rows, background)
-    self.foregroud = pygame.Color(foreground)
-    self.beats  = Beats(messages)
-    
+    self.foreground        = pygame.Color(foreground)
+    self.beats             = Beats(messages)
+    self.beats_progression = BeatsProgression(self.beats)
+
 
   def process(self, events):
     super().process(events)
     for e in events:
       if e.type == KEYDOWN:
-        self.output.append(mido.Message('note_on', note=self.beats.note(e.key), time=0))
-        
+        self._draw(self.beats_progression.current_beat_plus_plus())
+
           
-  def _draw(self, beat_on, beat_off):
-    
+  def _draw(self, beat):
+    scale_x = dim_in_pixels(cols=self.cols) / self.beats.time()
+    beat_height = 50
+    beat_width  = (beat[1].time - beat[0].time) * scale_x - 1
+    beat_left   = beat[0].time * scale_x
+    beat_top    = (self.beats.average_note - beat[0].note) * beat_height + dim_in_pixels(rows=self.rows) / 2 - beat_height
+    beat_key    = self.beats.key(beat[0])
+    #=========#
+    self.buffer.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
+
 
 class MidiPiano(object):
   def __init__(self, messages):
@@ -192,6 +205,22 @@ class Beats(object):
     #=================#
     return key_to_note[key] if key in key_to_note else None
 
+class BeatsProgression:
+  def __init__(self, beats):
+    self.beats    = list(beats)
+    self._current = 0
+
+  def current_beat(self):
+    return self.beats[self._current] if self._current < len(self.beats) else None
+
+  def next_beat(self):
+    self._current += 1
+
+  def current_beat_plus_plus(self):
+    beat = self.current_beat()
+    self.next_beat()
+    return beat
+
   
 class Plot(object):
   def __init__(self, cols, rows, background, foreground):
@@ -223,7 +252,7 @@ class Plot(object):
 
 
 if __name__ == '__main__':
-  midi_window    = MidiWindow(notes('Breath.mid'), MAX_COLS, MAX_ROWS, '#000080')
+  midi_window    = MidiWindow(notes('Breath.mid'), MAX_COLS, MAX_ROWS, '#000080', 'red')
   midi_keys = MidiPiano(notes('Breath.mid'))
 
   midi_window.on_esc = lambda: done(True)
