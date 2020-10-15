@@ -107,7 +107,8 @@ def label(text, background, foreground, size=None):
 class Window(object):
   def __init__(self, cols, rows, background):
     self.surface = pygame.surface.Surface(dim_in_pixels(cols, rows)).convert()
-    self.buffer  = pygame.surface.Surface(dim_in_pixels(cols, rows), pygame.SRCALPHA, 32).convert_alpha()
+    self.buffer  = self.surface.copy()
+    self.buffer.set_colorkey((0, 0, 0))
     self.cols = cols
     self.rows = rows
     self.background = pygame.Color(background)
@@ -142,15 +143,15 @@ class MidiWindow(Window):
     super().process(events)
     for e in events:
       if e.type == KEYDOWN:
-        self._draw(self.beats_progression.current_beat_plus_plus())
+        self._draw(self.beats_progression.current_beat_plus_plus(), note=self.beats.note(e.key))
 
           
-  def _draw(self, beat):
+  def _draw(self, beat, note):
     scale_x = dim_in_pixels(cols=self.cols) / self.beats.time()
     beat_height = 50
     beat_width  = (beat[1].time - beat[0].time) * scale_x - 1
     beat_left   = beat[0].time * scale_x
-    beat_top    = (self.beats.average_note - beat[0].note) * beat_height + dim_in_pixels(rows=self.rows) / 2 - beat_height
+    beat_top    = (self.beats.average_note - note) * beat_height + dim_in_pixels(rows=self.rows) / 2 - beat_height
     beat_key    = self.beats.key(beat[0])
     #=========#
     self.buffer.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
