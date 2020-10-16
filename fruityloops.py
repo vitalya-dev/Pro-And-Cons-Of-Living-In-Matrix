@@ -1,3 +1,5 @@
+#git show 8f98340e744d7c967c8faf71cedd320039c6befd:fruityloops.py | clip
+
 import threading
 import time
 import sys
@@ -50,8 +52,20 @@ def messages_to_abstime(messages):
     now += message.time
     yield message.copy(time=now)
 
-def read_messages(midifile):
+def read_midi(midifile):
   return list(mido.MidiFile(midifile))
+
+def generate_keys(beats):
+  middle_note = beats.middle_note()
+  return {
+    'F': middle_note,
+    'D': middle_note-1,
+    'S': middle_note-2,
+    'A': middle_note-3,
+    'J': middle_note+1,
+    'K': middle_note+2,
+    'L': middle_note+3,
+  }
 #================================================================#
 
 
@@ -69,7 +83,7 @@ def label(text, background, foreground, size=None):
 #================================================================#
 
 #================================================================#
-class Tune(object):
+class Beats(object):
   def __init__(self, messages):
     self.beat_ons    =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
     self.beat_offs   =  [message for message in messages_to_abstime(messages) if message.type == 'note_off']
@@ -89,6 +103,32 @@ class Tune(object):
 
   def __str__(self):
     return str(list(self))
+
+class Progression:
+  def __init__(self, prog):
+    self.prog = prog
+    self._current = 0
+
+  def current(self):
+    return self.prog[self._current]
+
+  def next(self):
+    self._current = (self._current + 1) % len(self.prog)
+
+
+class Piano(object):
+  def __init__(self, keys):
+    self.output = mido.open_output(None)
+    self.keys  = keys
+
+  def process(self, events):
+    keys_down = pygame.key.get_pressed()
+    for e in events:
+      if e.type == KEYDOWN:
+        self.output.send(mido.Message('note_on',  note=self.keys[e.key]))
+      if e.type == KEYUP:
+        self.output.send(mido.Message('note_off', note=self.keys[e.key]))
+
 #================================================================#
   
 
@@ -96,5 +136,5 @@ class Tune(object):
 
 #================================================================#
 if __name__ == '__main__':
-  print(Tune(read_messages('Breath.mid')))
+  print(Beats(read_midi('Breath.mid')))
 #================================================================#
