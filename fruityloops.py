@@ -30,8 +30,8 @@ font = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
 #================================================================#
 def find(lst, l):
   for i, j in enumerate(lst):
-    if l(j): return i
-  return -1
+    if l(j): return i, j
+  return -1, None
 
 def average(l):
   return sum(l) / len(l)
@@ -92,12 +92,12 @@ class Beats(object):
     return int(average([beat_on.note for beat_on in self.beat_ons]))
 
   def duration(self):
-    self.beat_offs[-1].time
+    return self.beat_offs[-1].time
 
   def __iter__(self):
     beat_offs = self.beat_offs[:]
     for beat_on in self.beat_ons:
-      i = find(beat_offs, lambda x: x.note == beat_on.note)
+      i = find(beat_offs, lambda x: x.note == beat_on.note)[0]
       if i >= 0:
         yield (beat_on, beat_offs.pop(i))
 
@@ -135,6 +135,30 @@ class Piano(object):
   def on_key_up(self, key):
     self.output.send(mido.Message('note_off', note=self.keys[key]))
 
+class BeatsPlot(object):
+  def __init__(self, width, height, background, foreground):
+    self.width  = width
+    self.height = height
+    self.background = pygame.Color(background) if type(background) == type('') else background
+    self.foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
+
+  def plot(self, beats):
+    surface = pygame.surface.Surface((self.width, self.height)).convert()
+    surface.fill(self.background)
+    self._draw(surface, beats)
+    return surface
+
+  def _draw(self, surface, beats):
+    scale_x = self.width / beats.duration()
+    keys = generate_keys(beats)
+    for beat in beats:
+      beat_height = 50
+      beat_width  = (beat[1].time - beat[0].time) * scale_x - 1
+      beat_left   = beat[0].time * scale_x
+      beat_top    = (beats.middle_note() - beat[0].note) * beat_height + self.height / 2 - beat_height
+      beat_key    = find(keys.items(), lambda x: x[1] == beat[0].note)[1][0]
+      #=========#
+      surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
 
 
 #================================================================#
@@ -144,10 +168,19 @@ class Piano(object):
 
 #================================================================#
 if __name__ == '__main__':
+  print(Beats(read_midi('Breath.mid')))
+
   piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
 
+  screen.blit(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55').plot(Beats(read_midi('Breath.mid'))), (0, 0))
+
   while not done():
+    #PROCESS
     events = pygame.event.get()
     piano.process(events)
+    #RENDER
+    ...
+    #UPDATE
+    pygame.display.update()
 
 
