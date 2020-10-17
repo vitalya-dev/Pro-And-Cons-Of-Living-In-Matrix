@@ -119,15 +119,23 @@ class Progression:
 class Piano(object):
   def __init__(self, keys):
     self.output = mido.open_output(None)
-    self.keys  = keys
+    self.keys = keys
 
   def process(self, events):
     keys_down = pygame.key.get_pressed()
     for e in events:
-      if e.type == KEYDOWN:
-        self.output.send(mido.Message('note_on',  note=self.keys[e.key]))
-      if e.type == KEYUP:
-        self.output.send(mido.Message('note_off', note=self.keys[e.key]))
+      if e.type == KEYDOWN and chr(e.key).upper() in self.keys:
+       self.on_key_down(chr(e.key).upper())
+      if e.type == KEYUP and chr(e.key).upper() in self.keys:
+        self.on_key_up(chr(e.key).upper())
+ 
+  def on_key_down(self, key):
+    self.output.send(mido.Message('note_on',  note=self.keys[key]))
+
+  def on_key_up(self, key):
+    self.output.send(mido.Message('note_off', note=self.keys[key]))
+
+
 
 #================================================================#
   
@@ -136,5 +144,10 @@ class Piano(object):
 
 #================================================================#
 if __name__ == '__main__':
-  print(Beats(read_midi('Breath.mid')))
-#================================================================#
+  piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
+
+  while not done():
+    events = pygame.event.get()
+    piano.process(events)
+
+
