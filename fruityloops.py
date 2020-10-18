@@ -110,7 +110,7 @@ class Beats(object):
     self._beats.append(beat)
 
   def __getitem__(self, index):
-    self._beats[index]
+    return self._beats[index]
 
   def __iter__(self):
     return iter(self._beats)
@@ -142,6 +142,14 @@ class Window(object):
     self.keys_down = pygame.key.get_pressed()
     self.draws = []
 
+  @property
+  def width(self):
+    return self.surface.get_width()
+
+  @property
+  def height(self):
+    return self.surface.get_height()
+
   def draw(self, surf, pos):
     self.draws.append({'surface': surf, 'pos': pos})
 
@@ -172,23 +180,44 @@ class PianoRoll(Window):
     self.foreground = foreground
     self.keys = keys
     self._beats = Beats()
-    self._beat_ons = []
+    self._inputs = []
 
   def on_key_down(self, key):
     if key.upper() in self.keys:
-      self._beat_ons.append(mido.Message('note_on',  note=self.keys[key.upper()], time=time.time()))
-      
+      self._inputs.append(mido.Message('note_on',  note=self.keys[key.upper()], time=time.time()))
+
   def on_key_up(self, key):
     if key.upper() in self.keys:
-      beat_off = mido.Message('note_off',  note=self.keys[key.upper()], time=time.time())
-      i = find(self._beat_ons, lambda x: x.note == beat_off.note)[0]
+      i = find(self._inputs, lambda x: x.note == self.keys[key.upper()])[0]
       if i >= 0:
-        beat_on = self._beat_ons.pop(i)
-        #============#
-        beat_off.time = beat_off.time - beat_on.time + self._beats.duration()
-        beat_on.time  = self._beats.duration()
-        #============#
-        self._beats.add((beat_on, beat_off))
+        self._beats.add(self._beat_from_input(self._inputs.pop(i), self._beats.duration()))
+
+  def process(self, events):
+    super().process(events)
+    for input in self._inputs:
+      self._draw_beat(self.buffer, self._beat_from_input(copy.copy(input), self._beats.duration()))
+
+
+  def _beat_from_input(self, beat_on, start_time):
+    beat_off = mido.Message('note_off',  note=beat_on.note, time=time.time()-beat_on.time)
+    print(dir(beat_off))
+    #============#
+    beat_on.time  = start_time
+    beat_off.time += start_time
+    #============#
+    return (beat_on, beat_off)
+
+  def _draw_beat(self, surface, beat):
+    scale_x = 150
+    beat_height = 50
+    beat_width  = (beat[1].time - beat[0].time) * scale_x - 1
+    beat_left   = beat[0].time * scale_x
+    beat_top    = (int(average(self.keys.values())) - beat[0].note) * beat_height + self.height / 2 - beat_height
+    beat_key    = find(self.keys.items(), lambda x: x[1] == beat[0].note)[1][0]
+    #=========#
+    if beat_width > 10:
+      surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
+
 
 class Piano(object):
   def __init__(self, keys):
