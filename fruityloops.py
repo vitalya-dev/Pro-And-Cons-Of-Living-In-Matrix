@@ -4,6 +4,7 @@ import threading
 import time
 import sys
 import mido
+import copy
 
 import pygame
 from pygame.locals import *
@@ -84,25 +85,39 @@ def label(text, background, foreground, size=None):
 
 #================================================================#
 class Beats(object):
-  def __init__(self, messages):
-    self.beat_ons    =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
-    self.beat_offs   =  [message for message in messages_to_abstime(messages) if message.type == 'note_off']
-  
-  def middle_note(self):
-    return int(average([beat_on.note for beat_on in self.beat_ons]))
+  def __init__(self, messages=[]):
+    self._beats = self._generate_beats(messages)
 
-  def duration(self):
-    return self.beat_offs[-1].time
-
-  def __iter__(self):
-    beat_offs = self.beat_offs[:]
-    for beat_on in self.beat_ons:
+  def _generate_beats(self, messages):
+    beats       =  []
+    beat_ons    =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
+    beat_offs   =  [message for message in messages_to_abstime(messages) if message.type == 'note_off']
+    #==============#
+    for beat_on in beat_ons:
       i = find(beat_offs, lambda x: x.note == beat_on.note)[0]
       if i >= 0:
-        yield (beat_on, beat_offs.pop(i))
+        beats.append((beat_on, beat_offs.pop(i)))
+    #==============#
+    return beats
+
+  def middle_note(self):
+    return int(average([beat[0].note for beat in self._beats]))
+
+  def duration(self):
+    return self._beats[-1][1].time if len(self._beats) > 0 else 0
+
+  def add(self, beat):
+    self._beats.append(beat)
+
+  def __getitem__(self, index):
+    self._beats[index]
+
+  def __iter__(self):
+    return iter(self._beats)
 
   def __str__(self):
     return str(list(self))
+
 
 class Progression:
   def __init__(self, prog):
@@ -115,6 +130,65 @@ class Progression:
   def next(self):
     self._current = (self._current + 1) % len(self.prog)
 
+
+class Window(object):
+  def __init__(self, width, height, background):
+    self.surface = pygame.surface.Surface((width, height)).convert()
+    self.background = pygame.Color(background)
+    #=================#
+    self.buffer  = self.surface.copy()
+    self.buffer.set_colorkey((0, 0, 0))
+    #=================#
+    self.keys_down = pygame.key.get_pressed()
+    self.draws = []
+
+  def draw(self, surf, pos):
+    self.draws.append({'surface': surf, 'pos': pos})
+
+  def render(self):
+    self.surface.fill(self.background)
+    for d in self.draws:
+      self.surface.blit(d['surface'], d['pos'])
+    self.surface.blit(self.buffer, (0, 0))
+    return self.surface
+
+  def process(self, events):
+    self.keys_down = pygame.key.get_pressed()
+    for e in events:
+      if e.type == KEYUP:
+        self.on_key_up(chr(e.key))
+      if e.type == KEYDOWN:
+       self.on_key_down(chr(e.key))
+
+  def on_key_up(self, key):
+    ...
+
+  def on_key_down(self, key):
+    ...
+
+class PianoRoll(Window):
+  def __init__(self, width, height, background, foreground, keys):
+    super().__init__(width, height, background)
+    self.foreground = foreground
+    self.keys = keys
+    self._beats = Beats()
+    self._beat_ons = []
+
+  def on_key_down(self, key):
+    if key.upper() in self.keys:
+      self._beat_ons.append(mido.Message('note_on',  note=self.keys[key.upper()], time=time.time()))
+      
+  def on_key_up(self, key):
+    if key.upper() in self.keys:
+      beat_off = mido.Message('note_off',  note=self.keys[key.upper()], time=time.time())
+      i = find(self._beat_ons, lambda x: x.note == beat_off.note)[0]
+      if i >= 0:
+        beat_on = self._beat_ons.pop(i)
+        #============#
+        beat_off.time = beat_off.time - beat_on.time + self._beats.duration()
+        beat_on.time  = self._beats.duration()
+        #============#
+        self._beats.add((beat_on, beat_off))
 
 class Piano(object):
   def __init__(self, keys):
@@ -134,6 +208,10 @@ class Piano(object):
 
   def on_key_up(self, key):
     self.output.send(mido.Message('note_off', note=self.keys[key]))
+
+
+
+
 
 class BeatsPlot(object):
   def __init__(self, width, height, background, foreground):
@@ -159,8 +237,6 @@ class BeatsPlot(object):
       beat_key    = find(keys.items(), lambda x: x[1] == beat[0].note)[1][0]
       #=========#
       surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
-
-
 #================================================================#
   
 
@@ -168,18 +244,17 @@ class BeatsPlot(object):
 
 #================================================================#
 if __name__ == '__main__':
-  print(Beats(read_midi('Breath.mid')))
-
   piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
 
-  screen.blit(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55').plot(Beats(read_midi('Breath.mid'))), (0, 0))
+  piano_roll = PianoRoll(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55', generate_keys(Beats(read_midi('Breath.mid'))))
 
   while not done():
     #PROCESS
     events = pygame.event.get()
     piano.process(events)
+    piano_roll.process(events)
     #RENDER
-    ...
+    screen.blit(piano_roll.render(), (0, 0))
     #UPDATE
     pygame.display.update()
 
