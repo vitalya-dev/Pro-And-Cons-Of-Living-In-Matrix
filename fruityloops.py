@@ -183,7 +183,7 @@ class PianoRoll(Window):
     self._inputs = []
 
   def on_key_down(self, key):
-    if key.upper() in self.keys:
+    if key.upper() in self.keys and len(self._inputs) == 0:
       self._inputs.append(mido.Message('note_on',  note=self.keys[key.upper()], time=time.time()))
 
   def on_key_up(self, key):
@@ -198,12 +198,12 @@ class PianoRoll(Window):
       self._draw_beat(self.buffer, self._beat_from_input(copy.copy(input), self._beats.duration()))
 
 
-  def _beat_from_input(self, beat_on, start_time):
+  def _beat_from_input(self, beat_on, position):
     beat_off = mido.Message('note_off',  note=beat_on.note, time=time.time()-beat_on.time)
     print(dir(beat_off))
     #============#
-    beat_on.time  = start_time
-    beat_off.time += start_time
+    beat_on.time  = position
+    beat_off.time += position
     #============#
     return (beat_on, beat_off)
 
@@ -237,9 +237,6 @@ class Piano(object):
 
   def on_key_up(self, key):
     self.output.send(mido.Message('note_off', note=self.keys[key]))
-
-
-
 
 
 class BeatsPlot(object):
@@ -276,6 +273,7 @@ if __name__ == '__main__':
   piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
 
   piano_roll = PianoRoll(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55', generate_keys(Beats(read_midi('Breath.mid'))))
+  piano_roll.draw(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#AA0000').plot(Beats(read_midi('Breath.mid'))), (0, 0))
 
   while not done():
     #PROCESS
