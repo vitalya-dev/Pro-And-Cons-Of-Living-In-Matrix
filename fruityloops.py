@@ -100,6 +100,10 @@ class Beats(object):
     #==============#
     return beats
 
+  def to_stream(self):
+    return sorted([beat for fullbeat in self._beats for beat in fullbeat], key=lambda beat: beat.time)
+
+
   def middle_note(self):
     return int(average([beat[0].note for beat in self._beats]))
 
@@ -174,7 +178,7 @@ class Window(object):
   def on_key_down(self, key):
     ...
 
-class PianoRoll(Window):
+class BeatsEditor(Window):
   def __init__(self, width, height, background, foreground, keys):
     super().__init__(width, height, background)
     self.foreground = foreground
@@ -200,7 +204,6 @@ class PianoRoll(Window):
 
   def _beat_from_input(self, beat_on, position):
     beat_off = mido.Message('note_off',  note=beat_on.note, time=time.time()-beat_on.time)
-    print(dir(beat_off))
     #============#
     beat_on.time  = position
     beat_off.time += position
@@ -238,6 +241,21 @@ class Piano(object):
   def on_key_up(self, key):
     self.output.send(mido.Message('note_off', note=self.keys[key]))
 
+class PianoRoll(object):
+  def __init__(self, beats):
+    self.beats = beats
+
+  def play(self):
+    threading.Thread(target=self._play).start()
+
+  def _play(self):
+    with mido.open_output(None) as output:
+      start_time = time.time()
+      for beat in self.beats.to_stream():
+        playback_time = time.time() - start_time
+        if beat.time - playback_time > 0:
+          time.sleep(beat.time - playback_time)
+        output.send(beat)
 
 class BeatsPlot(object):
   def __init__(self, width, height, background, foreground):
@@ -270,18 +288,19 @@ class BeatsPlot(object):
 
 #================================================================#
 if __name__ == '__main__':
+  PianoRoll(Beats(read_midi('Breath.mid'))).play()
   piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
 
-  piano_roll = PianoRoll(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55', generate_keys(Beats(read_midi('Breath.mid'))))
-  piano_roll.draw(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#AA0000').plot(Beats(read_midi('Breath.mid'))), (0, 0))
+  beats_editor = BeatsEditor(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55', generate_keys(Beats(read_midi('Breath.mid'))))
+  beats_editor.draw(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#AA0000').plot(Beats(read_midi('Breath.mid'))), (0, 0))
 
   while not done():
     #PROCESS
     events = pygame.event.get()
     piano.process(events)
-    piano_roll.process(events)
+    beats_editor.process(events)
     #RENDER
-    screen.blit(piano_roll.render(), (0, 0))
+    screen.blit(beats_editor.render(), (0, 0))
     #UPDATE
     pygame.display.update()
 
