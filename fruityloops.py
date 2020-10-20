@@ -11,9 +11,9 @@ from pygame.locals import *
 
 #================================================================#
 SCREEN_SIZE = (640, 480)
-FONT_SIZE = 32
-MAX_COLS = (int)(SCREEN_SIZE[0] / (FONT_SIZE / 2))
-MAX_ROWS = (int)(SCREEN_SIZE[1] / FONT_SIZE)
+FONT_SIZE  = 32
+MAX_COLS   = (int)(SCREEN_SIZE[0] / (FONT_SIZE / 2))
+MAX_ROWS   = (int)(SCREEN_SIZE[1] / FONT_SIZE)
 #================================================================#
 
 
@@ -22,9 +22,11 @@ pygame.init()
 #================================================================#
 
 #================================================================#
-screen = pygame.display.set_mode(SCREEN_SIZE)
-clock = pygame.time.Clock()
-font = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
+screen     = pygame.display.set_mode(SCREEN_SIZE)
+clock      = pygame.time.Clock()
+font       = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
+midioutput = mido.open_output(None)
+
 #================================================================#
 
 
@@ -224,7 +226,6 @@ class BeatsEditor(Window):
 
 class Piano(object):
   def __init__(self, keys):
-    self.output = mido.open_output(None)
     self.keys = keys
 
   def process(self, events):
@@ -236,10 +237,10 @@ class Piano(object):
         self.on_key_up(chr(e.key).upper())
  
   def on_key_down(self, key):
-    self.output.send(mido.Message('note_on',  note=self.keys[key]))
+    midioutput.send(mido.Message('note_on',  note=self.keys[key]))
 
   def on_key_up(self, key):
-    self.output.send(mido.Message('note_off', note=self.keys[key]))
+    midioutput.send(mido.Message('note_off', note=self.keys[key]))
 
 class PianoRoll(object):
   def __init__(self, beats):
@@ -249,13 +250,12 @@ class PianoRoll(object):
     threading.Thread(target=self._play).start()
 
   def _play(self):
-    with mido.open_output(None) as output:
-      start_time = time.time()
-      for beat in self.beats.to_stream():
-        playback_time = time.time() - start_time
-        if beat.time - playback_time > 0:
-          time.sleep(beat.time - playback_time)
-        output.send(beat)
+    start_time = time.time()
+    for beat in self.beats.to_stream():
+      playback_time = time.time() - start_time
+      if beat.time - playback_time > 0:
+        time.sleep(beat.time - playback_time)
+      midioutput.send(beat)
 
 class BeatsPlot(object):
   def __init__(self, width, height, background, foreground):
