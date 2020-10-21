@@ -230,10 +230,9 @@ class BeatsEditor(Window):
 
 
 class Piano(object):
-  def __init__(self, keys):
+  def __init__(self, keys, midioutput):
     self.keys = keys
-    self.midioutput = mido.open_output(None)
-
+    self.midioutput = midioutput
 
   def process(self, events):
     keys_down = pygame.key.get_pressed()
@@ -249,20 +248,29 @@ class Piano(object):
   def on_key_up(self, key):
     self.midioutput.send(mido.Message('note_off', note=self.keys[key]))
 
+
+class PianoRoll(object):
+  def __init__(self, midioutput):
+    self.midioutput = midioutput
+    self._play = False
+
   def play_or_stop(self, beats):
-    self.play(beats)
+    self._play = not self.play
+    if self._play: self.play(beats)
 
   def play(self, beats):
-    threading.Thread(target=self._play, args=(beats,)).start()
+    self._play = True
+    threading.Thread(target=self._play_thread, args=(beats,)).start()
 
-  def _play(self, beats):
+  def _play_thread(self, beats):
     start_time = time.time()
     for beat in beats.to_stream():
       playback_time = time.time() - start_time
       if beat.time - playback_time > 0:
         time.sleep(beat.time - playback_time)
       self.midioutput.send(beat)
-
+      if not self._play:
+        break
 
 class Keyboard(object):
   def process(self, events):
@@ -302,13 +310,16 @@ class BeatsPlot(object):
 
 #================================================================#
 if __name__ == '__main__':
-  piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
+  midioutput = mido.open_output(None)
+  #===================#
+  piano      = Piano(generate_keys(Beats(read_midi('Breath.mid'))), midioutput)
+  piano_roll = PianoRoll(midioutput)
   #===================#
   beats_editor = BeatsEditor(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55', generate_keys(Beats(read_midi('Breath.mid'))))
   beats_editor.draw(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#AA0000').plot(Beats(read_midi('Breath.mid'))), (0, 0))
   #===================#
   keyboard = Keyboard()
-  keyboard.on_space = lambda: piano.play_or_stop(beats_editor.beats)
+  keyboard.on_space = lambda: piano_roll.play_or_stop(beats_editor.beats)
   keyboard.on_esc   = lambda: beats_editor.clear()
   #===================#
 
