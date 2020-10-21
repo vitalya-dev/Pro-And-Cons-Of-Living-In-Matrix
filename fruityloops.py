@@ -25,8 +25,6 @@ pygame.init()
 screen     = pygame.display.set_mode(SCREEN_SIZE)
 clock      = pygame.time.Clock()
 font       = pygame.font.Font('data/FSEX300.ttf', FONT_SIZE - 1)
-midioutput = mido.open_output(None)
-
 #================================================================#
 
 
@@ -89,6 +87,9 @@ def label(text, background, foreground, size=None):
 class Beats(object):
   def __init__(self, messages=[]):
     self._beats = self._generate_beats(messages)
+
+  def clear(self):
+    self._beats.clear()
 
   def _generate_beats(self, messages):
     beats       =  []
@@ -185,7 +186,7 @@ class BeatsEditor(Window):
     super().__init__(width, height, background)
     self.foreground = foreground
     self.keys = keys
-    self._beats = Beats()
+    self.beats = Beats()
     self._inputs = []
 
   def on_key_down(self, key):
@@ -196,13 +197,17 @@ class BeatsEditor(Window):
     if key.upper() in self.keys:
       i = find(self._inputs, lambda x: x.note == self.keys[key.upper()])[0]
       if i >= 0:
-        self._beats.add(self._beat_from_input(self._inputs.pop(i), self._beats.duration()))
+        self.beats.add(self._beat_from_input(self._inputs.pop(i), self.beats.duration()))
+
+  def clear(self):
+    self.beats.clear()
+    self._inputs.clear()
+    self.buffer.fill((0, 0, 0))
 
   def process(self, events):
     super().process(events)
     for input in self._inputs:
-      self._draw_beat(self.buffer, self._beat_from_input(copy.copy(input), self._beats.duration()))
-
+      self._draw_beat(self.buffer, self._beat_from_input(copy.copy(input), self.beats.duration()))
 
   def _beat_from_input(self, beat_on, position):
     beat_off = mido.Message('note_off',  note=beat_on.note, time=time.time()-beat_on.time)
@@ -227,6 +232,8 @@ class BeatsEditor(Window):
 class Piano(object):
   def __init__(self, keys):
     self.keys = keys
+    self.midioutput = mido.open_output(None)
+
 
   def process(self, events):
     keys_down = pygame.key.get_pressed()
@@ -237,25 +244,32 @@ class Piano(object):
         self.on_key_up(chr(e.key).upper())
  
   def on_key_down(self, key):
-    midioutput.send(mido.Message('note_on',  note=self.keys[key]))
+    self.midioutput.send(mido.Message('note_on',  note=self.keys[key]))
 
   def on_key_up(self, key):
-    midioutput.send(mido.Message('note_off', note=self.keys[key]))
+    self.midioutput.send(mido.Message('note_off', note=self.keys[key]))
 
-class PianoRoll(object):
-  def __init__(self, beats):
-    self.beats = beats
+  def play_or_stop(self, beats):
+    self.play(beats)
 
-  def play(self):
-    threading.Thread(target=self._play).start()
+  def play(self, beats):
+    threading.Thread(target=self._play, args=(beats,)).start()
 
-  def _play(self):
+  def _play(self, beats):
     start_time = time.time()
-    for beat in self.beats.to_stream():
+    for beat in beats.to_stream():
       playback_time = time.time() - start_time
       if beat.time - playback_time > 0:
         time.sleep(beat.time - playback_time)
-      midioutput.send(beat)
+      self.midioutput.send(beat)
+
+
+class Keyboard(object):
+  def process(self, events):
+    for e in events:
+      if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
+      if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
+
 
 class BeatsPlot(object):
   def __init__(self, width, height, background, foreground):
@@ -288,17 +302,22 @@ class BeatsPlot(object):
 
 #================================================================#
 if __name__ == '__main__':
-  PianoRoll(Beats(read_midi('Breath.mid'))).play()
   piano = Piano(generate_keys(Beats(read_midi('Breath.mid'))))
-
+  #===================#
   beats_editor = BeatsEditor(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#55FF55', generate_keys(Beats(read_midi('Breath.mid'))))
   beats_editor.draw(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#AA0000').plot(Beats(read_midi('Breath.mid'))), (0, 0))
+  #===================#
+  keyboard = Keyboard()
+  keyboard.on_space = lambda: piano.play_or_stop(beats_editor.beats)
+  keyboard.on_esc   = lambda: beats_editor.clear()
+  #===================#
 
   while not done():
     #PROCESS
     events = pygame.event.get()
     piano.process(events)
     beats_editor.process(events)
+    keyboard.process(events)
     #RENDER
     screen.blit(beats_editor.render(), (0, 0))
     #UPDATE
