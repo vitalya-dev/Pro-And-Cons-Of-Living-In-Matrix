@@ -254,8 +254,8 @@ class PianoRoll(object):
     self.midioutput = midioutput
     self._play = False
 
-  def play_or_stop(self, beats):
-    self._play = not self.play
+  def toggle(self, beats):
+    self._play = not self._play
     if self._play: self.play(beats)
 
   def play(self, beats):
@@ -271,6 +271,7 @@ class PianoRoll(object):
       self.midioutput.send(beat)
       if not self._play:
         break
+    self._play = False
 
 class Keyboard(object):
   def process(self, events):
@@ -319,7 +320,7 @@ if __name__ == '__main__':
   beats_editor.draw(BeatsPlot(SCREEN_SIZE[0], SCREEN_SIZE[1], '#000080', '#AA0000').plot(Beats(read_midi('Breath.mid'))), (0, 0))
   #===================#
   keyboard = Keyboard()
-  keyboard.on_space = lambda: piano_roll.play_or_stop(beats_editor.beats)
+  keyboard.on_space = lambda: piano_roll.toggle(beats_editor.beats)
   keyboard.on_esc   = lambda: beats_editor.clear()
   #===================#
 
