@@ -334,5 +334,5 @@ if __name__ == '__main__':
     screen.blit(beats_editor.render(), (0, 0))
     #UPDATE
     pygame.display.update()
-
+#================================================================#
 
