@@ -12,8 +12,6 @@ from pygame.locals import *
 #================================================================#
 SCREEN_SIZE = (640, 480)
 FONT_SIZE  = 32
-MAX_COLS   = (int)(SCREEN_SIZE[0] / (FONT_SIZE / 2))
-MAX_ROWS   = (int)(SCREEN_SIZE[1] / FONT_SIZE)
 #================================================================#
 
 
