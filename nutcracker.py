@@ -25,20 +25,57 @@ def done(val=None):
   done.val = val;
 
 def scale(l, x):
-  return tuple(map(lambda e: e * x, l)) if type(l) == type(tuple()) else list(map(lambda e: e * x, l))
+  if type(l) == type(tuple()):
+    return tuple(map(lambda e: e * x, l))
+  else:
+    return list(map(lambda e: e * x, l))
+
+def subtract(a, b):
+  from operator import sub
+  if type(a) == type(b) == type(tuple()):
+    return tuple(map(sub, a, b))
+  if type(a) == type(b) == type(list()):
+    return tuple(map(sub, a, b))
 #================================================================#
 
 
-mr_pleasant_image = pygame.image.load("graphics/mr_pleasant_1.png").convert_alpha()
-mr_pleasant_image = pygame.transform.scale(mr_pleasant_image, scale(mr_pleasant_image.get_size(), 15))
+#================================================================#
+class Keyboard(object):
+  def process(self, events):
+    for e in events:
+      if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
+      if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
+
+class Framesheet(object):
+  def __init__(self, *frames):
+    self.frames = [pygame.image.load(frame).convert_alpha() for frame in frames]
+
+  @property
+  def current(self):
+    return self.frames[0]
+
+  def __str__(self):
+    return str(self.frames)
+
+#================================================================#
+#framesheet.scale(15)
 
 screen.fill(pygame.Color('#000000'))
-screen.blit(mr_pleasant_image, (0, 0))
+#screen.blit(mr_pleasant_image, subtract(screen.get_rect().center, framesheet.current.get_rect().center))
+
 
 if __name__ == '__main__':
+  #================#
+  framesheet = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png")
+  #================#
+  keyboard = Keyboard()
+  keyboard.on_space = lambda: print(framesheet)
+  keyboard.on_esc   = lambda: done(True)
+  #================#
+
   while not done():
     #PROCESS INPUT
     events = pygame.event.get()
+    keyboard.process(events)
     #RENDER
-
     pygame.display.update()
