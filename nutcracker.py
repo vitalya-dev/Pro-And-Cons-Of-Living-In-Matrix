@@ -48,11 +48,19 @@ class Keyboard(object):
 
 class Framesheet(object):
   def __init__(self, *frames):
-    self.frames = [pygame.image.load(frame).convert_alpha() for frame in frames]
+    self.frames = [pygame.image.load(frame).convert_alpha() if type(frame) == type(str()) else frame.copy() for frame in frames]
+    self._i = 0 
 
   @property
   def current(self):
-    return self.frames[0]
+    return self.frames[self._i]
+
+  def next_frame(self):
+    self._i = (self._i + 1) % len(self.frames)
+
+
+  def scale(self, s):
+    return Framesheet(*[pygame.transform.scale(frame, scale(frame.get_size(), s)) for frame in self.frames])
 
   def __str__(self):
     return str(self.frames)
@@ -60,16 +68,17 @@ class Framesheet(object):
 #================================================================#
 #framesheet.scale(15)
 
-screen.fill(pygame.Color('#000000'))
-#screen.blit(mr_pleasant_image, subtract(screen.get_rect().center, framesheet.current.get_rect().center))
+
+#
 
 
 if __name__ == '__main__':
   #================#
-  framesheet = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png")
+  mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png").scale(15)
+  nutcracker         = Framesheet("graphics/nutcracker.png").scale(15)
   #================#
   keyboard = Keyboard()
-  keyboard.on_space = lambda: print(framesheet)
+  keyboard.on_space = lambda: mr_pleasant_frames.next_frame()
   keyboard.on_esc   = lambda: done(True)
   #================#
 
@@ -78,4 +87,6 @@ if __name__ == '__main__':
     events = pygame.event.get()
     keyboard.process(events)
     #RENDER
+    screen.fill(pygame.Color('#000000'))
+    screen.blit(mr_pleasant_frames.current, subtract(screen.get_rect().center, mr_pleasant_frames.current.get_rect().center))
     pygame.display.update()
