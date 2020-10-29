@@ -55,12 +55,27 @@ class Framesheet(object):
   def current(self):
     return self.frames[self._i]
 
+  @current.setter
+  def current(self, current):
+    self._i = self.frames.index(current)
+
+  @property
+  def last(self):
+    return self.frames[-1]
+
+
   def next_frame(self):
     self._i = (self._i + 1) % len(self.frames)
 
 
+  def append(self, *frames):
+    self.frames += frames
+
   def scale(self, s):
     return Framesheet(*[pygame.transform.scale(frame, scale(frame.get_size(), s)) for frame in self.frames])
+
+  def rotate(self, r):
+    return Framesheet(*[pygame.transform.rotate(frame, r) for frame in self.frames])
 
   def __str__(self):
     return str(self.frames)
@@ -68,14 +83,13 @@ class Framesheet(object):
 #================================================================#
 #framesheet.scale(15)
 
-
-#
-
-
 if __name__ == '__main__':
   #================#
   mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png").scale(15)
-  nutcracker         = Framesheet("graphics/nutcracker.png").scale(15)
+  #================#
+  nutcracker_frames  = Framesheet("graphics/nutcracker.png").scale(15)
+  nutcracker_frames.append(*nutcracker_frames.rotate(180).frames)
+  nutcracker_frames.current = nutcracker_frames.last
   #================#
   keyboard = Keyboard()
   keyboard.on_space = lambda: mr_pleasant_frames.next_frame()
@@ -88,5 +102,7 @@ if __name__ == '__main__':
     keyboard.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    screen.blit(mr_pleasant_frames.current, subtract(screen.get_rect().center, mr_pleasant_frames.current.get_rect().center))
+    screen.blit(mr_pleasant_frames.current, center(screen, mr_pleasant_frames.current))
+    screen.blit(nutcracker_frames.current,  bottom_center(screen, nutcracker_frames.current), (0, 100))
+
     pygame.display.update()
