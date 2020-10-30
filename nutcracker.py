@@ -32,19 +32,24 @@ def scale(l, x):
 
 def subtract(a, b):
   from operator import sub
-  if type(a) == type(b) == type(tuple()):
-    return tuple(map(sub, a, b))
-  if type(a) == type(b) == type(list()):
-    return tuple(map(sub, a, b))
+  return tuple(map(sub, a, b))
+
+
 #================================================================#
 
 
 #================================================================#
 class Keyboard(object):
+  def __init__(self):
+    self.on_esc   = []
+    self.on_space = []
+
   def process(self, events):
     for e in events:
-      if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
-      if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
+      if e.type == KEYDOWN and e.key == K_ESCAPE:
+        for c in self.on_esc: c()
+      if e.type == KEYDOWN and e.key == K_SPACE:
+        for c in self.on_space: c()
 
 class Framesheet(object):
   def __init__(self, *frames):
@@ -85,15 +90,16 @@ class Framesheet(object):
 
 if __name__ == '__main__':
   #================#
-  mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png").scale(15)
+  mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png").scale(14)
   #================#
-  nutcracker_frames  = Framesheet("graphics/nutcracker.png").scale(15)
+  nutcracker_frames  = Framesheet("graphics/nutcracker.png").scale(14)
   nutcracker_frames.append(*nutcracker_frames.rotate(180).frames)
   nutcracker_frames.current = nutcracker_frames.last
   #================#
   keyboard = Keyboard()
-  keyboard.on_space = lambda: mr_pleasant_frames.next_frame()
-  keyboard.on_esc   = lambda: done(True)
+  keyboard.on_space += [lambda: mr_pleasant_frames.next_frame()]
+  keyboard.on_space += [lambda: nutcracker_frames.next_frame()]
+  keyboard.on_esc   += [lambda: done(True)]
   #================#
 
   while not done():
@@ -102,7 +108,18 @@ if __name__ == '__main__':
     keyboard.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    screen.blit(mr_pleasant_frames.current, center(screen, mr_pleasant_frames.current))
-    screen.blit(nutcracker_frames.current,  bottom_center(screen, nutcracker_frames.current), (0, 100))
-
+    screen.blit(
+      mr_pleasant_frames.current,
+      subtract(
+        subtract(screen.get_rect().center, mr_pleasant_frames.current.get_rect().center),
+        (0, 75)
+      )
+    )
+    screen.blit(
+      nutcracker_frames.current,
+      subtract(
+        subtract(screen.get_rect().center, nutcracker_frames.current.get_rect().center),
+        (0, -125)
+      )
+    )
     pygame.display.update()
