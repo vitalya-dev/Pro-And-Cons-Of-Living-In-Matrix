@@ -66,8 +66,23 @@ class Progression:
 
 class Framesheet(object):
   def __init__(self, *frames):
-    self.frames = [pygame.image.load(frame).convert_alpha() if type(frame) == type(str()) else frame.copy() for frame in frames]
+    self.frames = [self._load(frame) if type(frame) == type(str()) else frame.copy() for frame in frames]
     self._i = 0 
+
+  def _load(self, frame):
+    frame = frame.split(':')
+    if len(frame) == 1:
+      return pygame.image.load(frame[0]).convert_alpha()
+    elif len(frame) == 3:
+      return self._load_and_translate(frame[0], frame[1], frame[2])
+    else:
+      return pygame.image.load(frame[-1]).convert_alpha()
+
+  def _load_and_translate(self, tr, x, frame):
+    if tr == 'r':
+      return pygame.transform.rotate(pygame.image.load(frame).convert_alpha(), int(x))
+    else:
+      return pygame.image.load(frame)
 
   @property
   def current(self):
@@ -90,14 +105,8 @@ class Framesheet(object):
     self._i = (self._i + 1) % len(self.frames)
 
 
-  def append(self, *frames):
-    self.frames += frames
-
   def scale(self, s):
     return Framesheet(*[pygame.transform.scale(frame, scale(frame.get_size(), s)) for frame in self.frames])
-
-  def rotate(self, r):
-    return Framesheet(*[pygame.transform.rotate(frame, r) for frame in self.frames])
 
   def __getitem__(self, index):
     return self.frames[index]
@@ -112,16 +121,16 @@ class Framesheet(object):
 
 if __name__ == '__main__':
   #================#
-  mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png").scale(14)
+  mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png").scale(14)
   mr_pleasant_positions = [
     subtract(subtract(screen.get_rect().center, mr_pleasant_frames[0].get_rect().center), (0, 75)),
+    subtract(subtract(screen.get_rect().center, mr_pleasant_frames[1].get_rect().center), (0, 75)),
     subtract(subtract(screen.get_rect().center, mr_pleasant_frames[1].get_rect().center), (0, 75))
   ]
   #================#
-  nutcracker_frames  = Framesheet("graphics/nutcracker.png").scale(14)
-  nutcracker_frames.append(*nutcracker_frames.rotate(180).frames)
-  nutcracker_frames.current = nutcracker_frames.last
+  nutcracker_frames  = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
   nutcracker_positions = [
+    subtract(subtract(screen.get_rect().center, nutcracker_frames[1].get_rect().center), (0, -125)),
     subtract(subtract(screen.get_rect().center, nutcracker_frames[0].get_rect().center), (0, -45)),
     subtract(subtract(screen.get_rect().center, nutcracker_frames[1].get_rect().center), (0, -125))
   ]
