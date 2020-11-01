@@ -51,6 +51,19 @@ class Keyboard(object):
       if e.type == KEYDOWN and e.key == K_SPACE:
         for c in self.on_space: c()
 
+class Progression:
+  def __init__(self, prog):
+    self.progression = progression
+    self._i = 0
+
+  @property
+  def current(self):
+    return self.progression[self._i]
+
+  def next(self):
+    self._i = (self._i + 1) % len(self.progression)
+
+
 class Framesheet(object):
   def __init__(self, *frames):
     self.frames = [pygame.image.load(frame).convert_alpha() if type(frame) == type(str()) else frame.copy() for frame in frames]
@@ -59,6 +72,10 @@ class Framesheet(object):
   @property
   def current(self):
     return self.frames[self._i]
+
+  @property
+  def index(self):
+    return self._i
 
   @current.setter
   def current(self, current):
@@ -82,19 +99,32 @@ class Framesheet(object):
   def rotate(self, r):
     return Framesheet(*[pygame.transform.rotate(frame, r) for frame in self.frames])
 
+  def __getitem__(self, index):
+    return self.frames[index]
+
   def __str__(self):
     return str(self.frames)
 
 #================================================================#
 #framesheet.scale(15)
 
+
+
 if __name__ == '__main__':
   #================#
   mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png").scale(14)
+  mr_pleasant_positions = [
+    subtract(subtract(screen.get_rect().center, mr_pleasant_frames[0].get_rect().center), (0, 75)),
+    subtract(subtract(screen.get_rect().center, mr_pleasant_frames[1].get_rect().center), (0, 75))
+  ]
   #================#
   nutcracker_frames  = Framesheet("graphics/nutcracker.png").scale(14)
   nutcracker_frames.append(*nutcracker_frames.rotate(180).frames)
   nutcracker_frames.current = nutcracker_frames.last
+  nutcracker_positions = [
+    subtract(subtract(screen.get_rect().center, nutcracker_frames[0].get_rect().center), (0, -45)),
+    subtract(subtract(screen.get_rect().center, nutcracker_frames[1].get_rect().center), (0, -125))
+  ]
   #================#
   keyboard = Keyboard()
   keyboard.on_space += [lambda: mr_pleasant_frames.next_frame()]
@@ -108,18 +138,6 @@ if __name__ == '__main__':
     keyboard.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    screen.blit(
-      mr_pleasant_frames.current,
-      subtract(
-        subtract(screen.get_rect().center, mr_pleasant_frames.current.get_rect().center),
-        (0, 75)
-      )
-    )
-    screen.blit(
-      nutcracker_frames.current,
-      subtract(
-        subtract(screen.get_rect().center, nutcracker_frames.current.get_rect().center),
-        (0, -125)
-      )
-    )
+    screen.blit(mr_pleasant_frames.current, mr_pleasant_positions[mr_pleasant_frames.index])
+    screen.blit(nutcracker_frames.current,  nutcracker_positions[nutcracker_frames.index])
     pygame.display.update()
