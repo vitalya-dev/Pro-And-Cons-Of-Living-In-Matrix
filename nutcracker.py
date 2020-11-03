@@ -35,8 +35,6 @@ def scale(l, x):
 def subtract(a, b):
   from operator import sub
   return tuple(map(sub, a, b))
-
-
 #================================================================#
 
 
@@ -60,7 +58,7 @@ class Particles:
 
   def generate(self, n):
     for i in range(0, n):
-      pygame.draw.circle(self.surface, (255, 255, 255), self.sruface.get_rect().center, 10 * random.random())
+      pygame.draw.circle(self.surface, (255, 255, 255), self.surface.get_rect().center, int(10 * random.random()))
 
   def process(self, events):
     pass
@@ -70,7 +68,9 @@ class Particles:
 
 class Framesheet(object):
   def __init__(self, *frames):
-    self.frames = [self._load(frame) if type(frame) == type(str()) else frame.copy() for frame in frames]
+    self.frames    = [self._load(frame) if type(frame) == type(str()) else frame.copy() for frame in frames]
+    self.positions = [(0, 0) for frame in self.frames]
+    self.pivot     = (0, 0)
     self._i = 0 
 
   def _load(self, frame):
@@ -125,22 +125,20 @@ class Framesheet(object):
 
 if __name__ == '__main__':
   #================#
-  mr_pleasant_frames = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png").scale(14)
-  mr_pleasant_positions = [
-    subtract(screen.get_rect().center, (0, 75)),
-    subtract(screen.get_rect().center, (0, 75)),
-    subtract(screen.get_rect().center, (0, 75))
-  ]
+  mr_pleasant = Framesheet(
+    ("graphics/mr_pleasant_1.png", (0.5, 0.5)),
+    ("graphics/mr_pleasant_2.png", (0.5, 0.5)),
+    ("graphics/mr_pleasant_2.png", (0.5, 0.5))
+  )
+  mr_pleasant.position = subtract(screen.get_rect().center, (0, 75))
   #================#
   nutcracker_frames  = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
-  nutcracker_positions = [
+  nutcracker_frames.positions = [
     subtract(screen.get_rect().center, (0, -125)),
     subtract(screen.get_rect().center, (0, -45)),
     subtract(screen.get_rect().center, (0, -125))
   ]
-  #================#
-  particles = Particles(3)
-  particles_positions = [nutcracker_positions[0], nutcracker_positions[1], nutcracker_positions[2]]
+  nutcracker_frames.pivot = (0.5, 0.5)
   #================#
   keyboard = Keyboard()
   keyboard.on_space += [lambda: mr_pleasant_frames.next_frame()]
@@ -156,7 +154,7 @@ if __name__ == '__main__':
     particles.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    screen.blit(mr_pleasant_frames.current, mr_pleasant_positions[mr_pleasant_frames.index])
-    screen.blit(nutcracker_frames.current,  nutcracker_positions[nutcracker_frames.index])
-    screen.blit(particles.render(), particles_positions)
+    screen.blit(mr_pleasant_frames.current, mr_pleasant_frames.position)
+    screen.blit(nutcracker_frames.current, nutcracker_frames.position)
+    #screen.blit(particles.render(), particles_positions)
     pygame.display.update()
