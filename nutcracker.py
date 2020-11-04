@@ -119,31 +119,20 @@ class Framesheet(object):
     return str(self.frames)
 
 #================================================================#
-#framesheet.scale(15)
-
-
 
 if __name__ == '__main__':
   #================#
-  mr_pleasant = Framesheet(
-    ("graphics/mr_pleasant_1.png", (0.5, 0.5)),
-    ("graphics/mr_pleasant_2.png", (0.5, 0.5)),
-    ("graphics/mr_pleasant_2.png", (0.5, 0.5))
-  )
+  mr_pleasant = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png")
+  mr_pleasant.pivot = (0.5, 0.5)
   mr_pleasant.position = subtract(screen.get_rect().center, (0, 75))
   #================#
-  nutcracker_frames  = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
-  nutcracker_frames.positions = [
-    subtract(screen.get_rect().center, (0, -125)),
-    subtract(screen.get_rect().center, (0, -45)),
-    subtract(screen.get_rect().center, (0, -125))
-  ]
+  nutcracker = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
+  nutcracker.position = subtract(screen.get_rect().center, (0, -125))
   nutcracker_frames.pivot = (0.5, 0.5)
   #================#
   keyboard = Keyboard()
-  keyboard.on_space += [lambda: mr_pleasant_frames.next_frame()]
-  keyboard.on_space += [lambda: nutcracker_frames.next_frame()]
-  keyboard.on_space += [lambda: particles.generate(250 * 1 if nutcracker_frames.index == 1 else 0)]
+  keyboard.on_space += [lambda: mr_pleasant.next_frame()]
+  keyboard.on_space += [lambda: nutcracker.next_frame()]
   keyboard.on_esc   += [lambda: done(True)]
   #================#
 
@@ -154,7 +143,6 @@ if __name__ == '__main__':
     particles.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    screen.blit(mr_pleasant_frames.current, mr_pleasant_frames.position)
-    screen.blit(nutcracker_frames.current, nutcracker_frames.position)
-    #screen.blit(particles.render(), particles_positions)
+    mr_pleasant.render(screen)
+    nutcracker.render(screen)
     pygame.display.update()
