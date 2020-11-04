@@ -1,4 +1,5 @@
 import random
+import itertools
 
 import pygame
 from pygame.locals import *
@@ -33,6 +34,10 @@ def multiply(l1, l2):
 def subtract(l1, l2):
   from operator import sub
   return tuple(map(sub, l1, l2))
+
+def add(l1, l2):
+  from operator import add
+  return tuple(map(add, l1, l2))
 #================================================================#
 
 
@@ -67,24 +72,33 @@ class Particles:
 class Framesheet(object):
   def __init__(self, *frames):
     self.frames = [self._load(frame) if type(frame) == type(str()) else frame.copy() for frame in frames]
+    self.frame_offsets = list(itertools.repeat((0, 0), len(self.frames)))
     self.position = (0, 0)
     self.pivot    = (0, 0)
     self._current_frame_index = 0 
 
-  def _load(self, frame):
-    frame = frame.split(':')
-    if len(frame) == 1:
-      return pygame.image.load(frame[0]).convert_alpha()
-    elif len(frame) == 3:
-      return self._load_and_translate(frame[0], frame[1], frame[2])
+  def _load(self, frame_name):
+    frame_name_parts = frame_name.split(':')
+    if len(frame_name_parts) == 1:
+      return pygame.image.load(frame_name_parts[0]).convert_alpha()
+    elif len(frame_name_parts) == 3:
+      return self._load_and_translate(frame_name_parts[0], frame_name_parts[1], frame_name_parts[2])
     else:
-      return pygame.image.load(frame[-1]).convert_alpha()
+      return pygame.image.load(frame_name_parts[-1]).convert_alpha()
 
-  def _load_and_translate(self, translate_function, translate_param, frame):
+  def _load_and_translate(self, translate_function, translate_param, frame_name):
     if translate_function == 'r':
-      return pygame.transform.rotate(pygame.image.load(frame).convert_alpha(), int(translate_param))
+      translate_param = int(translate_param)
+      return pygame.transform.rotate(pygame.image.load(frame_name).convert_alpha(), translate_param)
+    if translate_function == 's':
+      translate_param = int(translate_param)
+      frame = pygame.image.load(frame_name).convert_alpha()
+      return pygame.transform.scale(frame, multiply(frame.get_size(), (translate_param, translate_param)))
     else:
-      return pygame.image.load(frame)
+      return pygame.image.load(frame_name)
+
+  def move(self, dx, dy):
+    self.position = add(self.position, (dx, dy))
 
   @property
   def current_frame(self):
@@ -107,7 +121,7 @@ class Framesheet(object):
 
   def render(self, surface):
     pivot_position = multiply(self.current_frame.get_size(), self.pivot)
-    surface.blit(self.current_frame, subtract(self.position, pivot_position))
+    surface.blit(self.current_frame, add(subtract(self.position, pivot_position), self.frame_offsets[self.current_index]))
 
   def scale(self, scale_factor):
     return Framesheet(*[pygame.transform.scale(frame, multiply(frame.get_size(), (scale_factor, scale_factor))) for frame in self.frames])
@@ -124,11 +138,12 @@ if __name__ == '__main__':
   #================#
   mr_pleasant = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png").scale(14)
   mr_pleasant.pivot = (0.5, 0.5)
-  mr_pleasant.position = subtract(screen.get_rect().center, (0, 75))
+  mr_pleasant.position = add(screen.get_rect().center, (0, -75))
   #================#
   nutcracker = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
-  nutcracker.position = subtract(screen.get_rect().center, (0, -125))
+  nutcracker.position  = add(screen.get_rect().center, (0, 125))
   nutcracker.pivot = (0.5, 0.5)
+  nutcracker.frame_offsets = [(0, 0), (0, -80), (0, 0)]
   #================#
   keyboard = Keyboard()
   keyboard.on_space += [lambda: mr_pleasant.next_frame()]
