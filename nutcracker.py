@@ -38,6 +38,9 @@ def subtract(l1, l2):
 def add(l1, l2):
   from operator import add
   return tuple(map(add, l1, l2))
+
+def random_pair(a, b):
+  return (random.randint(a, b), random.randint(a, b))
 #================================================================#
 
 
@@ -55,19 +58,24 @@ class Keyboard(object):
         for c in self.on_space: c()
 
 class Particles:
-  def __init__(self, timer):
-    self.surface = pygame.surface.Surface(SCREEN_SIZE).convert()
-    self.surface.set_colorkey((0, 0, 0))
+  def __init__(self):
+    self._particles = []
 
-  def generate(self, n):
+  def generate(self, position, n):
     for i in range(0, n):
-      pygame.draw.circle(self.surface, (255, 255, 255), self.surface.get_rect().center, int(10 * random.random()))
+      self._particles.append({
+        'position': position,
+        'force'   :  random_pair(-50, 50),
+        'radius'  : random.randint(0, 10),
+        'color'   : (255, 255, 255)
+      })
 
   def process(self, events):
     pass
 
-  def render(self):
-    return self.surface
+  def render(self, surface):
+    for particle in self._particles:
+      pygame.draw.circle(surface, particle['color'], particle['position'], particle['radius'])
 
 class Framesheet(object):
   def __init__(self, *frames):
@@ -116,12 +124,17 @@ class Framesheet(object):
   def last_frame(self):
     return self.frames[-1]
 
+  @property
+  def frame_position(self):
+    pivot_position = tuple(map(int, multiply(self.current_frame.get_size(), self.pivot)))
+    frame_top_left_position = subtract(self.position, pivot_position)
+    return add(frame_top_left_position, self.frame_offsets[self.current_index])
+
   def next_frame(self):
     self._current_frame_index = (self._current_frame_index + 1) % len(self.frames)
 
   def render(self, surface):
-    pivot_position = multiply(self.current_frame.get_size(), self.pivot)
-    surface.blit(self.current_frame, add(subtract(self.position, pivot_position), self.frame_offsets[self.current_index]))
+    surface.blit(self.current_frame, self.frame_position)
 
   def scale(self, scale_factor):
     return Framesheet(*[pygame.transform.scale(frame, multiply(frame.get_size(), (scale_factor, scale_factor))) for frame in self.frames])
@@ -145,9 +158,12 @@ if __name__ == '__main__':
   nutcracker.pivot = (0.5, 0.5)
   nutcracker.frame_offsets = [(0, 0), (0, -80), (0, 0)]
   #================#
+  particles = Particles()
+  #================#
   keyboard = Keyboard()
   keyboard.on_space += [lambda: mr_pleasant.next_frame()]
   keyboard.on_space += [lambda: nutcracker.next_frame()]
+  keyboard.on_space += [lambda: particles.generate(add(nutcracker.position, (0, -150)), 25) if nutcracker.current_index == 1 else ...]
   keyboard.on_esc   += [lambda: done(True)]
   #================#
 
@@ -155,8 +171,10 @@ if __name__ == '__main__':
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
+    particles.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
     mr_pleasant.render(screen)
     nutcracker.render(screen)
+    particles.render(screen)
     pygame.display.update()
