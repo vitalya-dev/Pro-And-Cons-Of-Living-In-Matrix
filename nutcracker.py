@@ -1,5 +1,6 @@
 import random
 import itertools
+import vector2
 
 import pygame
 from pygame.locals import *
@@ -13,6 +14,7 @@ FONT_SIZE   = 32
 
 #================================================================#
 pygame.init()
+random.seed()
 #================================================================#
 
 #================================================================#
@@ -39,8 +41,14 @@ def add(l1, l2):
   from operator import add
   return tuple(map(add, l1, l2))
 
+def to_int(l):
+  return tuple(map(int, l))
+
 def random_pair(a, b):
   return (random.randint(a, b), random.randint(a, b))
+
+def random_triple(a, b):
+  return (random.randint(a, b), random.randint(a, b), random.randint(a, b))
 #================================================================#
 
 
@@ -64,18 +72,21 @@ class Particles:
   def generate(self, position, n):
     for i in range(0, n):
       self._particles.append({
-        'position': position,
-        'force'   :  random_pair(-50, 50),
-        'radius'  : random.randint(0, 10),
-        'color'   : (255, 255, 255)
+        'position' : position,
+        'velocity' : random_pair(-150, 150),
+        'radius'   : random.randint(0, 10),
+        'color'    : random_triple(0, 255)
       })
 
   def process(self, events):
-    pass
+    for particle in self._particles:
+      delta_time_in_sec = multiply((clock.get_time(), clock.get_time()), (0.001, 0.001))
+      particle_movement = multiply(particle['velocity'], delta_time_in_sec)
+      particle['position'] = add(particle['position'], particle_movement)
 
   def render(self, surface):
     for particle in self._particles:
-      pygame.draw.circle(surface, particle['color'], particle['position'], particle['radius'])
+      pygame.draw.circle(surface, particle['color'], to_int(particle['position']), particle['radius'])
 
 class Framesheet(object):
   def __init__(self, *frames):
@@ -105,9 +116,6 @@ class Framesheet(object):
     else:
       return pygame.image.load(frame_name)
 
-  def move(self, dx, dy):
-    self.position = add(self.position, (dx, dy))
-
   @property
   def current_frame(self):
     return self.frames[self._current_frame_index]
@@ -126,7 +134,7 @@ class Framesheet(object):
 
   @property
   def frame_position(self):
-    pivot_position = tuple(map(int, multiply(self.current_frame.get_size(), self.pivot)))
+    pivot_position = multiply(self.current_frame.get_size(), self.pivot)
     frame_top_left_position = subtract(self.position, pivot_position)
     return add(frame_top_left_position, self.frame_offsets[self.current_index])
 
@@ -134,7 +142,7 @@ class Framesheet(object):
     self._current_frame_index = (self._current_frame_index + 1) % len(self.frames)
 
   def render(self, surface):
-    surface.blit(self.current_frame, self.frame_position)
+    surface.blit(self.current_frame, to_int(self.frame_position))
 
   def scale(self, scale_factor):
     return Framesheet(*[pygame.transform.scale(frame, multiply(frame.get_size(), (scale_factor, scale_factor))) for frame in self.frames])
@@ -168,6 +176,7 @@ if __name__ == '__main__':
   #================#
 
   while not done():
+    clock.tick()
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
