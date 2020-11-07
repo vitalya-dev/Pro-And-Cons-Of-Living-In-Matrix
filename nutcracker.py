@@ -1,6 +1,6 @@
 import random
 import itertools
-import vector2
+from pair import Pair
 
 import pygame
 from pygame.locals import *
@@ -33,22 +33,8 @@ def multiply(l1, l2):
   from operator import mul
   return tuple(map(mul, l1, l2))
 
-def subtract(l1, l2):
-  from operator import sub
-  return tuple(map(sub, l1, l2))
-
-def add(l1, l2):
-  from operator import add
-  return tuple(map(add, l1, l2))
-
 def to_int(l):
   return tuple(map(int, l))
-
-def random_pair(a, b):
-  return (random.randint(a, b), random.randint(a, b))
-
-def random_triple(a, b):
-  return (random.randint(a, b), random.randint(a, b), random.randint(a, b))
 #================================================================#
 
 
@@ -80,20 +66,18 @@ class Particles:
 
   def process(self, events):
     for particle in self._particles:
-      delta_time_in_sec = multiply((clock.get_time(), clock.get_time()), (0.001, 0.001))
-      particle_movement = multiply(particle['velocity'], delta_time_in_sec)
-      particle['position'] = add(particle['position'], particle_movement)
+      particle['position'] += particle['velocity'] * clock.get_time() * 0.001
 
   def render(self, surface):
     for particle in self._particles:
-      pygame.draw.circle(surface, particle['color'], to_int(particle['position']), particle['radius'])
+      pygame.draw.circle(surface, particle['color'], to_int(particle['position'].as_tuple()), particle['radius'])
 
 class Framesheet(object):
   def __init__(self, *frames):
     self.frames = [self._load(frame) if type(frame) == type(str()) else frame.copy() for frame in frames]
     self.frame_offsets = list(itertools.repeat((0, 0), len(self.frames)))
-    self.position = (0, 0)
-    self.pivot    = (0, 0)
+    self.position = Pair(0, 0)
+    self.pivot = Pair(0, 0)
     self._current_frame_index = 0 
 
   def _load(self, frame_name):
@@ -134,9 +118,7 @@ class Framesheet(object):
 
   @property
   def frame_position(self):
-    pivot_position = multiply(self.current_frame.get_size(), self.pivot)
-    frame_top_left_position = subtract(self.position, pivot_position)
-    return add(frame_top_left_position, self.frame_offsets[self.current_index])
+    return self.position - self.pivot * self.current_frame.get_size() + self.frame_offsets[self.current_index]
 
   def next_frame(self):
     self._current_frame_index = (self._current_frame_index + 1) % len(self.frames)
@@ -158,12 +140,12 @@ class Framesheet(object):
 if __name__ == '__main__':
   #================#
   mr_pleasant = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png").scale(14)
-  mr_pleasant.pivot = (0.5, 0.5)
-  mr_pleasant.position = add(screen.get_rect().center, (0, -75))
+  mr_pleasant.pivot = Pair(0.5, 0.5)
+  mr_pleasant.position = Pair(*screen.get_rect().center) + (0, -75)
   #================#
   nutcracker = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
-  nutcracker.position  = add(screen.get_rect().center, (0, 125))
-  nutcracker.pivot = (0.5, 0.5)
+  nutcracker.position  = Pair(*screen.get_rect().center) + (0, 125)
+  nutcracker.pivot = Pair(0.5, 0.5)
   nutcracker.frame_offsets = [(0, 0), (0, -80), (0, 0)]
   #================#
   particles = Particles()
