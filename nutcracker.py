@@ -1,6 +1,6 @@
 import random
 import itertools
-from pair import Pair
+from couple import Couple
 
 import pygame
 from pygame.locals import *
@@ -35,6 +35,12 @@ def multiply(l1, l2):
 
 def to_int(l):
   return tuple(map(int, l))
+
+def random_pair(a, b):
+  return (random.randint(a, b), random.randint(a, b))
+
+def random_triple(a, b):
+  return (random.randint(a, b), random.randint(a, b), random.randint(a, b))
 #================================================================#
 
 
@@ -58,9 +64,9 @@ class Particles:
   def generate(self, position, n):
     for i in range(0, n):
       self._particles.append({
-        'position' : position,
-        'velocity' : random_pair(-150, 150),
+        'position' : position.copy(),
         'radius'   : random.randint(0, 10),
+        'velocity' : Couple(*random_pair(-150, 150)),
         'color'    : random_triple(0, 255)
       })
 
@@ -76,8 +82,8 @@ class Framesheet(object):
   def __init__(self, *frames):
     self.frames = [self._load(frame) if type(frame) == type(str()) else frame.copy() for frame in frames]
     self.frame_offsets = list(itertools.repeat((0, 0), len(self.frames)))
-    self.position = Pair(0, 0)
-    self.pivot = Pair(0, 0)
+    self.position = Couple(0, 0)
+    self.pivot = Couple(0, 0)
     self._current_frame_index = 0 
 
   def _load(self, frame_name):
@@ -140,12 +146,12 @@ class Framesheet(object):
 if __name__ == '__main__':
   #================#
   mr_pleasant = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png").scale(14)
-  mr_pleasant.pivot = Pair(0.5, 0.5)
-  mr_pleasant.position = Pair(*screen.get_rect().center) + (0, -75)
+  mr_pleasant.pivot = Couple(0.5, 0.5)
+  mr_pleasant.position = Couple(*screen.get_rect().center) + (0, -75)
   #================#
   nutcracker = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
-  nutcracker.position  = Pair(*screen.get_rect().center) + (0, 125)
-  nutcracker.pivot = Pair(0.5, 0.5)
+  nutcracker.position  = Couple(*screen.get_rect().center) + (0, 125)
+  nutcracker.pivot = Couple(0.5, 0.5)
   nutcracker.frame_offsets = [(0, 0), (0, -80), (0, 0)]
   #================#
   particles = Particles()
@@ -153,7 +159,7 @@ if __name__ == '__main__':
   keyboard = Keyboard()
   keyboard.on_space += [lambda: mr_pleasant.next_frame()]
   keyboard.on_space += [lambda: nutcracker.next_frame()]
-  keyboard.on_space += [lambda: particles.generate(add(nutcracker.position, (0, -150)), 25) if nutcracker.current_index == 1 else ...]
+  keyboard.on_space += [lambda: particles.generate(nutcracker.position + (0, -150), 25) if nutcracker.current_index == 1 else ...]
   keyboard.on_esc   += [lambda: done(True)]
   #================#
 
