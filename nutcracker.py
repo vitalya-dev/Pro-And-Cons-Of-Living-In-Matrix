@@ -152,12 +152,15 @@ class Framesheet(object):
 
 #================================================================#
 
+
 if __name__ == '__main__':
-  mr_pleasant = Framesheet("graphics/mr_pleasant_1.png", "graphics/mr_pleasant_2.png", "graphics/mr_pleasant_2.png").scale(14)
+  clang = pygame.mixer.Sound('sounds/clang.wav')
+  #================#
+  mr_pleasant = Framesheet('graphics/mr_pleasant_1.png', 'graphics/mr_pleasant_2.png', 'graphics/mr_pleasant_2.png').scale(14)
   mr_pleasant.pivot = (0.5, 0.5)
   mr_pleasant.position = tuple_math(screen.get_rect().center, '+', (0, -75))
   #================#
-  nutcracker = Framesheet("r:180:graphics/nutcracker.png", "graphics/nutcracker.png", "r:180:graphics/nutcracker.png").scale(14)
+  nutcracker = Framesheet('r:180:graphics/nutcracker.png', 'graphics/nutcracker.png', 'r:180:graphics/nutcracker.png').scale(14)
   nutcracker.position  = tuple_math(screen.get_rect().center, '+', (0, 125))
   nutcracker.pivot = (0.5, 0.5)
   nutcracker.frame_offsets = [(0, 0), (0, -80), (0, 0)]
@@ -170,6 +173,7 @@ if __name__ == '__main__':
   keyboard.on_space += [lambda: mr_pleasant.next_frame()]
   keyboard.on_space += [lambda: nutcracker.next_frame()]
   keyboard.on_space += [lambda: particles.boom() if nutcracker.current_index == 1 else ...]
+  keyboard.on_space += [lambda: clang.play() if nutcracker.current_index == 1 else ...]
   keyboard.on_esc   += [lambda: done(True)]
   #================#
 
