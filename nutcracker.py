@@ -50,6 +50,9 @@ def load_frame(frame_name):
 
 def rotate_frame(frame, angle):
   return pygame.transform.rotate(frame, angle)
+
+def scale_frame(frame, factor):
+  return pygame.transform.scale(frame, tuple_math(frame.get_size(), '*', factor))
 #================================================================#
 
 #================================================================#
@@ -84,12 +87,12 @@ class FrameRenderer(object):
 
 
 #================================================================#
-mr_pleasant_frame_1 = load_frame('graphics/mr_pleasant_1.png')
-mr_pleasant_frame_2 = load_frame('graphics/mr_pleasant_2.png')
+mr_pleasant_frame_1 = scale_frame(load_frame('graphics/mr_pleasant_1.png'), 14)
+mr_pleasant_frame_2 = scale_frame(load_frame('graphics/mr_pleasant_2.png'), 14)
 
-nutcracker_frame_1 = rotate_frame(load_frame('graphics/nutcracker.png'), 180)
-nutcracker_frame_2 = load_frame('graphics/nutcracker.png')
-nutcracker_frame_3 = rotate_frame(load_frame('graphics/nutcracker.png'), 180)
+nutcracker_frame_1 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.png'), 180), 14)
+nutcracker_frame_2 = scale_frame(load_frame('graphics/nutcracker.png'), 14)
+nutcracker_frame_3 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.png'), 180), 14)
 
 
 if __name__ == '__main__':
