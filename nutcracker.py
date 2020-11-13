@@ -81,9 +81,11 @@ class FrameRenderer(object):
   @property
   def frame_top_left_position(self):
     pivot_position = tuple_math(self.pivot, '*', self.frame.get_size())
-    pivot_position = tuple(map(int, pivot_position))
-    return tuple_math(self.position, '-', pivot_position)
+    pivot_position_as_int = tuple(map(int, pivot_position))
+    return tuple_math(self.position, '-', pivot_position_as_int)
 
+class Timeline(object):
+  pass
 
 
 #================================================================#
@@ -97,9 +99,6 @@ nutcracker_frame_3 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.pn
 
 if __name__ == '__main__':
   #================#
-  keyboard = Keyboard()
-  keyboard.on_esc += [lambda: done(True)]
-  #================#
   mr_pleasant = FrameRenderer()
   mr_pleasant.pivot = (0.5, 0.5)
   mr_pleasant.position = tuple_math(screen.get_rect().center, '-', (0, 75))
@@ -110,13 +109,20 @@ if __name__ == '__main__':
   nutcracker.position = tuple_math(screen.get_rect().center, '+', (0, 125))
   nutcracker.frame = nutcracker_frame_1
   #================#
-
+  nutcracking_timeline = Timeline()
+  nutcracking_timeline.add_event(0.0, lambda: nutcracker.set_frame(nutcracker_frame_2))
+  nutcracking_timeline.add_event(0.0, lambda: nutcracker.move(0, -80))
   #================#
+  keyboard = Keyboard()
+  keyboard.on_esc += [lambda: done(True)]
+  keyboard.on_space += [lambda: nutcracking_timeline.play()]
+
   while not done():
     clock.tick()
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
+    nutcracking_timeline.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
     mr_pleasant.render(screen)
