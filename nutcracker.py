@@ -66,13 +66,26 @@ class Keyboard(object):
         for c in self.on_space: c()
 
 class FrameRenderer(object):
+  def __init__(self):
+    self.frame = None
+    self.position = (0, 0)
+    self.pivot = (0.5, 0.5)
+
   def render(self, surface):
+    surface.blit(self.frame, self.frame_top_left_position)
     pass
 
-#================================================================#
+  @property
+  def frame_top_left_position(self):
+    pivot_position = tuple_math(self.pivot, '*', self.frame.get_size())
+    pivot_position = tuple(map(int, pivot_position))
+    return tuple_math(self.position, '-', pivot_position)
 
+
+
+#================================================================#
 mr_pleasant_frame_1 = load_frame('graphics/mr_pleasant_1.png')
-mr_pleasant_frame_2 = load_frame('graphics/mr_pleasant_2.png')  
+mr_pleasant_frame_2 = load_frame('graphics/mr_pleasant_2.png')
 
 nutcracker_frame_1 = rotate_frame(load_frame('graphics/nutcracker.png'), 180)
 nutcracker_frame_2 = load_frame('graphics/nutcracker.png')
@@ -87,11 +100,12 @@ if __name__ == '__main__':
   mr_pleasant = FrameRenderer()
   mr_pleasant.pivot = (0.5, 0.5)
   mr_pleasant.position = tuple_math(screen.get_rect().center, '-', (0, 75))
-  mr_pleasant.set_frame(mr_pleasant_frame_1)
+  mr_pleasant.frame = mr_pleasant_frame_1
   #================#
   nutcracker = FrameRenderer()
   nutcracker.pivot = (0.5, 0.5)
-  nutcracker.position = tuple_math(screen.get_rect().center, '-', (0, 75))
+  nutcracker.position = tuple_math(screen.get_rect().center, '+', (0, 125))
+  nutcracker.frame = nutcracker_frame_1
   #================#
 
   #================#
@@ -103,5 +117,6 @@ if __name__ == '__main__':
     #RENDER
     screen.fill(pygame.Color('#000000'))
     mr_pleasant.render(screen)
+    nutcracker.render(screen)
     pygame.display.update()
   #================#
