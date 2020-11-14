@@ -74,6 +74,12 @@ class FrameRenderer(object):
     self.position = (0, 0)
     self.pivot = (0.5, 0.5)
 
+  def set_frame(self, frame):
+    self.frame = frame
+
+  def move(self, dx, dy):
+    self.position = tuple_math(self.position, '+', (dx, dy))
+
   def render(self, surface):
     surface.blit(self.frame, self.frame_top_left_position)
     pass
@@ -85,7 +91,40 @@ class FrameRenderer(object):
     return tuple_math(self.position, '-', pivot_position_as_int)
 
 class Timeline(object):
-  pass
+  def __init__(self):
+    self._timeline_events = []
+    self._non_played_timeline_events = []
+    self._input_time = 0
+    self._is_playing = False
+
+  def add_event(self, time, event_func):
+    self._timeline_events.append(
+      {'time': time, 'func': event_func}
+    )
+    self._timeline_events.sort(key=lambda e: e['time'])
+
+
+  def process(self, events):
+    if self._is_playing:
+      self._input_time += clock.get_time()
+      self._call_events_if_time_comes()
+      self._remove_played_events()
+      if len(self._non_played_timeline_events) == 0:
+        self_is_playing = False
+        
+  def _call_events_if_time_comes(self):
+    for event in self._non_played_timeline_events:
+      if self._input_time >= event['time']:
+        event['func'].__call__()
+
+  def _remove_played_events(self):
+    self._non_played_timeline_events = [e for e in self._non_played_timeline_events if e['time'] > self._input_time]
+
+  def play(self):
+    self._input_time = 0
+    self._is_playing = True
+    self._non_played_timeline_events = self._timeline_events.copy()
+
 
 
 #================================================================#
@@ -110,8 +149,8 @@ if __name__ == '__main__':
   nutcracker.frame = nutcracker_frame_1
   #================#
   nutcracking_timeline = Timeline()
-  nutcracking_timeline.add_event(0.0, lambda: nutcracker.set_frame(nutcracker_frame_2))
-  nutcracking_timeline.add_event(0.0, lambda: nutcracker.move(0, -80))
+  nutcracking_timeline.add_event(0, lambda: nutcracker.set_frame(nutcracker_frame_2))
+  nutcracking_timeline.add_event(100, lambda: nutcracker.move(0, -80))
   #================#
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
