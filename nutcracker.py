@@ -8,6 +8,7 @@ from pygame.locals import *
 #================================================================#
 SCREEN_SIZE = (640, 480)
 FONT_SIZE = 32
+MSEC2SEC = 0.001
 #================================================================#
 
 
@@ -103,6 +104,10 @@ class Timeline(object):
     )
     self._timeline_events.sort(key=lambda e: e['time'])
 
+  def play(self):
+    self._input_time = 0
+    self._is_playing = True
+    self._non_played_timeline_events = self._timeline_events.copy()
 
   def process(self, events):
     if self._is_playing:
@@ -120,23 +125,41 @@ class Timeline(object):
   def _remove_played_events(self):
     self._non_played_timeline_events = [e for e in self._non_played_timeline_events if e['time'] > self._input_time]
 
-  def play(self):
-    self._input_time = 0
-    self._is_playing = True
-    self._non_played_timeline_events = self._timeline_events.copy()
 
+class ParticleEmitter:
+  def __init__(self):
+    self._particles = []
+    self.position = (0, 0)
+    self.count = 0
+
+  def emit(self):
+    for i in range(0, self.count):
+      self._particles.append({
+        'position' : self.position,
+        'radius'   : random.randint(0, 10),
+        'velocity' : random_couple(-150, 150),
+        'color'    : random_triple(0, 255)
+      })
+
+  def process(self, events):
+    for particle in self._particles:
+      movement = tuple_math(particle['velocity'], '*', clock.get_time() * MSEC2SEC)
+      particle['position'] = tuple_math(particle['position'], '+', movement)
+
+  def render(self, surface):
+    for particle in self._particles:
+      pygame.draw.circle(surface, particle['color'], tuple(map(int, particle['position'])), particle['radius'])
 
 
 #================================================================#
-mr_pleasant_frame_1 = scale_frame(load_frame('graphics/mr_pleasant_1.png'), 14)
-mr_pleasant_frame_2 = scale_frame(load_frame('graphics/mr_pleasant_2.png'), 14)
-
-nutcracker_frame_1 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.png'), 180), 14)
-nutcracker_frame_2 = scale_frame(load_frame('graphics/nutcracker.png'), 14)
-nutcracker_frame_3 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.png'), 180), 14)
-
-
 if __name__ == '__main__':
+  #================#
+  mr_pleasant_frame_1 = scale_frame(load_frame('graphics/mr_pleasant_1.png'), 14)
+  mr_pleasant_frame_2 = scale_frame(load_frame('graphics/mr_pleasant_2.png'), 14)
+  
+  nutcracker_frame_1 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.png'), 180), 14)
+  nutcracker_frame_2 = scale_frame(load_frame('graphics/nutcracker.png'), 14)
+  nutcracker_frame_3 = scale_frame(rotate_frame(load_frame('graphics/nutcracker.png'), 180), 14)
   #================#
   mr_pleasant = FrameRenderer()
   mr_pleasant.pivot = (0.5, 0.5)
@@ -148,9 +171,14 @@ if __name__ == '__main__':
   nutcracker.position = tuple_math(screen.get_rect().center, '+', (0, 125))
   nutcracker.frame = nutcracker_frame_1
   #================#
+  particle_emitter = ParticleEmitter()
+  particle_emitter.position = tuple_math(nutcracker.position, '+', (0, -150))
+  particle_emitter.count = 25
+  #================#
   nutcracking_timeline = Timeline()
   nutcracking_timeline.add_event(0, lambda: nutcracker.set_frame(nutcracker_frame_2))
-  nutcracking_timeline.add_event(100, lambda: nutcracker.move(0, -80))
+  nutcracking_timeline.add_event(0, lambda: nutcracker.move(0, -80))
+  nutcracking_timeline.add_event(0, lambda: particle_emitter.emit())
   #================#
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
@@ -161,10 +189,12 @@ if __name__ == '__main__':
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
+    particle_emitter.process(events)
     nutcracking_timeline.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
     mr_pleasant.render(screen)
     nutcracker.render(screen)
+    particle_emitter.render(screen)
     pygame.display.update()
   #================#
