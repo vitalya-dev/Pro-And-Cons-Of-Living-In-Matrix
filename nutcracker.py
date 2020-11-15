@@ -105,9 +105,10 @@ class Timeline(object):
     self._timeline_events.sort(key=lambda e: e['time'])
 
   def play(self):
-    self._input_time = 0
-    self._is_playing = True
-    self._non_played_timeline_events = self._timeline_events.copy()
+    if not self._is_playing:
+      self._input_time = 0
+      self._is_playing = True
+      self._non_played_timeline_events = self._timeline_events.copy()
 
   def process(self, events):
     if self._is_playing:
@@ -115,7 +116,7 @@ class Timeline(object):
       self._call_events_if_time_comes()
       self._remove_played_events()
       if len(self._non_played_timeline_events) == 0:
-        self_is_playing = False
+        self._is_playing = False
         
   def _call_events_if_time_comes(self):
     for event in self._non_played_timeline_events:
@@ -154,6 +155,9 @@ class ParticleEmitter:
 #================================================================#
 if __name__ == '__main__':
   #================#
+  clang = pygame.mixer.Sound('sounds/clang.wav')
+  pain_1 = pygame.mixer.Sound('sounds/pain_1.wav')
+  #================#
   mr_pleasant_frame_1 = scale_frame(load_frame('graphics/mr_pleasant_1.png'), 14)
   mr_pleasant_frame_2 = scale_frame(load_frame('graphics/mr_pleasant_2.png'), 14)
   
@@ -165,7 +169,7 @@ if __name__ == '__main__':
   mr_pleasant.pivot = (0.5, 0.5)
   mr_pleasant.position = tuple_math(screen.get_rect().center, '-', (0, 75))
   mr_pleasant.frame = mr_pleasant_frame_1
-  #================#
+
   nutcracker = FrameRenderer()
   nutcracker.pivot = (0.5, 0.5)
   nutcracker.position = tuple_math(screen.get_rect().center, '+', (0, 125))
@@ -176,9 +180,20 @@ if __name__ == '__main__':
   particle_emitter.count = 25
   #================#
   nutcracking_timeline = Timeline()
-  nutcracking_timeline.add_event(0, lambda: nutcracker.set_frame(nutcracker_frame_2))
-  nutcracking_timeline.add_event(0, lambda: nutcracker.move(0, -80))
-  nutcracking_timeline.add_event(0, lambda: particle_emitter.emit())
+  nutcracking_timeline.add_event(0, lambda: clang.play())
+  nutcracking_timeline.add_event(100, lambda: nutcracker.set_frame(nutcracker_frame_2))
+  nutcracking_timeline.add_event(100, lambda: nutcracker.move(0, -80))
+  nutcracking_timeline.add_event(100, lambda: particle_emitter.emit())
+
+  nutcracking_timeline.add_event(200, lambda: mr_pleasant.set_frame(mr_pleasant_frame_2))
+
+  nutcracking_timeline.add_event(2000, lambda: nutcracker.set_frame(nutcracker_frame_1))
+  nutcracking_timeline.add_event(2000, lambda: nutcracker.move(0, 80))
+
+  nutcracking_timeline.add_event(3000, lambda: pain_1.play())
+
+  nutcracking_timeline.add_event(9000, lambda: mr_pleasant.set_frame(mr_pleasant_frame_1))
+
   #================#
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
