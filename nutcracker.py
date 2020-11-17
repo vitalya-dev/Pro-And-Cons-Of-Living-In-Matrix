@@ -127,13 +127,35 @@ class Timeline(object):
     self._non_played_timeline_events = [e for e in self._non_played_timeline_events if e['time'] > self._input_time]
 
 
-class ParticleEmitter:
+class Effects:
+  def __init__(self):
+    self._effects = []
+  
+  def process(self, events):
+    for e in self._effects:
+      e.process(events)
+
+  def render(self, surface):
+    for e in self._effects:
+      e.render(surface)
+
+  def create_particle_effect(self, pos, count):
+    particle_effect = ParticleEffect()
+    particle_effect.position = pos
+    particle_effect.count = count
+    particle_effect.burst()
+    self._effects.append(particle_effect)
+
+  def create_middle_screen_text_fly_effect(self, text, size, speed):
+    pass
+
+class ParticleEffect:
   def __init__(self):
     self._particles = []
     self.position = (0, 0)
     self.count = 0
 
-  def emit(self):
+  def burst(self):
     for i in range(0, self.count):
       self._particles.append({
         'position' : self.position,
@@ -151,12 +173,13 @@ class ParticleEmitter:
     for particle in self._particles:
       pygame.draw.circle(surface, particle['color'], tuple(map(int, particle['position'])), particle['radius'])
 
-
 #================================================================#
 if __name__ == '__main__':
   #================#
   clang = pygame.mixer.Sound('sounds/clang.wav')
   pain_1 = pygame.mixer.Sound('sounds/pain_1.wav')
+  #================#
+  effects = Effects()
   #================#
   mr_pleasant_frame_1 = scale_frame(load_frame('graphics/mr_pleasant_1.png'), 14)
   mr_pleasant_frame_2 = scale_frame(load_frame('graphics/mr_pleasant_2.png'), 14)
@@ -175,15 +198,12 @@ if __name__ == '__main__':
   nutcracker.position = tuple_math(screen.get_rect().center, '+', (0, 125))
   nutcracker.frame = nutcracker_frame_1
   #================#
-  particle_emitter = ParticleEmitter()
-  particle_emitter.position = tuple_math(nutcracker.position, '+', (0, -150))
-  particle_emitter.count = 25
-  #================#
   nutcracking_timeline = Timeline()
   nutcracking_timeline.add_event(0, lambda: clang.play())
   nutcracking_timeline.add_event(100, lambda: nutcracker.set_frame(nutcracker_frame_2))
   nutcracking_timeline.add_event(100, lambda: nutcracker.move(0, -80))
-  nutcracking_timeline.add_event(100, lambda: particle_emitter.emit())
+
+  nutcracking_timeline.add_event(110, lambda: effects.create_particle_effect(pos=tuple_math(nutcracker.position, '-', (0, 75)), count=10))
 
   nutcracking_timeline.add_event(200, lambda: mr_pleasant.set_frame(mr_pleasant_frame_2))
 
@@ -191,9 +211,9 @@ if __name__ == '__main__':
   nutcracking_timeline.add_event(2000, lambda: nutcracker.move(0, 80))
 
   nutcracking_timeline.add_event(3000, lambda: pain_1.play())
+  nutcracking_timeline.add_event(3000, lambda: effects.create_middle_screen_text_fly_effect(text='AAAAAAAAAAAAAA', size=150, speed=20))
 
   nutcracking_timeline.add_event(9000, lambda: mr_pleasant.set_frame(mr_pleasant_frame_1))
-
   #================#
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
@@ -204,12 +224,12 @@ if __name__ == '__main__':
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
-    particle_emitter.process(events)
+    effects.process(events)
     nutcracking_timeline.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
     mr_pleasant.render(screen)
     nutcracker.render(screen)
-    particle_emitter.render(screen)
+    effects.render(screen)
     pygame.display.update()
   #================#
