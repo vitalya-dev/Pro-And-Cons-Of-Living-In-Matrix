@@ -143,11 +143,15 @@ class Effects:
     particle_effect = ParticleEffect()
     particle_effect.position = pos
     particle_effect.count = count
-    particle_effect.burst()
+    particle_effect.burst() 
     self._effects.append(particle_effect)
 
-  def create_middle_screen_text_fly_effect(self, text, size, speed):
-    pass
+  def create_running_text_effect(self, text, font_size, velocity):
+    running_text_effect = RunningTextEffect()
+    running_text_effect.text = text
+    running_text_effect.velocity = velocity
+    self._effects.append(running_text_effect)
+    
 
 class ParticleEffect:
   def __init__(self):
@@ -172,6 +176,22 @@ class ParticleEffect:
   def render(self, surface):
     for particle in self._particles:
       pygame.draw.circle(surface, particle['color'], tuple(map(int, particle['position'])), particle['radius'])
+
+class RunningTextEffect:
+  def __init__(self):
+    self.position = (0, 0)
+    self.velocity = (0, 0)
+    self.text = ''
+    self.foreground = pygame.Color('#000000')
+
+  def process(self, events):
+    movement = tuple_math(self.velocity, '*', clock.get_time() * MSEC2SEC)
+    self.position = tuple_math(self.position, '+', movement)
+
+  def render(self, surface):
+    font_surface = font.render(self.text, False, self.foreground)
+    surface.blit(font_surface, self.position)
+
 
 #================================================================#
 if __name__ == '__main__':
@@ -211,7 +231,7 @@ if __name__ == '__main__':
   nutcracking_timeline.add_event(2000, lambda: nutcracker.move(0, 80))
 
   nutcracking_timeline.add_event(3000, lambda: pain_1.play())
-  nutcracking_timeline.add_event(3000, lambda: effects.create_middle_screen_text_fly_effect(text='AAAAAAAAAAAAAA', size=150, speed=20))
+  nutcracking_timeline.add_event(3000, lambda: effects.create_running_text_effect(text='AAAAAAAAAAAAAA', font_size=150, velocity=(20, 0)))
 
   nutcracking_timeline.add_event(9000, lambda: mr_pleasant.set_frame(mr_pleasant_frame_1))
   #================#
