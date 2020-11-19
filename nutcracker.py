@@ -146,12 +146,15 @@ class Effects:
     particle_effect.burst() 
     self._effects.append(particle_effect)
 
-  def create_running_text_effect(self, text, font_size, velocity):
+  def create_running_text_effect(self, text, font_size, velocity, pos):
     running_text_effect = RunningTextEffect()
-    running_text_effect.text = text
     running_text_effect.velocity = velocity
+    running_text_effect.text = text
+    running_text_effect.font_size = font_size
+    running_text_effect.foreground = '#ffffff'
+    running_text_effect.position = pos
     self._effects.append(running_text_effect)
-    
+
 
 class ParticleEffect:
   def __init__(self):
@@ -181,16 +184,51 @@ class RunningTextEffect:
   def __init__(self):
     self.position = (0, 0)
     self.velocity = (0, 0)
-    self.text = ''
-    self.foreground = pygame.Color('#000000')
+    #================#
+    self._text = ''
+    self._font_size = FONT_SIZE
+    self._foreground = pygame.Color('#000000')
+    self._surface = font.render(self._text, False, self._foreground)
+    #================#
+
+  @property
+  def text(self):
+    pass
+
+  @text.setter
+  def text(self, value):
+    self._text = value
+    self._update_surface()
+  
+  @property
+  def font_size(self):
+    pass
+
+  @font_size.setter
+  def font_size(self, value):
+    self._font_size = value
+    self._update_surface()
+
+  @property
+  def foreground(self):
+    pass
+
+  @foreground.setter
+  def foreground(self, value):
+    self._foreground = pygame.Color(value) if type(value) == type('') else value
+    self._update_surface()
+
+
+  def _update_surface(self):
+    font = pygame.font.Font('data/FSEX300.ttf', self._font_size)
+    self._surface = font.render(self._text, False, self._foreground)
 
   def process(self, events):
     movement = tuple_math(self.velocity, '*', clock.get_time() * MSEC2SEC)
     self.position = tuple_math(self.position, '+', movement)
 
   def render(self, surface):
-    font_surface = font.render(self.text, False, self.foreground)
-    surface.blit(font_surface, self.position)
+    surface.blit(self._surface, self.position)
 
 
 #================================================================#
@@ -231,7 +269,7 @@ if __name__ == '__main__':
   nutcracking_timeline.add_event(2000, lambda: nutcracker.move(0, 80))
 
   nutcracking_timeline.add_event(3000, lambda: pain_1.play())
-  nutcracking_timeline.add_event(3000, lambda: effects.create_running_text_effect(text='AAAAAAAAAAAAAA', font_size=150, velocity=(20, 0)))
+  nutcracking_timeline.add_event(3000, lambda: effects.create_running_text_effect(text='A'*20, font_size=150, velocity=(-500, 0), pos=(640, 0)))
 
   nutcracking_timeline.add_event(9000, lambda: mr_pleasant.set_frame(mr_pleasant_frame_1))
   #================#
