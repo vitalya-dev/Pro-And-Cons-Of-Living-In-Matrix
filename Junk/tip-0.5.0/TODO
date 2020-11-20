@@ -1,8 +1,0 @@
-- Differentiate BS and Del
-- Handle Tabs (Might be useful ;-)
-- Make cursor show up when TERMs other than vt100 is used (Help!)
-- Implement Insert File
-- Implement Cursor Pos (P.O.S. indeed)
-- Implement Spelling
-- Fix FIXMEs
-- Make code not suck so badly (ongoing)

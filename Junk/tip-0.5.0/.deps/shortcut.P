@@ -1,2 +1,0 @@
-shortcut.o: shortcut.c
-shortcut.c :
