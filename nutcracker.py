@@ -193,7 +193,7 @@ class RunningTextEffect:
 
   @property
   def text(self):
-    pass
+    return self._text
 
   @text.setter
   def text(self, value):
@@ -202,7 +202,7 @@ class RunningTextEffect:
   
   @property
   def font_size(self):
-    pass
+    return self._font_size
 
   @font_size.setter
   def font_size(self, value):
@@ -211,7 +211,7 @@ class RunningTextEffect:
 
   @property
   def foreground(self):
-    pass
+    return self._foreground
 
   @foreground.setter
   def foreground(self, value):
