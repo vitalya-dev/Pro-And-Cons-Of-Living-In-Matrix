@@ -54,36 +54,35 @@ class Keyboard(object):
       if e.type == KEYDOWN and e.key == K_SPACE:
         for f in self.on_space: f()
 
-class ControlPanelButton(object):
-  def __init__(self, name):
-    self._name = name
-    self._button_rect = pygame.Rect(0, 0, 16, 32)
+class HorizontalSelectorSwitchButton(object):
+  def __init__(self, text):
+    self.position = (0, 0)
     #================#
     self._foreground_color = pygame.Color('#ffffff')
     self._background_color = pygame.Color('#b82e0a')
     self._light_color = pygame.Color('#f15815')
     #================#
     self._font = pygame.font.Font('data/FSEX300.ttf', 32)
+    self._text = text
+    self._rendered_text = self._font.render(self._text, False, self._foreground_color)
+    #================#
+
 
   @property
-  def position(self):
-    return self._button_rect.topleft
-
-  @position.setter
-  def position(self, value):
-    self._button_rect.topleft = value
+  def button_rect(self):
+    return pygame.Rect(self.position, tuple_math(self._rendered_text.get_size(), '-', (0, 1)))
+  
+  @property
+  def button_size(self):
+    return self.button_rect.size
 
   @property
-  def size(self):
-    return self._button_rect.size
+  def button_height(self):
+    return self.button_rect.height
 
   @property
-  def width(self):
-    return self._button_rect.width
-
-  @property
-  def height(self):
-    return self._button_rect.height
+  def button_width(self):
+    return self.button_rect.width
 
   def process(self, events):
     pass
@@ -91,18 +90,18 @@ class ControlPanelButton(object):
   def render(self, surface):
     self._draw_background(surface)
     self._draw_light(surface)
-    self._draw_text(surface)
 
   def _draw_background(self, surface):
-    surface.fill(self._background_color, self._button_rect)
+    surface.fill(self._background_color, self.button_rect)
 
   def _draw_light(self, surface):
-    light_position = tuple_math(self.position, '+', (0, self.height - 8))
-    light_size = (self.width, 8)
+    light_position = tuple_math(self.position, '+', (0, self.button_height * 3 / 4))
+    light_size = (self.button_width, self.button_height  / 4)
     surface.fill(self._light_color, pygame.Rect(light_position, light_size))
 
-  def _draw_text(self, surface):
-    surface.blit(self._font.render(self._name, False, self._foreground_color), tuple_math(self.position, '-', (0, 5)))
+
+
+VerticalSelectorSwitchButton = HorizontalSelectorSwitchButton
 
 #================================================================#
 
@@ -114,19 +113,22 @@ if __name__ == '__main__':
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
   #================#
-  a_btn = selector_switch_horizontal_button('A')
+  a_btn = HorizontalSelectorSwitchButton('A')
   a_btn.position = screen.get_rect().center
 
-
+  select_btn = VerticalSelectorSwitchButton('SELECT')
+  select_btn.position = tuple_math(screen.get_rect().center, '+', (50, 50))
   
   while not done():
     clock.tick()
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
-    a.process(events)
+    a_btn.process(events)
+    select_btn.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    a.render(screen)
+    a_btn.render(screen)
+    select_btn.render(screen)
     pygame.display.update()
 
