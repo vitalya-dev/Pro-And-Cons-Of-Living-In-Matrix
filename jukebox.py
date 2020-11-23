@@ -57,20 +57,33 @@ class Keyboard(object):
 class ControlPanelButton(object):
   def __init__(self, name):
     self._name = name
-    self._rect = pygame.Rect(0, 0, 16, 32)
-    self._foreground = pygame.Color('#ffffff')
-    self._background = pygame.Color('#b82e0a')
-    self._light = pygame.Color('#f15815')
+    self._button_rect = pygame.Rect(0, 0, 16, 32)
+    #================#
+    self._foreground_color = pygame.Color('#ffffff')
+    self._background_color = pygame.Color('#b82e0a')
+    self._light_color = pygame.Color('#f15815')
+    #================#
     self._font = pygame.font.Font('data/FSEX300.ttf', 32)
-
 
   @property
   def position(self):
-    return self._rect.topleft
+    return self._button_rect.topleft
 
   @position.setter
   def position(self, value):
-    self._rect.topleft = value
+    self._button_rect.topleft = value
+
+  @property
+  def size(self):
+    return self._button_rect.size
+
+  @property
+  def width(self):
+    return self._button_rect.width
+
+  @property
+  def height(self):
+    return self._button_rect.height
 
   def process(self, events):
     pass
@@ -81,14 +94,15 @@ class ControlPanelButton(object):
     self._draw_text(surface)
 
   def _draw_background(self, surface):
-    surface.fill(self._background, self._rect)
+    surface.fill(self._background_color, self._button_rect)
 
   def _draw_light(self, surface):
-    light_rect = pygame.Rect(tuple_math(self.position, '+', (0, 24)), (16, 8))
-    surface.fill(self._light, light_rect)
+    light_position = tuple_math(self.position, '+', (0, self.height - 8))
+    light_size = (self.width, 8)
+    surface.fill(self._light_color, pygame.Rect(light_position, light_size))
 
   def _draw_text(self, surface):
-    surface.blit(self._font.render(self._name, False, self._foreground), tuple_math(self.position, '-', (0, 5)))
+    surface.blit(self._font.render(self._name, False, self._foreground_color), tuple_math(self.position, '-', (0, 5)))
 
 #================================================================#
 
@@ -100,9 +114,11 @@ if __name__ == '__main__':
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
   #================#
-  a = ControlPanelButton('A')
-  a.position = screen.get_rect().center
+  a_btn = selector_switch_horizontal_button('A')
+  a_btn.position = screen.get_rect().center
 
+
+  
   while not done():
     clock.tick()
     #PROCESS INPUT
