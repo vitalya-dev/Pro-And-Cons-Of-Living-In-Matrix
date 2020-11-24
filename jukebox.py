@@ -90,6 +90,7 @@ class HorizontalSelectorSwitchButton(object):
   def render(self, surface):
     self._draw_background(surface)
     self._draw_light(surface)
+    self._draw_text(surface)
 
   def _draw_background(self, surface):
     surface.fill(self._background_color, self.button_rect)
@@ -99,7 +100,9 @@ class HorizontalSelectorSwitchButton(object):
     light_size = (self.button_width, self.button_height  / 4)
     surface.fill(self._light_color, pygame.Rect(light_position, light_size))
 
-
+  def _draw_text(self, surface):
+    surface.blit(self._rendered_text, tuple_math(self.position, '-', (0, 5)))
+    
 
 VerticalSelectorSwitchButton = HorizontalSelectorSwitchButton
 
@@ -116,7 +119,7 @@ if __name__ == '__main__':
   a_btn = HorizontalSelectorSwitchButton('A')
   a_btn.position = screen.get_rect().center
 
-  select_btn = VerticalSelectorSwitchButton('SELECT')
+  select_btn = VerticalSelectorSwitchButton("SELECT")
   select_btn.position = tuple_math(screen.get_rect().center, '+', (50, 50))
   
   while not done():
