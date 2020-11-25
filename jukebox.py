@@ -126,6 +126,41 @@ class VerticalSelectorSwitchButton(HorizontalSelectorSwitchButton):
   def _draw_text(self, surface):
     surface.blit(self._rendered_text, self.position)
 
+class SelectorSwitch(object):
+  def __init__(self):
+    self._switches = []
+    self.position = (0, 0)
+    self.margin = 25
+
+  def add_horizontal_switch_button(self, button_name):
+    button = HorizontalSelectorSwitchButton(button_name)
+    button.position = self._calculate_position_for_new_button()
+    self._switches.append(button)
+
+  def _calculate_position_for_new_button(self):
+    if len(self._switches) == 0:
+      return self.position
+    else:
+      new_button_position = tuple_math(self._switches[-1].position, '+', (self._switches[-1].width, 0))
+      new_button_position = tuple_math(new_button_position, '+', (self.margin, 0))
+      return new_button_position
+
+
+  def add_vertical_switch_button(self, button_name):
+    button = VerticalSelectorSwitchButton(button_name)
+    button.position = self._calculate_position_for_new_button()
+    self._switches.append(button)
+
+  def render(self, surface):
+    for button in self._switches:
+      button.render(surface)
+    
+
+  def process(self, events):
+    for button in self._switches:
+      button.process(events)
+
+    
 #================================================================#
 
 
@@ -136,28 +171,23 @@ if __name__ == '__main__':
   keyboard = Keyboard()
   keyboard.on_esc += [lambda: done(True)]
   #================#
-  selector_switch = []
-  for i, button_name in enumerate('ABCDEF123456'):
-    button = HorizontalSelectorSwitchButton(button_name)
-    button.position = tuple_math(screen.get_rect().center, '/', (4, 1))
-    if i > 0:
-      button.position = tuple_math(selector_switch[i-1].position, '+', (selector_switch[i-1].width, 0))
-      button.position = tuple_math(button.position, '+', (25, 0))
-    selector_switch.append(button)
+  selector_switch = SelectorSwitch()
+  selector_switch.position = (25, 25)
+  for i in 'ABCDEF':
+    selector_switch.add_horizontal_switch_button(i) 
+  selector_switch.add_vertical_switch_button('SELECT')
+  for i in '123456':
+    selector_switch.add_horizontal_switch_button(i) 
+  #================#
 
-  select_btn = VerticalSelectorSwitchButton("SELECT")
-  select_btn.position = tuple_math(screen.get_rect().center, '+', (50, 50))
-  
   while not done():
     clock.tick()
     #PROCESS INPUT
     events = pygame.event.get()
     keyboard.process(events)
-    select_btn.process(events)
+    selector_switch.process(events)
     #RENDER
     screen.fill(pygame.Color('#000000'))
-    for button in selector_switch:
-      button.render(screen)
-    select_btn.render(screen)
+    selector_switch.render(screen)
     pygame.display.update()
 
