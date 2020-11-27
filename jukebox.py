@@ -190,7 +190,39 @@ class SelectorSwitch(object):
     for button in self._switches:
       button.process(events)
 
+
+class SongEntry(object):
+  def __init__(self, name, id):
+    self.name = name
+    self.id = id
+    self.position = (0, 0)
+    self.pivot = (0, 0)
+    self._surface = pygame.surface.Surface((136, 32)).convert()
+    self._surface.set_colorkey((0, 0, 0))
+    #================#
+    self._song_name_foreground_color = pygame.Color('#b99559')
+    self._song_id_foreground_color = pygame.Color('#b82e0a')
+    self._background_color = pygame.Color('#efe8b4')
+    self._border_color = pygame.Color('#767877')
+    #================#
+    self._song_name_font = pygame.font.Font('data/FSEX300.ttf', 32)
+    self._song_id_font = pygame.font.Font('data/FSEX300.ttf', 64)
+    self._rendered_song_name = self._song_name_font.render(self.name, False, self._song_name_foreground_color)
+    self._rendered_song_id = self._song_id_font.render(self.id, False, self._song_id_foreground_color)
+    #================#
     
+  def _top_left_position(self):
+    pivot_position = tuple_math(self.pivot, '*', self._surface.get_size())
+    pivot_position_as_int = tuple(map(int, pivot_position))
+    return tuple_math(self.position, '-', pivot_position_as_int)
+
+  def process(self, events):
+    pass
+
+  def render(self, surface):
+    self._surface.blit(self._rendered_song_name, self._rendered_song_name_position())
+    self._surface.blit(self._rendered_song_id, self._rendered_song_id_position())
+    surface.blit(self._surface, self._top_left_position())
 #================================================================#
 
 
