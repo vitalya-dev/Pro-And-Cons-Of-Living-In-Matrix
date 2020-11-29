@@ -191,6 +191,15 @@ class SelectorSwitch(object):
       button.process(events)
 
 
+class SongHolder(object):
+  def __init__(self):
+    self.position = (0, 0)
+    self.pivot = (0, 0)
+    self.song_entries_margin = 25
+    self._song_entries = []
+    self._surface = pygame.surface.Surface((0, 0)).convert()
+
+
 class SongEntry(object):
   def __init__(self, name, id):
     self.name = name
