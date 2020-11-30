@@ -5,8 +5,8 @@ import utils
 class Shape(object):
   def __init__(self):
     self.position = (0, 0)
-    self.pivot = (0.5, 0.5)
     self.size = (0, 0)
+    self.pivot = (0.5, 0.5)
 
   @property
   def rect(self):

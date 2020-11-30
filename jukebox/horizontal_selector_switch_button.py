@@ -4,9 +4,9 @@ from pygame.locals import *
 from constants import *
 from utils import *
 
-import shape
+from shape import *
 
-class HorizontalSelectorSwitchButton(shape.Shape):
+class HorizontalSelectorSwitchButton(Shape):
   def __init__(self, text):
     super().__init__()
     #================#
@@ -16,6 +16,7 @@ class HorizontalSelectorSwitchButton(shape.Shape):
     #================#
     self._font = pygame.font.Font('data/FSEX300.ttf', 32)
     self._text = text
+    self._text_offset = (0, -5)
     self._rendered_text = self._font.render(self._text, False, self._foreground_color)
     #================#
 
@@ -44,7 +45,7 @@ class HorizontalSelectorSwitchButton(shape.Shape):
     surface.fill(self._light_color, pygame.Rect(light_position, light_size))
 
   def _draw_text(self, surface):
-    surface.blit(self._rendered_text, tuple_math(self.rect.topleft, '-', (0, 5)))
+    surface.blit(self._rendered_text, tuple_math(self.rect.topleft, '+', self._text_offset))
     
 
 if __name__ == '__main__':
