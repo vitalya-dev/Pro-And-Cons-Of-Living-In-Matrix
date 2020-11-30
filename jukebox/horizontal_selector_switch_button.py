@@ -16,36 +16,30 @@ class HorizontalSelectorSwitchButton(Shape):
     #================#
     self._font = pygame.font.Font('data/FSEX300.ttf', 32)
     self._text = text
-    self._text_offset = (0, -5)
     self._rendered_text = self._font.render(self._text, False, self._foreground_color)
+    self._rendered_text_position = (0, -5)
     #================#
-
-  @property
-  def size(self):
-    return self._rendered_text.get_size()
-
-  @size.setter
-  def size(self, value):
-    pass
+    self._surface = pygame.surface.Surface(self._rendered_text.get_size()).convert()
 
   def process(self, events):
     pass
 
-  def render(self, surface):
-    self._draw_background(surface)
-    self._draw_light(surface)
-    self._draw_text(surface)
+  def draw(self):
+    self._draw_background()
+    self._draw_text()
+    self._draw_light()
+    return self._surface
 
-  def _draw_background(self, surface):
-    surface.fill(self._background_color, self.rect)
+  def _draw_background(self):
+    self._surface.fill(self._background_color, self._surface.get_rect())
 
-  def _draw_light(self, surface):
-    light_position = tuple_math(self.rect.topleft, '+', (0, self.rect.height * 3 / 4))
-    light_size = (self.rect.width, self.rect.height / 4)
-    surface.fill(self._light_color, pygame.Rect(light_position, light_size))
+  def _draw_light(self):
+    light_position = (0, self._surface.get_height() * 3 / 4)
+    light_size = (self._surface.get_width(), self._surface.get_height() / 4)
+    self._surface.fill(self._light_color, pygame.Rect(light_position, light_size))
 
-  def _draw_text(self, surface):
-    surface.blit(self._rendered_text, tuple_math(self.rect.topleft, '+', self._text_offset))
+  def _draw_text(self):
+    self._surface.blit(self._rendered_text, self._rendered_text_position)
     
 
 if __name__ == '__main__':
@@ -57,7 +51,7 @@ if __name__ == '__main__':
   #================================================================================================#
 
   a_btn = HorizontalSelectorSwitchButton('A')
-  a_btn.pivot = (0.5, 0.5)
+  a_btn.pivot = (0, 0)
   a_btn.position = screen.get_rect().center
 
   while not done():
@@ -67,5 +61,6 @@ if __name__ == '__main__':
     a_btn.process(events)
     #===========================================RENDER==================================================#
     screen.fill(pygame.Color('#000000'))
-    a_btn.render(screen)
+    screen.blit(a_btn.draw(), a_btn.rect.topleft)
+
     pygame.display.update()

@@ -12,7 +12,6 @@ class VerticalSelectorSwitchButton(HorizontalSelectorSwitchButton):
 
 
 
-
 if __name__ == '__main__':
   #===========================================INIT=================================================#
   pygame.init()
