@@ -3,12 +3,14 @@ from horizontal_selector_switch_button import *
 class VerticalSelectorSwitchButton(HorizontalSelectorSwitchButton):
   def __init__(self, text):
     super().__init__(text)
-    self._rendered_text = pygame.transform.rotate(self._rendered_text, -90)
-    self._text_offset = (0, 0)
+    self.margin = (2, 0)
+    self.rotate(-90)
 
-  def render(self, surface):
-    self._draw_background(surface)
-    self._draw_text(surface)
+  def draw(self):
+    self._draw_background()
+    self._draw_text()
+    return self._surface
+    
 
 
 
@@ -31,6 +33,6 @@ if __name__ == '__main__':
     select_btn.process(events)
     #===========================================RENDER==================================================#
     screen.fill(pygame.Color('#000000'))
-    select_btn.render(screen)
+    screen.blit(select_btn.draw(), select_btn.world_space_rect.topleft)
     pygame.display.update()
     
