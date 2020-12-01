@@ -55,7 +55,7 @@ class HorizontalSelectorSwitchButton(Shape):
 
   def _draw_text(self):
     self._surface.blit(self._rendered_text, self._rendered_text.get_rect(center=self._surface.get_rect().center).topleft)
-    
+
 
 if __name__ == '__main__':
   #===========================================INIT=================================================#

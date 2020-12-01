@@ -1,21 +1,19 @@
-class SelectorSwitch(object):
+import pygame
+from pygame.locals import *
+
+from constants import *
+from utils import *
+
+from shape import *
+
+class SelectorSwitch(Shape):
   def __init__(self):
-    self.position = (0, 0)
-    self.pivot = (0, 0)
-    self.button_margin = 25
-    self._switches = []
-    self._surface = pygame.surface.Surface((0, 0)).convert()
-
-  def add_horizontal_switch_button(self, button_name):
-    button = HorizontalSelectorSwitchButton(button_name)
-    button.position = self._calculate_position_for_new_button()
-    self._switches.append(button)
+    super().__init__()
     #================#
-    self._resize_surface()
+    self._switches = []
+    self._space_between_switches = 25
 
-
-  def add_vertical_switch_button(self, button_name):
-    button = VerticalSelectorSwitchButton(button_name)
+  def add_switch_button(self, button):
     button.position = self._calculate_position_for_new_button()
     self._switches.append(button)
     #================#
@@ -29,14 +27,14 @@ class SelectorSwitch(object):
     if len(self._switches) == 0:
       return (0, 0)
     else:
-      new_button_position = tuple_math(self._switches[-1].position, '+', (self._switches[-1].width, 0))
-      new_button_position = tuple_math(new_button_position, '+', (self.button_margin, 0))
+      new_button_position = tuple_math(self._switches[-1].position, '+', (self._switches[-1].world_space_rect.width, 0))
+      new_button_position = tuple_math(new_button_position, '+', (self._space_between_switches, 0))
       return new_button_position
 
   def _buttons_total_width(self):
     if len(self._switches) > 0:
-      buttons_total_width = sum([button.width for button in self._switches])
-      buttons_total_width_with_margin = buttons_total_width + self.button_margin * (len(self._switches) - 1)
+      buttons_total_width = sum([button.world_space_rect.width for button in self._switches])
+      buttons_total_width_with_margin = buttons_total_width + self._space_between_switches * (len(self._switches) - 1)
       return buttons_total_width_with_margin
     else:
       return 0
@@ -46,11 +44,6 @@ class SelectorSwitch(object):
       return max([button.height for button in self._switches])
     else:
       return 0
-
-  def _top_left_position(self):
-    pivot_position = tuple_math(self.pivot, '*', self._surface.get_size())
-    pivot_position_as_int = tuple(map(int, pivot_position))
-    return tuple_math(self.position, '-', pivot_position_as_int)
 
   def render(self, surface):
     self._surface.fill((0, 0, 0))
