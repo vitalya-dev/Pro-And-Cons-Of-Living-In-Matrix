@@ -7,10 +7,13 @@ from utils import *
 from shape import *
 
 class HorizontalSelectorSwitchButton(Shape):
-  def __init__(self, text):
+  def __init__(self, text, **kwargs):
     super().__init__()
     #================#
-    self._margin = (2, -2)
+    for key, value in kwargs.items():
+      self.key = value
+    #================#
+    self._padding = (2, -2)
     #================#
     self._foreground_color = pygame.Color('#ffffff')
     self._background_color = pygame.Color('#b82e0a')
@@ -20,16 +23,16 @@ class HorizontalSelectorSwitchButton(Shape):
     self._text = text
     self._rendered_text = self._font.render(self._text, False, self._foreground_color)
     #================#
-    self._surface = pygame.surface.Surface(tuple_math(self._rendered_text.get_size(), '+', self.margin)).convert()
+    self._surface = pygame.surface.Surface(tuple_math(self._rendered_text.get_size(), '+', self.padding)).convert()
 
   @property
-  def margin(self):
-    return self._margin
+  def padding(self):
+    return self._padding
 
-  @margin.setter
-  def margin(self, value):
-    self._margin = value
-    self._surface = pygame.surface.Surface(tuple_math(self._rendered_text.get_size(), '+', self.margin)).convert()
+  @padding.setter
+  def padding(self, value):
+    self._padding = value
+    self._surface = pygame.surface.Surface(tuple_math(self._rendered_text.get_size(), '+', self.padding)).convert()
 
   def process(self, events):
     pass

@@ -1,9 +1,9 @@
 from horizontal_selector_switch_button import *
 
 class VerticalSelectorSwitchButton(HorizontalSelectorSwitchButton):
-  def __init__(self, text):
-    super().__init__(text)
-    self.margin = (2, 0)
+  def __init__(self, text, **kwargs):
+    super().__init__(text, **kwargs)
+    self.padding = (2, 0)
     self.rotate(-90)
 
   def draw(self):
