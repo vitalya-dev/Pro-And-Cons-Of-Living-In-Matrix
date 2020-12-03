@@ -13,13 +13,20 @@ class SelectorSwitch(Shape):
     super().__init__()
     #================#
     self._switches = []
+    self._space_between_switches = 15
 
   def add_switch_button(self, button):
-    button.position = (0, 0) if len(self._switches) == 0 else self._switches[-1].world_space_rect.topright
+    button.position = self._calculate_position_for_new_button()
     self._switches.append(button)
     #================#
     self._rebuild_surface()
 
+  def _calculate_position_for_new_button(self):
+    if len(self._switches) > 0:
+      button_position = tuple_math(self._switches[-1].world_space_rect.topright, '+', (self._space_between_switches, 0))
+      return button_position
+    else:
+      return (0, 0)
 
   def _rebuild_surface(self):
     self._surface = pygame.surface.Surface((self._buttons_total_width(), self._buttons_max_height())).convert()
@@ -27,7 +34,9 @@ class SelectorSwitch(Shape):
 
   def _buttons_total_width(self):
     if len(self._switches) > 0:
-      return sum([button.world_space_rect.width for button in self._switches])
+      buttons_total_width  = sum([button.world_space_rect.width for button in self._switches])
+      buttons_total_width_with_spaces = buttons_total_width + (len(self._switches) - 1) * self._space_between_switches
+      return buttons_total_width_with_spaces
     else:
       return 0
 
@@ -61,6 +70,7 @@ if __name__ == '__main__':
   selector_switch = SelectorSwitch()
   selector_switch.position = screen.get_rect().center
   selector_switch.pivot = (0.5, 0.5)
+
   for i in 'ABCDEF':
     selector_switch.add_switch_button(HorizontalSelectorSwitchButton(i))
   selector_switch.add_switch_button(VerticalSelectorSwitchButton('SELECT'))
