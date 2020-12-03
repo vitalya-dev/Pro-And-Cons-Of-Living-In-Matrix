@@ -91,7 +91,6 @@ class SongEntry(object):
     #================#
     self._surface = pygame.surface.Surface(self._calculate_surface_size())
     self._surface.fill(self._background_color)
-    pygame.draw.rect(self._surface, self._border_color, self._surface.get_rect(), 5)
   
   def _calculate_surface_size(self):
     size_for_name = self._rendered_song_name.get_size()

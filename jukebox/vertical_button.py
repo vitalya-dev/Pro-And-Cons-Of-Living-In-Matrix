@@ -1,6 +1,6 @@
-from horizontal_selector_switch_button import *
+from horizontal_button import *
 
-class VerticalSelectorSwitchButton(HorizontalSelectorSwitchButton):
+class VerticalButton(HorizontalButton):
   def __init__(self, text, **kwargs):
     super().__init__(text, **kwargs)
     self.padding = (2, 0)
@@ -22,7 +22,7 @@ if __name__ == '__main__':
   clock = pygame.time.Clock()
   #================================================================================================#
 
-  select_btn = VerticalSelectorSwitchButton('SELECT')
+  select_btn = VerticalButton('SELECT')
   select_btn.pivot = (0.5, 0.5)
   select_btn.position = screen.get_rect().center
 

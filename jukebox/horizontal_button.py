@@ -6,7 +6,7 @@ from utils import *
 
 from shape import *
 
-class HorizontalSelectorSwitchButton(Shape):
+class HorizontalButton(Shape):
   def __init__(self, text, **kwargs):
     super().__init__()
     #================#
@@ -68,7 +68,7 @@ if __name__ == '__main__':
   clock = pygame.time.Clock()
   #================================================================================================#
 
-  a_btn = HorizontalSelectorSwitchButton('A')
+  a_btn = HorizontalButton('A')
   a_btn.pivot = (0, 0)
   a_btn.position = screen.get_rect().center
 
