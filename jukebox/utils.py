@@ -16,3 +16,5 @@ def tuple_math(a, op, b):
     return tuple(map(operator.mul, a, b))
   if op == '/':
     return tuple(map(operator.truediv, a, b))
+
+  
