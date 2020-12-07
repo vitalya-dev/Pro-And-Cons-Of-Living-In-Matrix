@@ -19,6 +19,9 @@ class Scroll(Shape):
     #================#
     self._scroll_offset = (0, 0)
     self._scroll_step = 10
+    #================#
+    self.limit = (1e300, 1e300)
+
 
   @property
   def size(self):
@@ -30,10 +33,13 @@ class Scroll(Shape):
     self._surface.set_colorkey((0, 0, 0))
 
   def draw(self):
+    self._limit_surface_if_needed()
     self._surface.fill((0, 0, 0))
     self._surface.blit(self.child.draw(), self._scroll_offset)
     return self._surface
     
+  def lin
+
   def process(self, events):
     self.child.process(events)
     for e in events:
@@ -54,9 +60,9 @@ if __name__ == '__main__':
   
   #================#
   song_holder_scroller = Scroll(SongHolder())
-  song_holder_scroller.size = tuple_math(SCREEN_SIZE, '/', (1, 2))
   song_holder_scroller.position = screen.get_rect().center
   song_holder_scroller.pivot = (0.5, 0.5)
+  song_holder_scroller.limit = tuple_math(SCREEN_SIZE, '/', (1, 2))
 
   song_holder_scroller.child.add_song_entry(SongEntry('You Cant Always Get What You Want', 'A1'))
   song_holder_scroller.child.add_song_entry(SongEntry('Sympathy For Devil', 'A2'))
