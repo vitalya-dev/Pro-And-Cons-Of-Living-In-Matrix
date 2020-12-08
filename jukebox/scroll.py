@@ -14,7 +14,8 @@ class Scroll(Shape):
     super().__init__()
     #================#
     self.child = child
-    self._surface = pygame.surface.Surface((0, 0)).convert()
+    #================#
+    self._surface = pygame.Surface(self.child._surface.get_size())
     self._surface.set_colorkey((0, 0, 0))
     #================#
     self._scroll_offset = (0, 0)
@@ -33,13 +34,17 @@ class Scroll(Shape):
     self._surface.set_colorkey((0, 0, 0))
 
   def draw(self):
-    self._limit_surface_if_needed()
+    self._sync_surface_size_if_needed()
     self._surface.fill((0, 0, 0))
     self._surface.blit(self.child.draw(), self._scroll_offset)
     return self._surface
     
-  def lin
-
+  def _sync_surface_size_if_needed(self):
+    child_surface_clipping_size = self.child._surface.get_rect().clip(pygame.Rect((0, 0), self.limit)).size
+    scroll_surface_size = self._surface.get_rect().size
+    if child_surface_clipping_size != scroll_surface_size:
+      self._surface = pygame.Surface(child_surface_clipping_size)
+    
   def process(self, events):
     self.child.process(events)
     for e in events:
@@ -47,7 +52,10 @@ class Scroll(Shape):
         self._scroll_offset = tuple_math(self._scroll_offset, '+', (0, -self._scroll_step))
       if e.type == KEYDOWN and e.key == K_UP:
         self._scroll_offset = tuple_math(self._scroll_offset, '+', (0, self._scroll_step))
-
+      if e.type == KEYDOWN and e.key == K_LEFT:
+        self._scroll_offset = tuple_math(self._scroll_offset, '+', (-self._scroll_step, 0))
+      if e.type == KEYDOWN and e.key == K_RIGHT:
+        self._scroll_offset = tuple_math(self._scroll_offset, '+', (self._scroll_step, 0))
 
 
 if __name__ == '__main__':
@@ -62,7 +70,7 @@ if __name__ == '__main__':
   song_holder_scroller = Scroll(SongHolder())
   song_holder_scroller.position = screen.get_rect().center
   song_holder_scroller.pivot = (0.5, 0.5)
-  song_holder_scroller.limit = tuple_math(SCREEN_SIZE, '/', (1, 2))
+  song_holder_scroller.limit = tuple_math(SCREEN_SIZE, '/', (4, 4))
 
   song_holder_scroller.child.add_song_entry(SongEntry('You Cant Always Get What You Want', 'A1'))
   song_holder_scroller.child.add_song_entry(SongEntry('Sympathy For Devil', 'A2'))
@@ -79,7 +87,7 @@ if __name__ == '__main__':
 
     song_holder_scroller.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill((50, 50, 50))
     screen.blit(song_holder_scroller.draw(), song_holder_scroller.world_space_rect.topleft)
 
     pygame.display.update()
