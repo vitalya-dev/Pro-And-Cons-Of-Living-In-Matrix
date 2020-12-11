@@ -10,10 +10,11 @@ from song_holder import *
 
 class Scroll(Shape):
   
-  def __init__(self, child):
-    super().__init__()
+  def __init__(self, child, parent=None):
+    super().__init__(parent)
     #================#
     self.child = child
+    self.child.parent = self
     #================#
     self._surface = pygame.Surface(self.child._surface.get_size())
     self._surface.set_colorkey((0, 0, 0))

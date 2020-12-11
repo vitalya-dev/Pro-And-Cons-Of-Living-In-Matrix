@@ -9,7 +9,7 @@ from horizontal_button import *
 from vertical_button import *
 
 class SongSelector(Shape):
-  def __init__(self):
+  def __init__(self, parent=None):
     super().__init__()
     #================#
     self._selectors = []
@@ -17,13 +17,14 @@ class SongSelector(Shape):
 
   def add_selector(self, selector):
     selector.position = self._calculate_position_for_new_selector()
+    selector.parent = self
     self._selectors.append(selector)
     #================#
     self._rebuild_surface()
 
   def _calculate_position_for_new_selector(self):
     if len(self._selectors) > 0:
-      selector_position = tuple_math(self._selectors[-1].world_space_rect.topright, '+', (self._space_between_selectors, 0))
+      selector_position = tuple_math(self._selectors[-1].parent_space_rect.topright, '+', (self._space_between_selectors, 0))
       return selector_position
     else:
       return (0, 0)
@@ -34,7 +35,7 @@ class SongSelector(Shape):
 
   def _selectors_total_width(self):
     if len(self._selectors) > 0:
-      selectors_total_width  = sum([selector.world_space_rect.width for selector in self._selectors])
+      selectors_total_width  = sum([selector.parent_space_rect.width for selector in self._selectors])
       selectors_total_width_with_spaces = selectors_total_width + (len(self._selectors) - 1) * self._space_between_selectors
       return selectors_total_width_with_spaces
     else:
@@ -42,17 +43,18 @@ class SongSelector(Shape):
 
   def _selectors_max_height(self):
     if len(self._selectors) > 0:
-      return max([selector.world_space_rect.height for selector in self._selectors])
+      return max([selector.parent_space_rect.height for selector in self._selectors])
     else:
       return 0
 
   def draw(self):
     self._surface.fill((0, 0, 0))
     for selector in self._selectors:
-      self._surface.blit(selector.draw(), selector.world_space_rect.topleft)
+      self._surface.blit(selector.draw(), selector.parent_space_rect.topleft)
     return self._surface
 
   def process(self, events):
+    print('process')
     for selector in self._selectors:
       selector.process(events)
 
@@ -82,6 +84,7 @@ if __name__ == '__main__':
     clock.tick()
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
+    song_selector.process(events)
     #===========================================RENDER==================================================#
     screen.fill(pygame.Color('#000000'))
     screen.blit(song_selector.draw(), song_selector.world_space_rect.topleft)

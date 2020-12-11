@@ -1,8 +1,8 @@
 from horizontal_button import *
 
 class VerticalButton(HorizontalButton):
-  def __init__(self, text, **kwargs):
-    super().__init__(text, **kwargs)
+  def __init__(self, text, parent=None):
+    super().__init__(text, parent)
     self.padding = (2, 0)
     self.rotate(-90)
 

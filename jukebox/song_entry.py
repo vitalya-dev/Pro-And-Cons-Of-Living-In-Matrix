@@ -7,8 +7,8 @@ from utils import *
 from shape import *
 
 class SongEntry(Shape):
-  def __init__(self, name, id):
-    super().__init__()
+  def __init__(self, name, id, parent=None):
+    super().__init__(parent)
     #================#
     self.name = name
     self.id = id

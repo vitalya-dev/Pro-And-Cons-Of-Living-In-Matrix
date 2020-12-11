@@ -7,17 +7,17 @@ from utils import *
 from shape import *
 
 class HorizontalButton(Shape):
-  def __init__(self, text, **kwargs):
-    super().__init__()
-    #================#
-    for key, value in kwargs.items():
-      self.key = value
+  def __init__(self, text, parent=None):
+    super().__init__(parent)
     #================#
     self._padding = (2, -2)
+    #================#
+    self._clicked = False
     #================#
     self._foreground_color = pygame.Color('#ffffff')
     self._background_color = pygame.Color('#b82e0a')
     self._light_color = pygame.Color('#f15815')
+    self._highlight_blend_color = pygame.Color('#444444')
     #================#
     self._font = pygame.font.Font('data/FSEX300.ttf', 32)
     self._text = text
@@ -35,7 +35,23 @@ class HorizontalButton(Shape):
     self._surface = pygame.surface.Surface(tuple_math(self._rendered_text.get_size(), '+', self.padding)).convert()
 
   def process(self, events):
-    pass
+    for e in events:
+      if e.type == MOUSEBUTTONDOWN:
+        self._process_mouse_button_down_event(e)
+      if e.type == MOUSEBUTTONUP:
+        self._process_mouse_button_up_event(e)
+
+  def _process_mouse_button_down_event(self, e):
+    if self.world_space_rect.collidepoint(e.pos):
+      self._clicked = True
+
+  def _process_mouse_button_up_event(self, e):
+    if self.world_space_rect.collidepoint(e.pos):
+      self._clicked = False
+
+  def rotate(self, angle):
+    self._surface = pygame.transform.rotate(self._surface, angle)
+    self._rendered_text = pygame.transform.rotate(self._rendered_text, angle)
 
   def draw(self):
     self._draw_background()
@@ -43,13 +59,12 @@ class HorizontalButton(Shape):
     self._draw_text()
     return self._surface
 
-  def rotate(self, angle):
-    self._surface = pygame.transform.rotate(self._surface, angle)
-    self._rendered_text = pygame.transform.rotate(self._rendered_text, angle)
-
   
   def _draw_background(self):
     self._surface.fill(self._background_color, self._surface.get_rect())
+    if self._clicked:
+      self._surface.fill(self._highlight_blend_color, self._surface.get_rect(), special_flags=pygame.BLEND_RGB_ADD) 
+
 
   def _draw_light(self):
     light_position = (0, self._surface.get_height() * 7.0 / 8.0)

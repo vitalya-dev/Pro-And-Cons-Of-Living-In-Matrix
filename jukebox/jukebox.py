@@ -20,6 +20,7 @@ if __name__ == '__main__':
   #================#
   song_selector = SongSelector()
   song_selector.position = screen.get_rect().center
+  song_selector.move(0, -150)
   song_selector.pivot = (0.5, 0.5)
 
   for i in 'ABCDEF':
@@ -31,8 +32,9 @@ if __name__ == '__main__':
 
   #================#
   song_holder_scroller = Scroll(SongHolder())
-  song_holder_scroller.size = tuple_math(SCREEN_SIZE, '/', (1, 2))
+  song_holder_scroller.limit = tuple_math(SCREEN_SIZE, '/', (1, 2))
   song_holder_scroller.position = screen.get_rect().center
+  song_holder_scroller.move(0, 50)
   song_holder_scroller.pivot = (0.5, 0.5)
 
   song_holder_scroller.child.add_song_entry(SongEntry('You Cant Always Get What You Want', 'A1'))
