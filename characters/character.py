@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from pygame.locals import *
 
@@ -5,12 +7,22 @@ from constants import *
 from utils import *
 
 from shape import *
+from keyboard import *
 
 class Character(Shape):
   def __init__(self, head, body, parent=None):
     super().__init__(parent)
     self.head = head
     self.body = body
+    self._scale_factor = 1
+    self._rebuild_surface()
+
+  def set_head(self, head):
+    self.head = scale_frame(head, self._scale_factor)
+    self._rebuild_surface()
+
+  def set_body(self, body):
+    self.body = scale_frame(body, self._scale_factor)
     self._rebuild_surface()
 
   def _rebuild_surface(self):
@@ -41,6 +53,8 @@ class Character(Shape):
   def scale(self, scale_factor):
     self.head = scale_frame(self.head, scale_factor)
     self.body = scale_frame(self.body, scale_factor)
+    #==============#
+    self._scale_factor = scale_factor
     self._rebuild_surface()
 
 
@@ -64,14 +78,21 @@ if __name__ == '__main__':
 
   bob = Character(head_1, body_1)
   bob.scale(7)
+  bob.pivot = (0.5, 0.5)
+  bob.position = screen.get_rect().center
+
+  keyboard = Keyboard()
+  keyboard.on_space += [lambda: bob.set_head(random.choice([head_1, head_2, head_3]))]
+  keyboard.on_space += [lambda: bob.set_body(random.choice([body_1, body_2, body_3]))]
 
   while not done():
     clock.tick()
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
+    keyboard.process(events)
     bob.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(pygame.Color('#ffffff'))
     screen.blit(bob.draw(), bob.world_space_rect.topleft)
     pygame.display.update()
 

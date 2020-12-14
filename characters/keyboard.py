@@ -1,3 +1,6 @@
+import pygame
+from pygame.locals import *
+
 class Keyboard(object):
   def __init__(self):
     self.on_esc   = []
