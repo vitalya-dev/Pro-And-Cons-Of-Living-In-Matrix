@@ -19,6 +19,14 @@ def tuple_math(a, op, b):
   if op == '/':
     return tuple(map(operator.truediv, a, b))
 
+def average(l):
+  return sum(l) / len(l)
+
+def find(lst, f):
+  for i, j in enumerate(lst):
+    if f(j): return i, j
+  return -1, None
+
 def load_frame(frame_name):
   return pygame.image.load(frame_name).convert_alpha()
 
@@ -27,3 +35,6 @@ def rotate_frame(frame, angle):
 
 def scale_frame(frame, factor):
   return pygame.transform.scale(frame, tuple_math(frame.get_size(), '*', factor))  
+
+
+
