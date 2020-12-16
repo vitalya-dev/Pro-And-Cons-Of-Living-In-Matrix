@@ -1,3 +1,4 @@
+import functools
 import operator
 import pygame
 
@@ -26,6 +27,9 @@ def find(lst, f):
   for i, j in enumerate(lst):
     if f(j): return i, j
   return -1, None
+
+def flatten(lst):
+  return functools.reduce(operator.concat, lst)
 
 def load_frame(frame_name):
   return pygame.image.load(frame_name).convert_alpha()
