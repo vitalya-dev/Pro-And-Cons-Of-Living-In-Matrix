@@ -1,3 +1,5 @@
+import math
+
 import mido
 import pygame
 from pygame.locals import *
@@ -27,23 +29,26 @@ class Piano(object):
 
   @staticmethod
   def generate_keys_from_midi(midi):
-    middle_note = midi.middle_note()
+    return Piano.generate_keys_from_beats(midi.beats())
+   
+  @staticmethod
+  def generate_keys_from_beats(beats):
+    middle_note = math.floor(average([beat[0].note for beat in beats]))
     return {
-    'F': middle_note,
-    'D': middle_note-1,
-    'S': middle_note-2,
-    'A': middle_note-3,
-    'J': middle_note+1,
-    'K': middle_note+2,
-    'L': middle_note+3,
-  }
-    
-
+      'F': middle_note,
+      'D': middle_note-1,
+      'S': middle_note-2,
+      'A': middle_note-3,
+      'J': middle_note+1,
+      'K': middle_note+2,
+      'L': middle_note+3,
+    }
 
 
 if __name__ == '__main__':
   midioutput = mido.open_output(None)
   piano = Piano(midioutput, Piano.generate_keys_from_midi(Midi('Breath.mid')))
+  print(Piano.generate_keys_from_beats(Midi('Breath.mid').beats()))
   #===========================================INIT=================================================#
   pygame.init()
   screen = pygame.display.set_mode(SCREEN_SIZE)

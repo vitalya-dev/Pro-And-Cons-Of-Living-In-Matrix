@@ -39,9 +39,6 @@ class Midi(object):
   def beats_stream(self):
     return sorted(flatten(self.beats()), key=lambda beat: beat.time)
 
-  def middle_note(self):
-    return int(average([beat.note for beat in self.beats_stream()]))
-
   def duration(self):
     if len(self.beats_stream()) > 0:
       last_beat = self.beats_stream()[-1]
@@ -52,7 +49,6 @@ class Midi(object):
 
 if __name__ == '__main__':
   print(Midi('Breath.mid').beats_stream())
-  print(Midi('Breath.mid').middle_note())
   print(Midi('Breath.mid').duration())
   
 

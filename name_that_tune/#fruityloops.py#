@@ -43,6 +43,27 @@ def done(val=None):
   if val == None: return done.val
   done.val = val;
 
+def messages_to_abstime(messages):
+  now = 0
+  for message in messages:
+    now += message.time
+    yield message.copy(time=now)
+
+def read_midi(midifile):
+  return list(mido.MidiFile(midifile))
+
+def generate_keys(beats):
+  middle_note = beats.middle_note()
+  return {
+    'F': middle_note,
+    'D': middle_note-1,
+    'S': middle_note-2,
+    'A': middle_note-3,
+    'J': middle_note+1,
+    'K': middle_note+2,
+    'L': middle_note+3,
+  }
+#================================================================#
 
 
 #================================================================#
@@ -60,7 +81,23 @@ def label(text, background, foreground, size=None):
 
 #================================================================#
 class Beats(object):
+  def __init__(self, messages=[]):
+    self._beats = self._generate_beats(messages)
 
+  def clear(self):
+    self._beats.clear()
+
+  def _generate_beats(self, messages):
+    beats       =  []
+    beat_ons    =  [message for message in messages_to_abstime(messages) if message.type == 'note_on']
+    beat_offs   =  [message for message in messages_to_abstime(messages) if message.type == 'note_off']
+    #==============#
+    for beat_on in beat_ons:
+      i = find(beat_offs, lambda x: x.note == beat_on.note)[0]
+      if i >= 0:
+        beats.append((beat_on, beat_offs.pop(i)))
+    #==============#
+    return beats
 
   def to_stream(self):
     return sorted([beat for fullbeat in self._beats for beat in fullbeat], key=lambda beat: beat.time)
@@ -83,6 +120,18 @@ class Beats(object):
 
   def __str__(self):
     return str(list(self))
+
+
+class Progression:
+  def __init__(self, prog):
+    self.prog = prog
+    self._current = 0
+
+  def current(self):
+    return self.prog[self._current]
+
+  def next(self):
+    self._current = (self._current + 1) % len(self.prog)
 
 
 class Window(object):
@@ -176,59 +225,7 @@ class BeatsEditor(Window):
       surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
 
 
-class Piano(object):
-  def __init__(self, keys, midioutput):
-    self.keys = keys
-    self.midioutput = midioutput
-
-  def process(self, events):
-    keys_down = pygame.key.get_pressed()
-    for e in events:
-      if e.type == KEYDOWN and chr(e.key).upper() in self.keys:
-       self.on_key_down(chr(e.key).upper())
-      if e.type == KEYUP and chr(e.key).upper() in self.keys:
-        self.on_key_up(chr(e.key).upper())
- 
-  def on_key_down(self, key):
-    self.midioutput.send(mido.Message('note_on',  note=self.keys[key]))
-
-  def on_key_up(self, key):
-    self.midioutput.send(mido.Message('note_off', note=self.keys[key]))
-
-
-
-class Keyboard(object):
-  def process(self, events):
-    for e in events:
-      if e.type == KEYDOWN and e.key == K_ESCAPE and hasattr(self,  'on_esc'):    self.on_esc()
-      if e.type == KEYDOWN and e.key == K_SPACE  and hasattr(self,  'on_space'):  self.on_space()
-
-
-class BeatsPlot(object):
-  def __init__(self, width, height, background, foreground):
-    self.width  = width
-    self.height = height
-    self.background = pygame.Color(background) if type(background) == type('') else background
-    self.foreground = pygame.Color(foreground) if type(foreground) == type('') else foreground
-
-  def plot(self, beats):
-    surface = pygame.surface.Surface((self.width, self.height)).convert()
-    surface.fill(self.background)
-    self._draw(surface, beats)
-    return surface
-
-  def _draw(self, surface, beats):
-    scale_x = self.width / beats.duration()
-    keys = generate_keys(beats)
-    for beat in beats:
-      beat_height = 50
-      beat_width  = (beat[1].time - beat[0].time) * scale_x - 1
-      beat_left   = beat[0].time * scale_x
-      beat_top    = (beats.middle_note() - beat[0].note) * beat_height + self.height / 2 - beat_height
-      beat_key    = find(keys.items(), lambda x: x[1] == beat[0].note)[1][0]
-      #=========#
-      surface.blit(label(beat_key, self.foreground, self.background, (beat_width, beat_height)), (beat_left, beat_top))
-#================================================================#
+=========================================#
   
 
 
