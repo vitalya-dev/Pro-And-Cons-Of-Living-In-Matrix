@@ -7,7 +7,7 @@ from utils import *
 from shape import *
 
 class BeatsPlot(Shape):
-  def __init__(self, beats, beats, width, height, parent=None):
+  def __init__(self, beats, width, height, parent=None):
     super().__init__(parent)
     #================#
     self.beats = beats

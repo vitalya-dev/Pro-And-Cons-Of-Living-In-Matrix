@@ -7,11 +7,11 @@ from utils import *
 from shape import *
 
 class Label(Shape):
-  def __init__(self, text, size=None, parent=None):
+  def __init__(self, text, background=BLACK, foreground=WHITE, size=None, parent=None):
     super().__init__(parent)
     #================#
-    self._foreground_color = pygame.Color('#AA0000')
-    self._background_color = pygame.Color('#000080')
+    self._background_color = background
+    self._foreground_color = foreground
     #================#
     self._font = pygame.font.Font('fonts/FSEX300.ttf', 32)
     self._text = text
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     events = pygame.event.get()
     a_label.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(BLACK)
     screen.blit(a_label.draw(), a_label.world_space_rect.topleft)
     pygame.display.update()
 

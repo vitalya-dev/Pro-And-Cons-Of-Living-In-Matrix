@@ -55,5 +55,5 @@ if __name__ == '__main__':
     events = pygame.event.get()
     keyboard.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(BLACK)
     pygame.display.update()

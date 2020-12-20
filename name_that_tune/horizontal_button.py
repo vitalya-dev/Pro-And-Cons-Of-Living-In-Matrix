@@ -7,19 +7,19 @@ from utils import *
 from shape import *
 
 class HorizontalButton(Shape):
-  def __init__(self, text, parent=None):
+  def __init__(self, text, background=BLACK, foreground=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self._padding = (2, -2)
     #================#
     self._clicked = False
     #================#
-    self._foreground_color = pygame.Color('#ffffff')
-    self._background_color = pygame.Color('#b82e0a')
-    self._light_color = pygame.Color('#f15815')
-    self._highlight_blend_color = pygame.Color('#444444')
+    self._foreground_color = foreground
+    self._background_color = background
+    self._light_color = tuple_math(self._background_color, '*', (1.2, 1.2, 1.2))
+    self._highlight_blend_color = (125, 125, 125)
     #================#
-    self._font = pygame.font.Font('data/FSEX300.ttf', 32)
+    self._font = pygame.font.Font('fonts/FSEX300.ttf', 32)
     self._text = text
     self._rendered_text = self._font.render(self._text, False, self._foreground_color)
     #================#
@@ -67,9 +67,10 @@ class HorizontalButton(Shape):
 
 
   def _draw_light(self):
-    light_position = (0, self._surface.get_height() * 7.0 / 8.0)
-    light_size = (self._surface.get_width(), self._surface.get_height() / 8.0)
-    self._surface.fill(self._light_color, pygame.Rect(light_position, light_size))
+    if not self._clicked:
+      light_position = (0, self._surface.get_height() * 7.0 / 8.0)
+      light_size = (self._surface.get_width(), self._surface.get_height() / 8.0)
+      self._surface.fill(self._light_color, pygame.Rect(light_position, light_size))
 
   def _draw_text(self):
     self._surface.blit(self._rendered_text, self._rendered_text.get_rect(center=self._surface.get_rect().center).topleft)
@@ -83,7 +84,7 @@ if __name__ == '__main__':
   clock = pygame.time.Clock()
   #================================================================================================#
 
-  a_btn = HorizontalButton('A')
+  a_btn = HorizontalButton('A', background=(75, 75, 75))
   a_btn.pivot = (0, 0)
   a_btn.position = screen.get_rect().center
 
@@ -93,7 +94,7 @@ if __name__ == '__main__':
     events = pygame.event.get()
     a_btn.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill((0, 0, 0))
     screen.blit(a_btn.draw(), a_btn.world_space_rect.topleft)
 
     pygame.display.update()

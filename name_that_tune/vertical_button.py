@@ -1,8 +1,8 @@
 from horizontal_button import *
 
 class VerticalButton(HorizontalButton):
-  def __init__(self, text, parent=None):
-    super().__init__(text, parent)
+  def __init__(self, text, background=BLACK, foreground=GRAY, parent=None):
+    super().__init__(text, background, foreground, parent)
     self.padding = (2, 0)
     self.rotate(-90)
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     events = pygame.event.get()
     select_btn.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(BLACK)
     screen.blit(select_btn.draw(), select_btn.world_space_rect.topleft)
     pygame.display.update()
     
