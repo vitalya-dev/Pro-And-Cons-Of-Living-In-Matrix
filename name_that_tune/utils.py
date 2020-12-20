@@ -23,10 +23,16 @@ def tuple_math(a, op, b):
 def average(l):
   return sum(l) / len(l)
 
-def find(lst, f):
+def find_index_value(lst, f):
   for i, j in enumerate(lst):
     if f(j): return i, j
   return -1, None
+
+def find_index(lst, f):
+  return find(lst, f)[0]
+
+def find_value(lst, f):
+  return find(lst, f)[1]
 
 def flatten(lst):
   return functools.reduce(operator.concat, lst)
