@@ -34,7 +34,7 @@ class Midi(object):
     return all_beats
 
   def _find_note_in_beats(self, beats, note):
-    return find(beats, lambda x: x.note == note)[0]
+    return find_index(beats, lambda x: x.note == note)
 
   def beats_stream(self):
     return sorted(flatten(self.beats()), key=lambda beat: beat.time)

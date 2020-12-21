@@ -29,10 +29,10 @@ def find_index_value(lst, f):
   return -1, None
 
 def find_index(lst, f):
-  return find(lst, f)[0]
+  return find_index_value(lst, f)[0]
 
 def find_value(lst, f):
-  return find(lst, f)[1]
+  return find_index_value(lst, f)[1]
 
 def flatten(lst):
   return functools.reduce(operator.concat, lst)

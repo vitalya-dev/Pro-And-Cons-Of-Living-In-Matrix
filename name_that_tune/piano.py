@@ -28,11 +28,11 @@ class Piano(object):
     self.midioutput.send(mido.Message('note_off', note=self.keys[key]))
 
   @staticmethod
-  def generate_keys_from_midi(midi):
-    return Piano.generate_keys_from_beats(midi.beats())
+  def generate_pianokeys_from_midi(midi):
+    return Piano.generate_pianokeys_from_beats(midi.beats())
    
   @staticmethod
-  def generate_keys_from_beats(beats):
+  def generate_pianokeys_from_beats(beats):
     middle_note = math.floor(average([beat[0].note for beat in beats]))
     return {
       'F': middle_note,
@@ -47,8 +47,8 @@ class Piano(object):
 
 if __name__ == '__main__':
   midioutput = mido.open_output(None)
-  piano = Piano(midioutput, Piano.generate_keys_from_midi(Midi('Breath.mid')))
-  print(Piano.generate_keys_from_beats(Midi('Breath.mid').beats()))
+  piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
+  print(Piano.generate_pianokeys_from_beats(Midi('Breath.mid').beats()))
   #===========================================INIT=================================================#
   pygame.init()
   screen = pygame.display.set_mode(SCREEN_SIZE)
