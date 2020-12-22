@@ -73,6 +73,9 @@ if __name__ == '__main__':
   screen = pygame.display.set_mode(SCREEN_SIZE)
   clock = pygame.time.Clock()
   #================================================================================================#
+  midioutput = mido.open_output(None)
+  piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
+
   melody = Melody(Midi('Breath.mid').beats(), 640, 480)
 
   while not done():
@@ -80,6 +83,7 @@ if __name__ == '__main__':
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
     melody.process(events)
+    piano.process(events)
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
     screen.blit(melody.draw(), melody.world_space_rect.topleft)
