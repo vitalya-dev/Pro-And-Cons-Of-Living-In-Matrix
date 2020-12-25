@@ -42,6 +42,13 @@ class Piano(object):
       'J': middle_note+1,
       'K': middle_note+2,
       'L': middle_note+3,
+      middle_note:   'F',
+      middle_note-1: 'D',
+      middle_note-2: 'S',
+      middle_note-3: 'A',
+      middle_note+1: 'J',
+      middle_note+2: 'K',
+      middle_note+3: 'L',
     }
 
 

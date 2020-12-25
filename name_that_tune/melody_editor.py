@@ -44,7 +44,7 @@ class MelodyEditor(Shape):
       note_on = self._pop_note_from_input(self._pianokeys[key])
       note_off = mido.Message('note_off',  note=note_on.note, time=time.time()-note_on.time)
       self._add_beat_to_melody((note_on, note_off))
-
+      self._create_beatbar_from_beat((note_on, note_off))
 
   def _input_contains_note(self, note):
     return find_index(self._inputs, lambda x: x.note == note) != -1
@@ -58,20 +58,52 @@ class MelodyEditor(Shape):
     self._melody.append(beat)
 
   def _make_beat_start_time_equal_to_melody_end_time(self, beat):
+    beat[0].time = self._melody_duration()
+    beat[1].time += self._melody_duration()
+
+  def _melody_duration(self):
     if len(self._melody) > 0:
       last_beat_in_melody = self._melody[-1]
-      beat[0].time = last_beat_in_melody[1].time
-      beat[1].time += last_beat_in_melody[1].time
+      return last_beat_in_melody[1].time
     else:
-      beat[0].time = 0
+      return 0
 
   def _create_beatbar_from_beat(self, beat):
     beatbar_height = 50
-    beatbar_left = beat[0].time * self_scale_x
+    beatbar_left = beat[0].time * self._scale_x
     beatbar_width = (beat[1].time - beat[0].time) * self._scale_x - 1
-    beatbar_top = (melody_middle_note - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
-    beatbar_text = self._get_pianokey_with_corresponded_note(beat[0].note)[0]
+    beatbar_top = (self._pianokeys['F'] - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
+    beatbar_text = self._pianokeys[beat[0].note]
+    #================#
+    beatbar = Label(
+      beatbar_text, background=self._foreground_color, foreground=self._background_color, size=(beatbar_width, beatbar_height), parent=self
+    )
+    beatbar.position = (beatbar_left, beatbar_top)
+    self._melody_beatbars.append(beatbar)
 
+  def draw(self):
+    self._draw_background()
+    self._draw_melody()
+    self._draw_input()
+    return self._surface
+
+  def _draw_background(self):
+    self._surface.fill(self._background_color)
+
+  def _draw_melody(self):
+    for beatbar in self._melody_beatbars:
+      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect.topleft)
+
+  def _draw_input(self):
+    for input in self._inputs:
+      inputbar_left = self._melody_duration() * self._scale_x
+      inputbar_height = 50
+      inputbar_width = (time.time - input.time) * self._scale_x
+      inputbar_top = (self._pianokeys['F'] - input.note) * inputbar_height + self._surface.get_height() / 2 - inputbar_height
+      inputbar_text = self._pianokeys[beat[0].note]
+      pygame.draw.rect(self.screen, self.color, self.rect)
+
+    
 
 if __name__ == '__main__':
   #===========================================INIT=================================================#
@@ -94,4 +126,5 @@ if __name__ == '__main__':
     melody_editor.process(events)
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
+    screen.blit(melody_editor.draw(), melody_editor.world_space_rect.topleft)
     pygame.display.update()
