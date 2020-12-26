@@ -11,14 +11,15 @@ from midi import *
 from shape import *
 from label import *
 
-class Melody(Shape):
-  def __init__(self, melody, width, height, background=BLACK, foreground=WHITE, parent=None):
+class MelodyViewer(Shape):
+  def __init__(self, melody, width, height, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self._background_color = background
     self._foreground_color = foreground
     #================#
     self._surface = pygame.surface.Surface((width, height)).convert()
+    self._surface.set_colorkey(BLACK)
     #================#
     self._melody = melody
     self._melody_beatbars = self._create_melody_beatbars()
@@ -26,16 +27,19 @@ class Melody(Shape):
   def process(self, events):
     pass
 
-  def _create_melody_beatbars(self):
+  @property
+  def time_to_pixel_scale(self):
     melody_length = self._melody[-1][1].time
-    melody_scale_x = self._surface.get_width() / melody_length
+    return self._surface.get_width() / melody_length
+
+  def _create_melody_beatbars(self):
     melody_middle_note = math.floor(average([beat[0].note for beat in self._melody]))
     #================#
     melody_beatbars = []
     for beat in self._melody:
       beatbar_height = 50
-      beatbar_left = beat[0].time * melody_scale_x
-      beatbar_width = (beat[1].time - beat[0].time) * melody_scale_x - 1
+      beatbar_left = beat[0].time * self.time_to_pixel_scale
+      beatbar_width = (beat[1].time - beat[0].time) * self.time_to_pixel_scale - 1
       beatbar_top = (melody_middle_note - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
       beatbar_text = self._get_pianokey_with_corresponded_note(beat[0].note)[0]
       #================#
@@ -76,15 +80,15 @@ if __name__ == '__main__':
   midioutput = mido.open_output(None)
   piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
 
-  melody = Melody(Midi('Breath.mid').beats(), 640, 480)
+  melody_viewer = MelodyViewer(Midi('Breath.mid').beats(), 640, 480)
 
   while not done():
     clock.tick()
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
-    melody.process(events)
+    melody_viewer.process(events)
     piano.process(events)
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
-    screen.blit(melody.draw(), melody.world_space_rect.topleft)
+    screen.blit(melody_viewer.draw(), melody_viewer.world_space_rect.topleft)
     pygame.display.update()

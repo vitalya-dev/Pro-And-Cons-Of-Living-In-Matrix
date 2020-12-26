@@ -26,6 +26,8 @@ class MelodyEditor(Shape):
     self._melody_beatbars = []
     #================#
     self._surface = pygame.surface.Surface((width, height)).convert()
+    self._surface.set_colorkey(BLACK)
+
 
   def process(self, events):
     for e in events:
@@ -118,7 +120,6 @@ if __name__ == '__main__':
   piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
   
   melody_editor = MelodyEditor(Piano.generate_pianokeys_from_midi(Midi('Breath.mid')), 150, 640, 480)
-
 
   while not done():
     clock.tick()
