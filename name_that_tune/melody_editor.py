@@ -44,7 +44,7 @@ class MelodyEditor(Shape):
       note_on = self._pop_note_from_input(self._pianokeys[key])
       note_off = mido.Message('note_off',  note=note_on.note, time=time.time()-note_on.time)
       self._add_beat_to_melody((note_on, note_off))
-      self._create_beatbar_from_beat((note_on, note_off))
+      self._create_and_add_beatbar_from_beat((note_on, note_off))
 
   def _input_contains_note(self, note):
     return find_index(self._inputs, lambda x: x.note == note) != -1
@@ -68,7 +68,7 @@ class MelodyEditor(Shape):
     else:
       return 0
 
-  def _create_beatbar_from_beat(self, beat):
+  def _create_and_add_beatbar_from_beat(self, beat):
     beatbar_height = 50
     beatbar_left = beat[0].time * self._scale_x
     beatbar_width = (beat[1].time - beat[0].time) * self._scale_x - 1
@@ -98,10 +98,12 @@ class MelodyEditor(Shape):
     for input in self._inputs:
       inputbar_left = self._melody_duration() * self._scale_x
       inputbar_height = 50
-      inputbar_width = (time.time - input.time) * self._scale_x
+      inputbar_width = (time.time() - input.time) * self._scale_x
       inputbar_top = (self._pianokeys['F'] - input.note) * inputbar_height + self._surface.get_height() / 2 - inputbar_height
-      inputbar_text = self._pianokeys[beat[0].note]
-      pygame.draw.rect(self.screen, self.color, self.rect)
+      #================#
+      inputbar = pygame.Rect(inputbar_left, inputbar_top, inputbar_width, inputbar_height)
+      pygame.draw.rect(self._surface, self._foreground_color, inputbar)
+      
 
     
 
