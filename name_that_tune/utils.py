@@ -35,7 +35,10 @@ def find_value(lst, f):
   return find_index_value(lst, f)[1]
 
 def flatten(lst):
-  return functools.reduce(operator.concat, lst)
+  if len(lst) == 0:
+    return []
+  else:
+    return functools.reduce(operator.concat, lst)
 
 def load_frame(frame_name):
   return pygame.image.load(frame_name).convert_alpha()

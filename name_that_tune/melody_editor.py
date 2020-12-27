@@ -12,11 +12,12 @@ from shape import *
 from label import *
 
 class MelodyEditor(Shape):
-  def __init__(self, pianokeys, scale_x, width, height, background=BLACK, foreground=WHITE, parent=None):
+  def __init__(self, pianokeys, scale_x, width, height, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
-    self._background_color = background
-    self._foreground_color = foreground
+    self.background_color = background_color
+    self.foreground_color = foreground_color
+    self.text_color = text_color
     #================#
     self._pianokeys = pianokeys
     self._scale_x = scale_x
@@ -26,8 +27,11 @@ class MelodyEditor(Shape):
     self._melody_beatbars = []
     #================#
     self._surface = pygame.surface.Surface((width, height)).convert()
-    self._surface.set_colorkey(BLACK)
 
+
+  @property
+  def melody(self):
+    return self._melody
 
   def process(self, events):
     for e in events:
@@ -78,7 +82,7 @@ class MelodyEditor(Shape):
     beatbar_text = self._pianokeys[beat[0].note]
     #================#
     beatbar = Label(
-      beatbar_text, background=self._foreground_color, foreground=self._background_color, size=(beatbar_width, beatbar_height), parent=self
+      beatbar_text, background=self.foreground_color, foreground=self.text_color, size=(beatbar_width, beatbar_height), parent=self
     )
     beatbar.position = (beatbar_left, beatbar_top)
     self._melody_beatbars.append(beatbar)
@@ -90,7 +94,7 @@ class MelodyEditor(Shape):
     return self._surface
 
   def _draw_background(self):
-    self._surface.fill(self._background_color)
+    self._surface.fill(self.background_color)
 
   def _draw_melody(self):
     for beatbar in self._melody_beatbars:
@@ -104,8 +108,11 @@ class MelodyEditor(Shape):
       inputbar_top = (self._pianokeys['F'] - input.note) * inputbar_height + self._surface.get_height() / 2 - inputbar_height
       #================#
       inputbar = pygame.Rect(inputbar_left, inputbar_top, inputbar_width, inputbar_height)
-      pygame.draw.rect(self._surface, self._foreground_color, inputbar)
+      pygame.draw.rect(self._surface, self.foreground_color, inputbar)
       
+
+  def set_colorkey(self, colorkey):
+    self._surface.set_colorkey(colorkey)
 
     
 

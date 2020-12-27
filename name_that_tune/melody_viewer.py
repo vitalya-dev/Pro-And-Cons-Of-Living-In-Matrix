@@ -15,11 +15,11 @@ class MelodyViewer(Shape):
   def __init__(self, melody, width, height, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
-    self._background_color = background
-    self._foreground_color = foreground
+    self.background_color = background_color
+    self.foreground_color = foreground_color
+    self.text_color = text_color
     #================#
     self._surface = pygame.surface.Surface((width, height)).convert()
-    self._surface.set_colorkey(BLACK)
     #================#
     self._melody = melody
     self._melody_beatbars = self._create_melody_beatbars()
@@ -44,7 +44,7 @@ class MelodyViewer(Shape):
       beatbar_text = self._get_pianokey_with_corresponded_note(beat[0].note)[0]
       #================#
       beatbar = Label(
-        beatbar_text, background=self._foreground_color, foreground=self._background_color, size=(beatbar_width, beatbar_height), parent=self
+        beatbar_text, background=self.foreground_color, foreground=self.text_color, size=(beatbar_width, beatbar_height), parent=self
       )
       beatbar.position = (beatbar_left, beatbar_top)
       melody_beatbars.append(beatbar)
@@ -61,12 +61,14 @@ class MelodyViewer(Shape):
     return self._surface
 
   def _draw_background(self):
-    self._surface.fill(self._background_color)
+    self._surface.fill(self.background_color)
 
   def _draw_melody(self):
     for beatbar in self._melody_beatbars:
       self._surface.blit(beatbar.draw(), beatbar.parent_space_rect.topleft)
     
+  def set_colorkey(self, colorkey):
+    self._surface.set_colorkey(colorkey)
 
   
       
