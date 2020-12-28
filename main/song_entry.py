@@ -7,7 +7,7 @@ from utils import *
 from shape import *
 
 class SongEntry(Shape):
-  def __init__(self, name, id, parent=None):
+  def __init__(self, name, id, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self.name = name
@@ -15,15 +15,14 @@ class SongEntry(Shape):
     #================#
     self._padding = (12, 2)
     #================#
-    self._song_name_foreground_color = pygame.Color('#b99559')
-    self._song_id_foreground_color = pygame.Color('#b82e0a')
-    self._background_color = pygame.Color('#efe8b4')
-    self._border_color = pygame.Color('#767877')
+    self.background_color = background_color
+    self.foreground_color = foreground_color
+    self.text_color = text_color
     #================#
     self._song_name_font = pygame.font.Font('fonts/FSEX300.ttf', 24)
     self._song_id_font = pygame.font.Font('fonts/FSEX300.ttf', 64)
-    self._rendered_song_name = self._song_name_font.render(self.name, False, self._song_name_foreground_color)
-    self._rendered_song_id = self._song_id_font.render(self.id, False, self._song_id_foreground_color)
+    self._rendered_song_name = self._song_name_font.render(self.name, False, self.text_color)
+    self._rendered_song_id = self._song_id_font.render(self.id, False, self.text_color)
     #================#
     self._surface = pygame.surface.Surface(self._calculate_surface_size())
 
@@ -56,8 +55,8 @@ class SongEntry(Shape):
     return self._surface
 
   def _draw_rect(self):
-    self._surface.fill(self._background_color)
-    pygame.draw.rect(self._surface, self._border_color, self._surface.get_rect(), 4)
+    self._surface.fill(self.foreground_color)
+    pygame.draw.rect(self._surface, self.text_color, self._surface.get_rect(), 4)
 
   def _draw_text(self):
     self._surface.blit(self._rendered_song_name, self._song_name_position())
@@ -93,6 +92,6 @@ if __name__ == '__main__':
     events = pygame.event.get()
     song_entry.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(BLACK)
     screen.blit(song_entry.draw(), song_entry.world_space_rect.topleft)
     pygame.display.update()
