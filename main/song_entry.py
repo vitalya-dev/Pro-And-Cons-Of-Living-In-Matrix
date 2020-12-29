@@ -7,7 +7,7 @@ from utils import *
 from shape import *
 
 class SongEntry(Shape):
-  def __init__(self, name, id, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
+  def __init__(self, name, id, background_color=BLACK, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self.name = name
@@ -16,7 +16,6 @@ class SongEntry(Shape):
     self._padding = (12, 2)
     #================#
     self.background_color = background_color
-    self.foreground_color = foreground_color
     self.text_color = text_color
     #================#
     self._song_name_font = pygame.font.Font('fonts/FSEX300.ttf', 24)
@@ -55,7 +54,7 @@ class SongEntry(Shape):
     return self._surface
 
   def _draw_rect(self):
-    self._surface.fill(self.foreground_color)
+    self._surface.fill(self.background_color)
     pygame.draw.rect(self._surface, self.text_color, self._surface.get_rect(), 4)
 
   def _draw_text(self):
@@ -92,6 +91,6 @@ if __name__ == '__main__':
     events = pygame.event.get()
     song_entry.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(BLACK)
+    screen.fill(WHITE)
     screen.blit(song_entry.draw(), song_entry.world_space_rect.topleft)
     pygame.display.update()

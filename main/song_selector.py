@@ -9,8 +9,10 @@ from horizontal_button import *
 from vertical_button import *
 
 class SongSelector(Shape):
-  def __init__(self, parent=None):
+  def __init__(self, background_color=BLACK, parent=None):
     super().__init__()
+    #================#
+    self.background_color = background_color
     #================#
     self._selectors = []
     self._space_between_selectors = 15
@@ -31,7 +33,6 @@ class SongSelector(Shape):
 
   def _rebuild_surface(self):
     self._surface = pygame.surface.Surface((self._selectors_total_width(), self._selectors_max_height())).convert()
-    self._surface.set_colorkey((0, 0, 0))
 
   def _selectors_total_width(self):
     if len(self._selectors) > 0:
@@ -48,13 +49,12 @@ class SongSelector(Shape):
       return 0
 
   def draw(self):
-    self._surface.fill((0, 0, 0))
+    self._surface.fill(self.background_color)
     for selector in self._selectors:
       self._surface.blit(selector.draw(), selector.parent_space_rect.topleft)
     return self._surface
 
   def process(self, events):
-    print('process')
     for selector in self._selectors:
       selector.process(events)
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     events = pygame.event.get()
     song_selector.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(WHITE)
     screen.blit(song_selector.draw(), song_selector.world_space_rect.topleft)
 
     pygame.display.update()

@@ -7,15 +7,15 @@ from utils import *
 from shape import *
 
 class Label(Shape):
-  def __init__(self, text, background=BLACK, foreground=WHITE, size=None, parent=None):
+  def __init__(self, text, background_color=BLACK, text_color=GRAY, size=None, parent=None):
     super().__init__(parent)
     #================#
-    self._background_color = background
-    self._foreground_color = foreground
+    self.background_color = background_color
+    self.text_color = text_color
     #================#
     self._font = pygame.font.Font('fonts/FSEX300.ttf', 32)
     self._text = text
-    self._rendered_text = self._font.render(self._text, False, self._foreground_color)
+    self._rendered_text = self._font.render(self._text, False, self.text_color)
     #================#
     if size == None:
       size = self._rendered_text.get_size()
@@ -30,7 +30,7 @@ class Label(Shape):
     return self._surface
 
   def _draw_background(self):
-    self._surface.fill(self._background_color)
+    self._surface.fill(self.background_color)
 
   def _draw_text(self):
     self._surface.blit(self._rendered_text, self._rendered_text.get_rect(center=self._surface.get_rect().center).topleft)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     events = pygame.event.get()
     a_label.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(BLACK)
+    screen.fill(WHITE)
     screen.blit(a_label.draw(), a_label.world_space_rect.topleft)
     pygame.display.update()
 

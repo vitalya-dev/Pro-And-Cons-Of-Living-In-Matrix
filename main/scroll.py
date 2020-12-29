@@ -17,7 +17,6 @@ class Scroll(Shape):
     self.child.parent = self
     #================#
     self._surface = pygame.Surface(self.child._surface.get_size())
-    self._surface.set_colorkey((0, 0, 0))
     #================#
     self._scroll_offset = (0, 0)
     self._scroll_step = 10
@@ -32,11 +31,9 @@ class Scroll(Shape):
   @size.setter
   def size(self, value):
     self._surface = pygame.surface.Surface(value).convert()
-    self._surface.set_colorkey((0, 0, 0))
 
   def draw(self):
     self._sync_surface_size_if_needed()
-    self._surface.fill((0, 0, 0))
     self._surface.blit(self.child.draw(), self._scroll_offset)
     return self._surface
     
@@ -68,7 +65,7 @@ if __name__ == '__main__':
   #================================================================================================#
   
   #================#
-  song_holder_scroller = Scroll(SongHolder())
+  song_holder_scroller = Scroll(SongHolder(background_color=WHITE))
   song_holder_scroller.position = screen.get_rect().center
   song_holder_scroller.pivot = (0.5, 0.5)
   song_holder_scroller.limit = tuple_math(SCREEN_SIZE, '/', (4, 4))
@@ -88,7 +85,7 @@ if __name__ == '__main__':
 
     song_holder_scroller.process(events)
     #===========================================RENDER==================================================#
-    screen.fill((50, 50, 50))
+    screen.fill(WHITE)
     screen.blit(song_holder_scroller.draw(), song_holder_scroller.world_space_rect.topleft)
 
     pygame.display.update()

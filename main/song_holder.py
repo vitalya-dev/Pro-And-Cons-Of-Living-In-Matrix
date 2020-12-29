@@ -8,8 +8,10 @@ from shape import *
 from song_entry import *
 
 class SongHolder(Shape):
-  def __init__(self, parent=None):
+  def __init__(self, background_color=BLACK, parent=None):
     super().__init__(parent)
+    #================#
+    self.background_color = background_color
     #================#
     self._song_entries = []
     self._space_between_song_entries = 15
@@ -30,7 +32,6 @@ class SongHolder(Shape):
 
   def _rebuild_surface(self):
     self._surface = pygame.surface.Surface((self._song_entries_max_width(), self._song_entries_total_height())).convert()
-    self._surface.set_colorkey((0, 0, 0))
     
   def _song_entries_total_height(self):
     if len(self._song_entries) > 0:
@@ -47,7 +48,7 @@ class SongHolder(Shape):
       return 0
 
   def draw(self):
-    self._surface.fill((0, 0, 0))
+    self._surface.fill(self.background_color)
     for song_entry in self._song_entries:
       self._surface.blit(song_entry.draw(), song_entry.parent_space_rect.topleft)
     return self._surface
@@ -66,7 +67,7 @@ if __name__ == '__main__':
   #================================================================================================#
   
   #================#
-  song_holder = SongHolder()
+  song_holder = SongHolder(background_color=WHITE)
   song_holder.position = screen.get_rect().center
   song_holder.pivot = (0.5, 0.5)
 
@@ -83,7 +84,7 @@ if __name__ == '__main__':
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(WHITE)
     screen.blit(song_holder.draw(), song_holder.world_space_rect.topleft)
 
     pygame.display.update()

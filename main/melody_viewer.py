@@ -44,7 +44,7 @@ class MelodyViewer(Shape):
       beatbar_text = self._get_pianokey_with_corresponded_note(beat[0].note)[0]
       #================#
       beatbar = Label(
-        beatbar_text, background=self.foreground_color, foreground=self.text_color, size=(beatbar_width, beatbar_height), parent=self
+        beatbar_text, background_color=self.foreground_color, text_color=self.text_color, size=(beatbar_width, beatbar_height), parent=self
       )
       beatbar.position = (beatbar_left, beatbar_top)
       melody_beatbars.append(beatbar)

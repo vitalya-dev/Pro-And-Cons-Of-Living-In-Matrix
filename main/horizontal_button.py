@@ -57,13 +57,13 @@ class HorizontalButton(Shape):
     self._draw_background()
     self._draw_light()
     self._draw_text()
+    if self._clicked:
+      self._draw_highlight()
     return self._surface
 
   
   def _draw_background(self):
     self._surface.fill(self.background_color, self._surface.get_rect())
-    if self._clicked:
-      self._surface.fill(self.highlight_blend_color, self._surface.get_rect(), special_flags=pygame.BLEND_RGB_ADD) 
 
 
   def _draw_light(self):
@@ -74,6 +74,9 @@ class HorizontalButton(Shape):
 
   def _draw_text(self):
     self._surface.blit(self._rendered_text, self._rendered_text.get_rect(center=self._surface.get_rect().center).topleft)
+
+  def _draw_highlight(self):
+    self._surface.fill(self.highlight_blend_color, self._surface.get_rect(), special_flags=pygame.BLEND_RGB_ADD)     
 
 
 if __name__ == '__main__':

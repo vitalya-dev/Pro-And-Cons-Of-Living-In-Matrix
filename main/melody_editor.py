@@ -82,7 +82,7 @@ class MelodyEditor(Shape):
     beatbar_text = self._pianokeys[beat[0].note]
     #================#
     beatbar = Label(
-      beatbar_text, background=self.foreground_color, foreground=self.text_color, size=(beatbar_width, beatbar_height), parent=self
+      beatbar_text, background_color=self.foreground_color, text_color=self.text_color, size=(beatbar_width, beatbar_height), parent=self
     )
     beatbar.position = (beatbar_left, beatbar_top)
     self._melody_beatbars.append(beatbar)
