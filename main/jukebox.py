@@ -53,7 +53,7 @@ if __name__ == '__main__':
     song_selector.process(events)
     song_holder_scroller.process(events)
     #===========================================RENDER==================================================#
-    screen.fill(pygame.Color('#000000'))
+    screen.fill(WHITE)
     screen.blit(song_selector.draw(), song_selector.world_space_rect.topleft)
     screen.blit(song_holder_scroller.draw(), song_holder_scroller.world_space_rect.topleft)
     pygame.display.update()
