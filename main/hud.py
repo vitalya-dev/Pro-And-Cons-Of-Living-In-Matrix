@@ -11,11 +11,13 @@ class HUD(Shape):
   def __init__(self, screen_size):
     super().__init__(parent=None)
     #================#
-    self._jukebox_label = Label('Jukebox', parent=self)
-    #================#
     self._colorkey = BLACK
     self._surface = pygame.surface.Surface(screen_size).convert()
     self._surface.set_colorkey(self._colorkey)
+    #================#
+    self._jukebox_label = Label('Jukebox', parent=self)
+    self._jukebox_label.pivot = (1, 0)
+    self._jukebox_label.position = self.self_space_rect.topright
 
   def draw(self):
     self._draw_background()
@@ -26,6 +28,7 @@ class HUD(Shape):
     self._surface.fill(self._colorkey)
 
   def _draw_labels(self):
+    self._surface.blit(self._jukebox_label.draw(), self._jukebox_label.parent_space_rect.topleft)
     return self._surface
 
 
