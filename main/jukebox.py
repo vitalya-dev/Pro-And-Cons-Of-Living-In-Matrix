@@ -4,9 +4,25 @@ from pygame.locals import *
 from constants import *
 from utils import *
 
+from shape import *
 from song_selector import *
 from song_holder import *
 from scroll import *
+
+
+class Jukebox(Shape):
+  def __init__(self, size, parent=None):
+    super().__init__(parent)
+    #================#
+    self._surface = pygame.surface.Surface(size).convert()
+
+  def _create_song_selector(self):
+    song_selector = SongSelector()
+    for i in 'ABCDEF':
+      song_selector.add_selector(HorizontalButton(i))
+    song_selector.add_selector(VerticalButton('SELECT'))
+    for i in '123456':
+      song_selector.add_selector(HorizontalButton(i)) 
 
 
 if __name__ == '__main__':
@@ -18,6 +34,8 @@ if __name__ == '__main__':
   #================================================================================================#
 
   #================#
+  jukebox = Jukebox(SCREEN_SIZE)
+
   song_selector = SongSelector()
   song_selector.position = screen.get_rect().center
   song_selector.move(0, -150)

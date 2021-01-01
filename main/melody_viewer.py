@@ -12,14 +12,14 @@ from shape import *
 from label import *
 
 class MelodyViewer(Shape):
-  def __init__(self, melody, width, height, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
+  def __init__(self, melody, size, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self.background_color = background_color
     self.foreground_color = foreground_color
     self.text_color = text_color
     #================#
-    self._surface = pygame.surface.Surface((width, height)).convert()
+    self._surface = pygame.surface.Surface(size).convert()
     #================#
     self._melody = melody
     self._melody_beatbars = self._create_melody_beatbars()
@@ -82,7 +82,7 @@ if __name__ == '__main__':
   midioutput = mido.open_output(None)
   piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
 
-  melody_viewer = MelodyViewer(Midi('Breath.mid').beats(), 640, 480)
+  melody_viewer = MelodyViewer(Midi('Breath.mid').beats(), SCREEN_SIZE)
 
   while not done():
     clock.tick()

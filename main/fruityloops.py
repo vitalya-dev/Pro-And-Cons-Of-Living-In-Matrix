@@ -11,26 +11,25 @@ from melody_editor import *
 from melody_viewer import *
 
 class Fruityloops(Shape):
-  def __init__(self, midioutput, melody, width, height, parent=None):
+  def __init__(self, midioutput, melody, size, parent=None):
     super().__init__(parent)
     #================#
     self._piano = Piano(midioutput, Piano.generate_pianokeys_from_beats(melody))
     self._piano_roll = PianoRoll(midioutput)
     #================#
-    self._melody_viewer = MelodyViewer(melody, width, height, parent=self)
+    self._melody_viewer = MelodyViewer(melody, size, parent=self)
     #================#
     self._melody_editor = MelodyEditor(
       pianokeys=Piano.generate_pianokeys_from_beats(melody),
       scale_x=self._melody_viewer.time_to_pixel_scale,
-      width=width,
-      height=height,
+      size=size,
       parent=self
     )
     self._melody_editor.set_colorkey(BLACK)
     self._melody_editor.foreground_color = RED
     self._melody_editor.text_color = GREEN
     #================#
-    self._surface = pygame.surface.Surface((width, height)).convert()
+    self._surface = pygame.surface.Surface(size).convert()
 
   def process(self, events):
     for e in events:
@@ -54,7 +53,7 @@ if __name__ == '__main__':
   screen = pygame.display.set_mode(SCREEN_SIZE)
   clock = pygame.time.Clock()
   #================================================================================================#
-  fruityloops = Fruityloops(mido.open_output(None), Midi('Breath.mid').beats(), 320, 240)
+  fruityloops = Fruityloops(mido.open_output(None), Midi('Breath.mid').beats(), (320, 240))
 
   while not done():
     clock.tick()

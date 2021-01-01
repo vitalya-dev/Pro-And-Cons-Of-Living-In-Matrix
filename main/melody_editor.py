@@ -12,7 +12,7 @@ from shape import *
 from label import *
 
 class MelodyEditor(Shape):
-  def __init__(self, pianokeys, scale_x, width, height, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
+  def __init__(self, pianokeys, scale_x, size, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self.background_color = background_color
@@ -26,7 +26,7 @@ class MelodyEditor(Shape):
     self._melody = []
     self._melody_beatbars = []
     #================#
-    self._surface = pygame.surface.Surface((width, height)).convert()
+    self._surface = pygame.surface.Surface(size).convert()
 
 
   @property
@@ -126,7 +126,7 @@ if __name__ == '__main__':
   midioutput = mido.open_output(None)
   piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
   
-  melody_editor = MelodyEditor(Piano.generate_pianokeys_from_midi(Midi('Breath.mid')), 150, 640, 480)
+  melody_editor = MelodyEditor(Piano.generate_pianokeys_from_midi(Midi('Breath.mid')), 150, SCREEN_SIZE)
 
   while not done():
     clock.tick()
