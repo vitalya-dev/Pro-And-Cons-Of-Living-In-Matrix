@@ -75,7 +75,7 @@ class MelodyEditor(Shape):
       return 0
 
   def _create_and_add_beatbar_from_beat(self, beat):
-    beatbar_height = 50
+    beatbar_height = self._surface.get_height() / 10
     beatbar_left = beat[0].time * self._scale_x
     beatbar_width = (beat[1].time - beat[0].time) * self._scale_x - 1
     beatbar_top = (self._pianokeys['F'] - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
@@ -103,7 +103,7 @@ class MelodyEditor(Shape):
   def _draw_input(self):
     for input in self._inputs:
       inputbar_left = self._melody_duration() * self._scale_x
-      inputbar_height = 50
+      inputbar_height = self._surface.get_height() / 10
       inputbar_width = (time.time() - input.time) * self._scale_x
       inputbar_top = (self._pianokeys['F'] - input.note) * inputbar_height + self._surface.get_height() / 2 - inputbar_height
       #================#

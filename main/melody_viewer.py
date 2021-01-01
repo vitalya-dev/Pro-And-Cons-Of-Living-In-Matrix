@@ -37,7 +37,7 @@ class MelodyViewer(Shape):
     #================#
     melody_beatbars = []
     for beat in self._melody:
-      beatbar_height = 50
+      beatbar_height = self._surface.get_height() / 10
       beatbar_left = beat[0].time * self.time_to_pixel_scale
       beatbar_width = (beat[1].time - beat[0].time) * self.time_to_pixel_scale - 1
       beatbar_top = (melody_middle_note - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
