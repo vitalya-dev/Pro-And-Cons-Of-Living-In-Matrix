@@ -10,6 +10,41 @@ from midi import *
 from melody_editor import *
 from melody_viewer import *
 
+class Fruityloops(Shape):
+  def __init__(self, midioutput, melody, width, height, parent=None):
+    super().__init__(parent)
+    #================#
+    self._piano = Piano(midioutput, Piano.generate_pianokeys_from_beats(melody))
+    self._piano_roll = PianoRoll(midioutput)
+    #================#
+    self._melody_viewer = MelodyViewer(melody, width, height, parent=self)
+    #================#
+    self._melody_editor = MelodyEditor(
+      pianokeys=Piano.generate_pianokeys_from_beats(melody),
+      scale_x=self._melody_viewer.time_to_pixel_scale,
+      width=width,
+      height=height,
+      parent=self
+    )
+    self._melody_editor.set_colorkey(BLACK)
+    self._melody_editor.foreground_color = RED
+    self._melody_editor.text_color = GREEN
+    #================#
+    self._surface = pygame.surface.Surface((width, height)).convert()
+
+  def process(self, events):
+    for e in events:
+      if e.type == KEYDOWN and e.key == K_SPACE:
+        self._piano_roll.start_or_stop_playing_beats(self._melody_editor.melody)
+    #================#
+    self._melody_viewer.process(events)
+    self._melody_editor.process(events)
+    self._piano.process(events)
+
+  def draw(self):
+    self._surface.blit(self._melody_viewer.draw(), self._melody_viewer.parent_space_rect.topleft)
+    self._surface.blit(self._melody_editor.draw(), self._melody_editor.parent_space_rect.topleft)
+    return self._surface
 
       
 if __name__ == '__main__':
@@ -19,31 +54,14 @@ if __name__ == '__main__':
   screen = pygame.display.set_mode(SCREEN_SIZE)
   clock = pygame.time.Clock()
   #================================================================================================#
-  midioutput = mido.open_output(None)
-  piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
-
-  piano_roll = PianoRoll(midioutput)
-
-  melody_viewer = MelodyViewer(Midi('Breath.mid').beats(), 640, 480)
-
-  melody_editor = MelodyEditor(Piano.generate_pianokeys_from_midi(Midi('Breath.mid')), melody_viewer.time_to_pixel_scale, 640, 480)
-  melody_editor.set_colorkey(BLACK)
-  melody_editor.foreground_color = RED
-  melody_editor.text_color = GREEN
-
-  keyboard = Keyboard()
-  keyboard.on_space += [lambda: piano_roll.start_or_stop_playing_beats(melody_editor.melody)]
+  fruityloops = Fruityloops(mido.open_output(None), Midi('Breath.mid').beats(), 320, 240)
 
   while not done():
     clock.tick()
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
-    melody_viewer.process(events)
-    melody_editor.process(events)
-    piano.process(events)
-    keyboard.process(events)
+    fruityloops.process(events)
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
-    screen.blit(melody_viewer.draw(), melody_viewer.world_space_rect.topleft)
-    screen.blit(melody_editor.draw(), melody_editor.world_space_rect.topleft)
+    screen.blit(fruityloops.draw(), fruityloops.world_space_rect.topleft)
     pygame.display.update()
