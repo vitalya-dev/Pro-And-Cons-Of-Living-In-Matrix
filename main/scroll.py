@@ -33,6 +33,7 @@ class Scroll(Shape):
     self._surface = pygame.surface.Surface(value).convert()
 
   def draw(self):
+    self._surface.fill(BLACK)
     self._sync_surface_size_if_needed()
     self._surface.blit(self.child.draw(), self._scroll_offset)
     return self._surface
