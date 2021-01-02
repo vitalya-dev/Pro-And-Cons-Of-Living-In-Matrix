@@ -18,8 +18,6 @@ class HUD(Shape):
     self._surface.set_colorkey(self._colorkey)
     #================#
     self._topright_label = Label('', parent=self)
-    self._topright_label.pivot = (1, 0)
-    self._topright_label.position = self.self_space_rect.topright
 
   def set_topright_label_text(self, label_text):
     self._topright_label = Label(label_text, parent=self)
