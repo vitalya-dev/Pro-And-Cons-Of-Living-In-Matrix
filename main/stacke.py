@@ -16,6 +16,10 @@ class Stacke(Shape):
     self._shapes = []
     self._active_shape = None
 
+  @property
+  def active_shape(self):
+    return self._active_shape
+
   def add_shape(self, shape):
     shape.parent = self
     self._shapes.append(shape)
