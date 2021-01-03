@@ -7,7 +7,6 @@ from utils import *
 from shape import *
 
 class HorizontalButton(Shape):
-
   def __init__(self, text, background_color=BLACK, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
@@ -26,7 +25,7 @@ class HorizontalButton(Shape):
     #================#
     self._surface = pygame.surface.Surface(tuple_math(self._rendered_text.get_size(), '+', self.padding)).convert()
     #================#
-
+    
 
   @property
   def padding(self):
