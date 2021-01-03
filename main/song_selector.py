@@ -5,6 +5,7 @@ from constants import *
 from utils import *
 
 from shape import *
+from horizontal_box import *
 from horizontal_switch import *
 from vertical_switch import *
 
@@ -14,60 +15,67 @@ class SongSelector(Shape):
     #================#
     self.background_color = background_color
     #================#
-    self._selectors = []
-    self._space_between_selectors = 15
-
-  def add_selector(self, selector):
-    selector.position = self._calculate_position_for_new_selector()
-    selector.parent = self
-    self._selectors.append(selector)
+    self._space_between_child = 15
     #================#
-    self._rebuild_surface()
+    self._numbers_box = self._create_numbers_box()
+    self._select_switch = self._create_select_switch()
+    self._letters_box = self._create_letters_box()
+    #================#
+    self._build_surface()
 
-  def _calculate_position_for_new_selector(self):
-    if len(self._selectors) > 0:
-      selector_position = tuple_math(self._selectors[-1].parent_space_rect.topright, '+', (self._space_between_selectors, 0))
-      return selector_position
-    else:
-      return (0, 0)
+  def _build_surface(self):
+    self._surface = pygame.surface.Surface((self._calculate_surface_width(), self._calculate_surface_height())).convert()
 
-  def _rebuild_surface(self):
-    self._surface = pygame.surface.Surface((self._selectors_total_width(), self._selectors_max_height())).convert()
 
-  def _selectors_total_width(self):
-    if len(self._selectors) > 0:
-      selectors_total_width  = sum([selector.parent_space_rect.width for selector in self._selectors])
-      selectors_total_width_with_spaces = selectors_total_width + (len(self._selectors) - 1) * self._space_between_selectors
-      return selectors_total_width_with_spaces
-    else:
-      return 0
+  def _calculate_surface_width(self):
+    surface_width = self._numbers_box.parent_space_rect.width
+    surface_width += self._space_between_child
+    surface_width += self._select_switch.parent_space_rect.width
+    surface_width += self._space_between_child
+    surface_width += self._letters_box.parent_space_rect.width
+    return surface_width
 
-  def _selectors_max_height(self):
-    if len(self._selectors) > 0:
-      return max([selector.parent_space_rect.height for selector in self._selectors])
-    else:
-      return 0
+  def _calculate_surface_height(self):
+    return max(
+      [self._numbers_box.parent_space_rect.height, self._letters_box.parent_space_rect.height, self._select_switch.parent_space_rect.height]
+    )
+    
+  def _create_numbers_box(self):
+    numbers_box = HorizontalBox(background_color=self.background_color, parent=self)
+    for i in '123456':
+      numbers_box.add_child(HorizontalSwitch(i))
+    return numbers_box
+
+  def _create_select_switch(self):
+    select_switch = VerticalSwitch('SELECT')
+    select_switch.move(self._numbers_box.parent_space_rect.width, 0)
+    select_switch.move(self._space_between_child, 0)
+    return select_switch
+
+  def _create_letters_box(self):
+    letters_box = HorizontalBox(background_color=self.background_color, parent=self)
+    for i in 'ABCDEF':
+      letters_box.add_child(HorizontalSwitch(i))
+      #================#
+    letters_box.move(self._numbers_box.parent_space_rect.width, 0)
+    letters_box.move(self._space_between_child, 0)
+    letters_box.move(self._select_switch.parent_space_rect.width, 0)
+    letters_box.move(self._space_between_child, 0)
+    return letters_box
+
+  def process(self, events):
+    self._numbers_box.process(events)
+    self._letters_box.process(events)
+    self._select_switch.process(events)
 
   def draw(self):
     self._surface.fill(self.background_color)
-    for selector in self._selectors:
-      self._surface.blit(selector.draw(), selector.parent_space_rect.topleft)
-    return self._surface
-
-  def process(self, events):
-    for selector in self._selectors:
-      selector.process(events)
     #================#
-    for e in events:
-      if e.type == KEYDOWN: self._process_key_down_event(e)
-
-  def _process_key_down_event(self, e):
-    key_which_is_down = chr(e.key)
-    for selector in self._selectors:
-      if selector.key != key_which_is_down:
-        selector.toggle_off()
-      if selector.key = key_which_is_down:
-        selector.toggle()
+    self._surface.blit(self._numbers_box.draw(), self._numbers_box.parent_space_rect.topleft)
+    self._surface.blit(self._select_switch.draw(), self._select_switch.parent_space_rect.topleft)
+    self._surface.blit(self._letters_box.draw(), self._letters_box.parent_space_rect.topleft)
+    #================#
+    return self._surface
 
 
 if __name__ == '__main__':
@@ -82,12 +90,6 @@ if __name__ == '__main__':
   song_selector = SongSelector()
   song_selector.position = screen.get_rect().center
   song_selector.pivot = (0.5, 0.5)
-
-  for i in 'ABCDEF':
-    song_selector.add_selector(HorizontalSwitch(i))
-  song_selector.add_selector(VerticalSwitch('SELECT'))
-  for i in '123456':
-    song_selector.add_selector(HorizontalSwitch(i)) 
   #================#
 
   while not done():
