@@ -22,10 +22,12 @@ class SongSelector(Shape):
     self._letters_box = self._create_letters_box()
     #================#
     self._build_surface()
+    #================#
+    self._layout_elements()
+
 
   def _build_surface(self):
     self._surface = pygame.surface.Surface((self._calculate_surface_width(), self._calculate_surface_height())).convert()
-
 
   def _calculate_surface_width(self):
     surface_width = self._numbers_box.parent_space_rect.width
@@ -47,9 +49,7 @@ class SongSelector(Shape):
     return numbers_box
 
   def _create_select_switch(self):
-    select_switch = VerticalSwitch('SELECT')
-    select_switch.move(self._numbers_box.parent_space_rect.width, 0)
-    select_switch.move(self._space_between_child, 0)
+    select_switch = VerticalSwitch('SELECT', parent=self)
     return select_switch
 
   def _create_letters_box(self):
@@ -57,11 +57,18 @@ class SongSelector(Shape):
     for i in 'ABCDEF':
       letters_box.add_child(HorizontalSwitch(i))
       #================#
-    letters_box.move(self._numbers_box.parent_space_rect.width, 0)
-    letters_box.move(self._space_between_child, 0)
-    letters_box.move(self._select_switch.parent_space_rect.width, 0)
-    letters_box.move(self._space_between_child, 0)
     return letters_box
+
+  def _layout_elements(self):
+    self._numbers_box.pivot  = (0, 0)
+    self._numbers_box.position = self.self_space_rect.topleft
+    #================#
+    self._select_switch.pivot = (0.5, 0)
+    self._select_switch.position = self.self_space_rect.midtop
+    #================#
+    self._letters_box.pivot = (1, 0)
+    self._letters_box.position = self.self_space_rect.topright
+    
 
   def process(self, events):
     self._numbers_box.process(events)
