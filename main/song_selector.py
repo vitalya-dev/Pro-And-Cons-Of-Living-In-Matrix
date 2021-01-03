@@ -5,8 +5,8 @@ from constants import *
 from utils import *
 
 from shape import *
-from horizontal_button import *
-from vertical_button import *
+from horizontal_switch import *
+from vertical_switch import *
 
 class SongSelector(Shape):
   def __init__(self, background_color=BLACK, parent=None):
@@ -57,7 +57,17 @@ class SongSelector(Shape):
   def process(self, events):
     for selector in self._selectors:
       selector.process(events)
+    #================#
+    for e in events:
+      if e.type == KEYDOWN: self._process_key_down_event(e)
 
+  def _process_key_down_event(self, e):
+    key_which_is_down = chr(e.key)
+    for selector in self._selectors:
+      if selector.key != key_which_is_down:
+        selector.toggle_off()
+      if selector.key = key_which_is_down:
+        selector.toggle()
 
 
 if __name__ == '__main__':
@@ -74,10 +84,10 @@ if __name__ == '__main__':
   song_selector.pivot = (0.5, 0.5)
 
   for i in 'ABCDEF':
-    song_selector.add_selector(HorizontalButton(i))
-  song_selector.add_selector(VerticalButton('SELECT'))
+    song_selector.add_selector(HorizontalSwitch(i))
+  song_selector.add_selector(VerticalSwitch('SELECT'))
   for i in '123456':
-    song_selector.add_selector(HorizontalButton(i)) 
+    song_selector.add_selector(HorizontalSwitch(i)) 
   #================#
 
   while not done():
