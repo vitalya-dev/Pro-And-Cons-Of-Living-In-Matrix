@@ -17,6 +17,10 @@ class HorizontalBox(Shape):
     #================#
     self._childs = []
 
+  @property
+  def childs(self):
+    return self._childs
+
   def add_child(self, child):
     child.parent = self
     child.position = self._calculate_position_for_new_child()

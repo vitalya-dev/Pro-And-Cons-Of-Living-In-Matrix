@@ -25,7 +25,6 @@ class SongSelector(Shape):
     #================#
     self._layout_elements()
 
-
   def _build_surface(self):
     self._surface = pygame.surface.Surface((self._calculate_surface_width(), self._calculate_surface_height())).convert()
 
@@ -74,6 +73,28 @@ class SongSelector(Shape):
     self._numbers_box.process(events)
     self._letters_box.process(events)
     self._select_switch.process(events)
+    #================#
+    for e in events:
+      if e.type == KEYDOWN: self._process_keydown_event(e)
+
+  def _process_keydown_event(self, e):
+    keydown = chr(e.key)
+    if keydown == ' ':
+      self._select_switch.toggle()
+    elif keydown in '123456':
+      self._toggle_number_switch(keydown)
+    elif keydown in 'ABCDEF'.casefold():
+      self._toggle_letter_switch(keydown)
+
+  def _toggle_number_switch(self, number_switch):
+    for switch in self._numbers_box.childs:
+      if switch.text.casefold() == number_switch.casefold():
+        switch.toggle()
+
+  def _toggle_letter_switch(self, letter_switch):
+    for switch in self._letters_box.childs:
+      if switch.text.casefold() == letter_switch.casefold():
+        switch.toggle()
 
   def draw(self):
     self._surface.fill(self.background_color)

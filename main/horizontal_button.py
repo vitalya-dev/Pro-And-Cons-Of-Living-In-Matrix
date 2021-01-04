@@ -29,6 +29,10 @@ class HorizontalButton(Shape):
 
 
   @property
+  def text(self):
+    return self._text
+
+  @property
   def padding(self):
     return self._padding
 
