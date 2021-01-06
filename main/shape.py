@@ -11,7 +11,7 @@ class Shape(object):
 
   def move(self, dx, dy):
     self.position = tuple_math(self.position, '+', (dx, dy))
-
+  
   @property
   def world_space_rect(self):
     if self.parent:

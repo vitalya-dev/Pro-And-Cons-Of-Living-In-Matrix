@@ -50,4 +50,7 @@ def scale_frame(frame, factor):
   return pygame.transform.scale(frame, tuple_math(frame.get_size(), '*', factor))  
 
 
+def blit_center(target, source):
+  target.blit(source, source.get_rect(center=target.get_rect().center).topleft)
+
 
