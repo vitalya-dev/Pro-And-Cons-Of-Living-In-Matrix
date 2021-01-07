@@ -8,18 +8,23 @@ from shape import *
 from song_entry import *
 
 class SongHolder(Shape):
-  def __init__(self, song_entries, background_color=BLACK, parent=None):
+  def __init__(self, song_entries, size=SCREEN_SIZE, background_color=BLACK, parent=None):
     super().__init__(parent)
     #================#
     self.background_color = background_color
+    self.highlight_blend_color = (125, 125, 125)
     #================#
     self._song_entries = song_entries
     self._space_between_song_entries = 15
     #================#
+    self.scroll_area = [0, 6]
+    #================#
+    self._current_selection = 0 if len(self._song_entries) > 0 else -1
+    #================#
     self._parent_song_entries()
     self._layout_song_entries()
     #================#
-    self._surface = pygame.surface.Surface((self._song_entries_max_width(), self._song_entries_total_height())).convert()
+    self._surface = pygame.surface.Surface(size).convert()
 
   def _parent_song_entries(self):
     for song_entry in self._song_entries:
@@ -33,29 +38,47 @@ class SongHolder(Shape):
         song_entry_position = (0, 0)
       song_entry.position = song_entry_position
 
-  def _song_entries_total_height(self):
-    if len(self._song_entries) > 0:
-      song_entries_total_height = sum([song_entry.parent_space_rect.height for song_entry in self._song_entries])
-      song_entries_total_height_with_spaces = song_entries_total_height + self._space_between_song_entries * (len(self._song_entries) - 1)
-      return song_entries_total_height_with_spaces
-    else:
-      return 0
-
-  def _song_entries_max_width(self):
-    if len(self._song_entries) > 0:
-      return max([song_entry.parent_space_rect.width for song_entry in self._song_entries])
-    else:
-      return 0
-
   def draw(self):
-    self._surface.fill(self.background_color)
-    for song_entry in self._song_entries:
-      self._surface.blit(song_entry.draw(), song_entry.parent_space_rect.topleft)
+    self._draw_background()
+    self._draw_song_entries()
+    self._highlight_current_selection()
     return self._surface
 
+  def _draw_background(self):
+    self._surface.fill(self.background_color)
+
+  def _draw_song_entries(self):
+    for song_entry in self._song_entries:
+      self._surface.blit(song_entry.draw(), song_entry.parent_space_rect.topleft)
+
+  def _highlight_current_selection(self):
+    if len(self._song_entries) > 0:
+      selected_song_entry = self._song_entries[self._current_selection]
+      self._surface.fill(self.highlight_blend_color, selected_song_entry.parent_space_rect, special_flags=pygame.BLEND_RGB_ADD)     
+
   def process(self, events):
+    self._propogate_to_song_entries(events)
+    for e in events:
+      if e.type == KEYDOWN and e.key == K_DOWN and len(self._song_entries) > 0:
+        self._scroll_down()
+      if e.type == KEYDOWN and e.key == K_UP and len(self._song_entries) > 0:
+        self._scroll_up()
+
+  def _scroll_down(self):
+    self._current_selection += 1
+    self._current_selection %= len(self._song_entries)
+
+  def _scroll_up(self):
+    self._current_selection -= 1
+    self._current_selection %= len(self._song_entries)
+
+  def _propogate_to_song_entries(self, events):
     for song_entry in self._song_entries:
       song_entry.process(events)
+
+
+
+
 
 if __name__ == '__main__':
   #===========================================INIT=================================================#
@@ -67,22 +90,30 @@ if __name__ == '__main__':
   
   #================#
   song_entries =  [
-    SongEntry('You Cant Always Get What You Want'),
+    SongEntry('Gimme Shelter'),
     SongEntry('Sympathy For Devil'),
+    SongEntry('Bohemian Rhapsody'),
+    SongEntry('Respect'),
+    SongEntry('Feeling Good'),
+    SongEntry('Unchained Melody'),
+    SongEntry('Wish You Were Here'),
     SongEntry('Another Break In The Wall'),
+    SongEntry('You Cant Always Get What You Want'),
     SongEntry('California Dreaming'),
     SongEntry('No Woman No Cry'),
-    SongEntry('Voodoo Child')
+    SongEntry('Voodoo Child'),
+    SongEntry('Voodoo People')
   ]
   song_holder = SongHolder(song_entries, background_color=WHITE)
-  song_holder.position = screen.get_rect().center
-  song_holder.pivot = (0.5, 0.5)
+  song_holder.position = screen.get_rect().midtop
+  song_holder.pivot = (0.5, 0)
 
 
   while not done():
     clock.tick()
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
+    song_holder.process(events)
     #===========================================RENDER==================================================#
     screen.fill(WHITE)
     screen.blit(song_holder.draw(), song_holder.world_space_rect.topleft)
