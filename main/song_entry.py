@@ -7,21 +7,18 @@ from utils import *
 from shape import *
 
 class SongEntry(Shape):
-  def __init__(self, name, id, background_color=BLACK, text_color=GRAY, parent=None):
+  def __init__(self, name, background_color=BLACK, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self.name = name
-    self.id = id
     #================#
-    self._padding = (12, 2)
+    self._padding = (24, 48)
     #================#
     self.background_color = background_color
     self.text_color = text_color
     #================#
     self._song_name_font = pygame.font.Font('fonts/FSEX300.ttf', 24)
-    self._song_id_font = pygame.font.Font('fonts/FSEX300.ttf', 64)
     self._rendered_song_name = self._song_name_font.render(self.name, False, self.text_color)
-    self._rendered_song_id = self._song_id_font.render(self.id, False, self.text_color)
     #================#
     self._surface = pygame.surface.Surface(self._calculate_surface_size())
 
@@ -40,10 +37,8 @@ class SongEntry(Shape):
   
   def _calculate_surface_size(self):
     size_for_name = self._rendered_song_name.get_size()
-    size_for_id = self._rendered_song_id.get_size()
-    size_for_name_and_id = (max(size_for_name[0], size_for_id[0]), size_for_name[1] + size_for_id[1])
-    size_for_name_and_id_with_padding = tuple_math(size_for_name_and_id, '+', self._padding)
-    return size_for_name_and_id_with_padding
+    size_for_name_with_padding = tuple_math(size_for_name, '+', self._padding)
+    return size_for_name_with_padding
 
   def process(self, events):
     pass
@@ -59,17 +54,11 @@ class SongEntry(Shape):
 
   def _draw_text(self):
     self._surface.blit(self._rendered_song_name, self._song_name_position())
-    self._surface.blit(self._rendered_song_id, self._song_id_position())
 
   def _song_name_position(self):
     surface_rect_padding_respect = self._surface.get_rect().inflate(self.inflate[0], self.inflate[1])
-    song_name_rect = self._rendered_song_name.get_rect(topleft=surface_rect_padding_respect.topleft)
+    song_name_rect = self._rendered_song_name.get_rect(center=surface_rect_padding_respect.center)
     return song_name_rect.topleft
-
-  def _song_id_position(self):
-    surface_rect_padding_respect = self._surface.get_rect().inflate(self.inflate[0], self.inflate[1])
-    song_id_rect = self._rendered_song_id.get_rect(bottomleft=surface_rect_padding_respect.bottomleft)
-    return song_id_rect.topleft
 
 
 
@@ -81,7 +70,7 @@ if __name__ == '__main__':
   clock = pygame.time.Clock()
   #================================================================================================#
 
-  song_entry = SongEntry('You Cant Always Get What You Want', 'A1')
+  song_entry = SongEntry('You Cant Always Get What You Want')
   song_entry.pivot = (0.5, 0.5)
   song_entry.position = screen.get_rect().center
 

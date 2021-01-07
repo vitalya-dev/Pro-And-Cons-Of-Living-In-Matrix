@@ -8,13 +8,20 @@ from shape import *
 from song_entry import *
 
 class SongHolder(Shape):
-  def __init__(self, background_color=BLACK, parent=None):
+  def __init__(self, song_entries, background_color=BLACK, parent=None):
     super().__init__(parent)
     #================#
     self.background_color = background_color
     #================#
-    self._song_entries = []
+    self._song_entries = song_entries
     self._space_between_song_entries = 15
+    #================#
+    self._build_surface()
+
+
+  def _build_surface(self):
+    for i, song_entry in enumerate(self._song_entries):
+      
 
   def add_song_entry(self, song_entry):
     song_entry.position = self._calculate_position_for_new_song_entry()
