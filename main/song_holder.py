@@ -17,12 +17,12 @@ class SongHolder(Shape):
     self._song_entries = song_entries
     self._space_between_song_entries = 15
     #================#
-    self.scroll_area = [0, 6]
+    self._scroll_area = [1, 7]
     #================#
-    self._current_selection = 0 if len(self._song_entries) > 0 else -1
+    self._current_selection = self._scroll_area[0]
     #================#
     self._parent_song_entries()
-    self._layout_song_entries()
+    self._layout_song_entries_in_scroll_area()
     #================#
     self._surface = pygame.surface.Surface(size).convert()
 
@@ -30,25 +30,28 @@ class SongHolder(Shape):
     for song_entry in self._song_entries:
       song_entry.parent = self
 
-  def _layout_song_entries(self):
-    for i, song_entry in enumerate(self._song_entries):
+  def _layout_song_entries_in_scroll_area(self):
+    song_entries_in_scroll_area = self._song_entries[self._scroll_area[0]:self._scroll_area[1]]
+    for i, song_entry in enumerate(song_entries_in_scroll_area):
       if i > 0:
-        song_entry_position = tuple_math(self._song_entries[i-1].parent_space_rect.bottomleft, '+', (0, self._space_between_song_entries))
+        previous_song_entry = song_entries_in_scroll_area[i-1]
+        song_entry_position = tuple_math(previous_song_entry.parent_space_rect.bottomleft, '+', (0, self._space_between_song_entries))
       else:
         song_entry_position = (0, 0)
       song_entry.position = song_entry_position
 
   def draw(self):
     self._draw_background()
-    self._draw_song_entries()
+    self._draw_song_entries_in_scroll_area()
     self._highlight_current_selection()
     return self._surface
 
   def _draw_background(self):
     self._surface.fill(self.background_color)
 
-  def _draw_song_entries(self):
-    for song_entry in self._song_entries:
+  def _draw_song_entries_in_scroll_area(self):
+    song_entries_in_scroll_area = self._song_entries[self._scroll_area[0]:self._scroll_area[1]]
+    for song_entry in song_entries_in_scroll_area:
       self._surface.blit(song_entry.draw(), song_entry.parent_space_rect.topleft)
 
   def _highlight_current_selection(self):
@@ -66,11 +69,19 @@ class SongHolder(Shape):
 
   def _scroll_down(self):
     self._current_selection += 1
-    self._current_selection %= len(self._song_entries)
+    if self._current_selection >= self._scroll_area[1]:
+      self._scroll_area[1] += 1
+      self._scroll_area[0] += 1
+    #================#
+    self._layout_song_entries_in_scroll_area()
 
   def _scroll_up(self):
     self._current_selection -= 1
-    self._current_selection %= len(self._song_entries)
+    if self._current_selection < self._scroll_area[0]:
+      self._scroll_area[1] -= 1
+      self._scroll_area[0] -= 1
+    #================#
+    self._layout_song_entries_in_scroll_area()
 
   def _propogate_to_song_entries(self, events):
     for song_entry in self._song_entries:
