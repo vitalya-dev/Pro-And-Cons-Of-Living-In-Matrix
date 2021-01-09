@@ -15,11 +15,10 @@ class SongSelector(Shape):
     #================#
     self.background_color = background_color
     #================#
-    self._space_between_child = 15
+    self._letters_first_row = self._create_letters_first_row()
+    self._letters_second_row = self._create_letters_second_row()
     #================#
-    self._numbers_box = self._create_numbers_box()
-    self._select_switch = self._create_select_switch()
-    self._letters_box = self._create_letters_box()
+    self._space_between_rows = 15
     #================#
     self._build_surface()
     #================#
@@ -29,79 +28,47 @@ class SongSelector(Shape):
     self._surface = pygame.surface.Surface((self._calculate_surface_width(), self._calculate_surface_height())).convert()
 
   def _calculate_surface_width(self):
-    surface_width = self._numbers_box.parent_space_rect.width
-    surface_width += self._space_between_child
-    surface_width += self._select_switch.parent_space_rect.width
-    surface_width += self._space_between_child
-    surface_width += self._letters_box.parent_space_rect.width
-    return surface_width
+    return max(self._letters_first_row.width, self._letters_second_row.width)
 
   def _calculate_surface_height(self):
-    return max(
-      [self._numbers_box.parent_space_rect.height, self._letters_box.parent_space_rect.height, self._select_switch.parent_space_rect.height]
-    )
+    return self._letters_first_row.height + self._space_between_rows + self._letters_second_row.height
     
-  def _create_numbers_box(self):
-    numbers_box = HorizontalBox(background_color=self.background_color, parent=self)
-    for i in '123456':
-      numbers_box.add_child(HorizontalSwitch(i))
-    return numbers_box
-
-  def _create_select_switch(self):
-    select_switch = VerticalSwitch('SELECT', parent=self)
-    return select_switch
-
-  def _create_letters_box(self):
-    letters_box = HorizontalBox(background_color=self.background_color, parent=self)
-    for i in 'ABCDEF':
-      letters_box.add_child(HorizontalSwitch(i))
+  def _create_letters_first_row(self):
+    letters_first_row = HorizontalBox(background_color=self.background_color, parent=self)
+    for i in 'ABCDEFGHIJKLM':
+      letters_first_row.add_child(HorizontalSwitch(i))
       #================#
-    return letters_box
+    return letters_first_row
+
+  def _create_letters_second_row(self):
+    letters_second_row = HorizontalBox(background_color=self.background_color, parent=self)
+    for i in 'NOPQRSTUVWXYZ':
+      letters_second_row.add_child(HorizontalSwitch(i))
+      #================#
+    return letters_second_row
 
   def _layout_elements(self):
-    self._numbers_box.pivot  = (0, 0)
-    self._numbers_box.position = self.self_space_rect.topleft
+    self._letters_first_row.pivot = (0, 0)
+    self._letters_first_row.position = self.self_space_rect.topleft
     #================#
-    self._select_switch.pivot = (0.5, 0)
-    self._select_switch.position = self.self_space_rect.midtop
-    #================#
-    self._letters_box.pivot = (1, 0)
-    self._letters_box.position = self.self_space_rect.topright
-    
+    self._letters_second_row.pivot = (0, 1)
+    self._letters_second_row.position = self.self_space_rect.bottomleft
 
   def process(self, events):
-    self._numbers_box.process(events)
-    self._letters_box.process(events)
-    self._select_switch.process(events)
+    self._letters_first_row.process(events)
+    self._letters_second_row.process(events)
     #================#
     for e in events:
       if e.type == KEYDOWN: self._process_keydown_event(e)
 
   def _process_keydown_event(self, e):
     keydown = chr(e.key)
-    if keydown == ' ':
-      self._select_switch.toggle()
-    elif keydown in '123456':
-      self._toggle_number_switch(keydown)
-    elif keydown in 'ABCDEF'.casefold():
-      self._toggle_letter_switch(keydown)
-
-  def _toggle_number_switch(self, number_switch):
-    for switch in self._numbers_box.childs:
-      if switch.text.casefold() == number_switch.casefold():
-        switch.toggle()
-
-  def _toggle_letter_switch(self, letter_switch):
-    for switch in self._letters_box.childs:
-      if switch.text.casefold() == letter_switch.casefold():
-        switch.toggle()
 
   def draw(self):
     self._surface.fill(self.background_color)
     #================#
-    self._surface.blit(self._numbers_box.draw(), self._numbers_box.parent_space_rect.topleft)
-    self._surface.blit(self._select_switch.draw(), self._select_switch.parent_space_rect.topleft)
-    self._surface.blit(self._letters_box.draw(), self._letters_box.parent_space_rect.topleft)
+    self._surface.blit(self._letters_first_row.draw(), self._letters_first_row.parent_space_rect.topleft)
+    self._surface.blit(self._letters_second_row.draw(), self._letters_second_row.parent_space_rect.topleft)
     #================#
     return self._surface
 

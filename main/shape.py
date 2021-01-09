@@ -13,6 +13,14 @@ class Shape(object):
     self.position = tuple_math(self.position, '+', (dx, dy))
   
   @property
+  def width(self):
+    return self.self_space_rect.width
+
+  @property
+  def height(self):
+    return self.self_space_rect.height
+
+  @property
   def world_space_rect(self):
     if self.parent:
       top_left_pos_relative_to_world = tuple_math(self.parent.world_space_rect.topleft, '+', self.parent_space_rect.topleft)
