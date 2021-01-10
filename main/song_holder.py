@@ -26,6 +26,14 @@ class SongHolder(Shape):
     #================#
     self._surface = pygame.surface.Surface(size).convert()
 
+  @property
+  def scroll_area_size(self):
+    return self._scroll_area[1] - self._scroll_area[0]
+
+  @scroll_area_size.setter
+  def scroll_area_size(self, value):
+    self._scroll_area = [0, value]
+
   def _parent_song_entries(self):
     for song_entry in self._song_entries:
       song_entry.parent = self
@@ -39,6 +47,15 @@ class SongHolder(Shape):
       else:
         song_entry_position = (0, 0)
       song_entry.position = song_entry_position
+
+  def set_song_entries(self, song_entries):
+    self._song_entries = song_entries
+    self._parent_song_entries()
+    #================#
+    self._move_scroll_area_to_top()
+    self._move_current_selection_to_top()
+    #================#
+    self._layout_song_entries_in_scroll_area()
 
   def draw(self):
     self._draw_background()
@@ -64,49 +81,58 @@ class SongHolder(Shape):
     self._propogate_to_song_entries(events)
     for e in events:
       if e.type == KEYDOWN and e.key == K_DOWN and len(self._song_entries) > 0:
-        self._scroll_down()
+        self._move_down_current_selection()
       if e.type == KEYDOWN and e.key == K_UP and len(self._song_entries) > 0:
-        self._scroll_up()
+        self._move_up_current_selection()
 
-  @property
-  def scroll_area_size(self):
-    return self._scroll_area[1] - self._scroll_area[0]
-
-  @scroll_area_size.setter
-  def scroll_area_size(self, value):
-    self._scroll_area = [0, value]
-    
-
-  def _scroll_down(self):
-    if self._current_selection < self.scroll_area_size - 1:
-      self._current_selection += 1
+  def _move_down_current_selection(self):
+    if self._current_selection_at_the_end():
+      return
+    #================#
+    if self._current_selection_at_the_end_of_scroll_area():
+      self._move_down_scroll_area()
     else:
-      self._scroll_down_area()
+      self._current_selection += 1
     #================#
     self._layout_song_entries_in_scroll_area()
 
-  def _scroll_down_area(self):
+  def _move_up_current_selection(self):
+    if self._current_selection_at_the_start_of_scroll_area():
+      self._move_up_scroll_area()
+    else:
+      self._current_selection -= 1
+    #================#
+    self._layout_song_entries_in_scroll_area()
+
+  def _current_selection_at_the_end(self):
+    return self._scroll_area[0] + self._current_selection == len(self._song_entries) - 1
+
+  def _current_selection_at_the_end_of_scroll_area(self):
+    return self._current_selection == self.scroll_area_size - 1
+
+  def _current_selection_at_the_start_of_scroll_area(self):
+    return self._current_selection == 0
+
+  def _move_down_scroll_area(self):
     if self._scroll_area[1] < len(self._song_entries):
       self._scroll_area[0] += 1
       self._scroll_area[1] += 1
 
-  def _scroll_up(self):
-    if self._current_selection > 0:
-      self._current_selection -= 1
-    else:
-      self._scroll_up_area()
-    #================#
-    self._layout_song_entries_in_scroll_area()
-
-  def _scroll_up_area(self):
+  def _move_up_scroll_area(self):
     if self._scroll_area[0] > 0:
       self._scroll_area[0] -= 1
       self._scroll_area[1] -= 1
 
-
   def _propogate_to_song_entries(self, events):
     for song_entry in self._song_entries:
       song_entry.process(events)
+
+  def _move_scroll_area_to_top(self):
+    self._scroll_area = [0, self.scroll_area_size]
+
+  def _move_current_selection_to_top(self):
+    self._current_selection = 0
+
 
 
 

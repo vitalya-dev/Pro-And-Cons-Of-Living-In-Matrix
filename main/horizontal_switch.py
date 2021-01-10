@@ -11,8 +11,9 @@ class HorizontalSwitch(HorizontalButton):
   def toggle(self):
     self._clicked = not self._clicked
 
-
-        
+  @property
+  def is_on(self):
+    return self._clicked
 
 
 
