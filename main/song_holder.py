@@ -68,11 +68,17 @@ class SongHolder(Shape):
       if e.type == KEYDOWN and e.key == K_UP and len(self._song_entries) > 0:
         self._scroll_up()
 
-  def _scroll_area_size(self):
+  @property
+  def scroll_area_size(self):
     return self._scroll_area[1] - self._scroll_area[0]
 
+  @scroll_area_size.setter
+  def scroll_area_size(self, value):
+    self._scroll_area = [0, value]
+    
+
   def _scroll_down(self):
-    if self._current_selection < self._scroll_area_size() - 1:
+    if self._current_selection < self.scroll_area_size - 1:
       self._current_selection += 1
     else:
       self._scroll_down_area()

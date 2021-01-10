@@ -13,6 +13,8 @@ class SongSelector(Shape):
   def __init__(self, background_color=BLACK, parent=None):
     super().__init__()
     #================#
+    self.on_toggle = []
+    #================#
     self.background_color = background_color
     #================#
     self._letters_first_row = self._create_letters_first_row()
@@ -63,6 +65,14 @@ class SongSelector(Shape):
 
   def _process_keydown_event(self, e):
     keydown = chr(e.key)
+    if keydown in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.casefold():
+      self._toggle_letter_switch(keydown)
+
+  def _toggle_letter_switch(self, key_pressed):
+    for switch in self._letters_first_row.childs + self._letters_second_row.childs:
+      if switch.text.casefold() == key_pressed.casefold():
+        switch.toggle()
+        for f in self.on_toggle: f(switch)
 
   def draw(self):
     self._surface.fill(self.background_color)
