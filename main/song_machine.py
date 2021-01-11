@@ -7,29 +7,43 @@ from utils import *
 from song_holder import *
 from song_selector import *
 
-song_names =  [
-  'Gimme Shelter',
-  'Sympathy For Devil',
-  'Bohemian Rhapsody',
-  'Respect',
-  'Feeling Good',
-  'Unchained Melody',
-  'Wish You Were Here',
-  'Another Break In The Wall',
-  'You Cant Always Get What You Want',
-  'California Dreaming',
-  'No Woman No Cry',
-  'Voodoo Child',
-  'voodoo People'
-]
 
-def song_names_filter(filter):
-  return [song_name for song_name in song_names if song_name.casefold().startswith(filter.casefold())]
+class SongMachine(Shape):
+  def __init__(self, song_entries, size=SCREEN_SIZE, background_color=BLACK, parent=None):
+    super().__init__(parent)
+    #================#
+    self.background_color = background_color
+    #================#
+    self._song_entries = song_entries
+    #================#
+    self._song_selector = SongSelector(background_color=background_color, parent=self)
+    self._song_selector.on_toggle.append(self._song_selector_on_toggle_handler)
+    #================#
+    self._song_holder = SongHolder(
+      song_entries,
+      size=tuple_math(size, '-', (0, self._song_selector.height)),
+      background_color=background_color,
+      parent=self
+    )
+    self._song_holder.scroll_area_size = 4
+    #================#
+    self._surface = pygame.surface.Surface(size).convert()
+    #================#
+    self._layout_elements()
 
-def song_entries_filter(filter):
-  return [SongEntry(song_name) for song_name in song_names_filter(filter)]
+  def _song_selector_on_toggle_handler(self, switch):
+    print(switch)
 
+  def _song_holder_filter_entries(self, filter):
+    filtered_entries = [song_entry for song_entry in self._song_entries if song_entry.name.casefold().startswidth(filter.casefold())]
+    self._song_holder.set_song_entries(filtered_entries)
 
+  def _layout_elements(self):
+    self._song_selector.pivot = (0.5, 0)
+    self._song_selector.position = self._surface.get_rect().midtop
+    #================#
+    self._song_holder.pivot = (0.5, 1)
+    self._song_holder.position = self._surface.get_rect().midbottom
 
 if __name__ == '__main__':
   #===========================================INIT=================================================#
@@ -38,25 +52,27 @@ if __name__ == '__main__':
   screen = pygame.display.set_mode(SCREEN_SIZE)
   clock = pygame.time.Clock()
   #================================================================================================#
-  song_holder = SongHolder([SongEntry(song_name) for song_name in song_names], background_color=WHITE)
-  song_holder.scroll_area_size = 4
-  song_holder.position = screen.get_rect().midtop
-  song_holder.pivot = (0.5, 0)
-  song_holder.move(0, 120)
-
-  song_selector = SongSelector()
-  song_selector.position = screen.get_rect().midtop
-  song_selector.pivot = (0.5, 0)
-  song_selector.on_toggle += [lambda switch: song_holder.set_song_entries(song_entries_filter(switch.text if switch.is_on else ''))]
+  song_entries = [
+    SongEntry('Gimme Shelter'),
+    SongEntry('Sympathy For Devil'),
+    SongEntry('Bohemian Rhapsody'),
+    SongEntry('Respect'),
+    SongEntry('Feeling Good'),
+    SongEntry('Unchained Melody'),
+    SongEntry('Wish You Were Here'),
+    SongEntry('Another Break In The Wall'),
+    SongEntry('You Cant Always Get What You Want'),
+    SongEntry('California Dreaming'),
+    SongEntry('No Woman No Cry'),
+    SongEntry('Voodoo Child'),
+    SongEntry('voodoo People')
+  ]
+  song_machine = SongMachine(song_entries)
 
   while not done():
     clock.tick()
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
-    song_holder.process(events)
-    song_selector.process(events)
     #===========================================RENDER==================================================#
     screen.fill(WHITE)
-    screen.blit(song_holder.draw(), song_holder.world_space_rect.topleft)
-    screen.blit(song_selector.draw(), song_selector.world_space_rect.topleft)
     pygame.display.update()
