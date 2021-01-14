@@ -1,0 +1,2 @@
+SCREEN = None
+CLOCK = None
