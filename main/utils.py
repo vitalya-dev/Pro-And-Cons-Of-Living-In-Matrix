@@ -51,6 +51,7 @@ def scale_frame(frame, factor):
 
 
 def blit_center(target, source):
-  target.blit(source, source.get_rect(center=target.get_rect().center).topleft)
+  target.blit(source, source.get_rect(center=target.get_rect().center))
 
-
+def one_eighth_of(val):
+  return val / 8.0
