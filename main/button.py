@@ -18,8 +18,9 @@ class Button(Shape):
     self.background_color = background_color
     self.text_color = text_color
     #================#
-    self._when_button_in_focus_state_blending = (150, 150, 150)
-    self._when_button_in_pressed_state_blending = (130, 130, 130)
+    self._when_button_in_normal_state_blending = (100, 100, 100)
+    self._when_button_in_focus_state_blending = (200, 200, 200)
+    self._when_button_in_pressed_state_blending = (250, 250, 250)
     #================#
     self._font = pygame.font.Font('fonts/FSEX300.ttf', 32)
     self._text = text
@@ -60,6 +61,7 @@ class Button(Shape):
   def _draw_button_in_normal_state(self):
     self._draw_background()
     self._draw_text()
+    self._add_blending(self._when_button_in_normal_state_blending)
 
   def _draw_button_in_pressed_state(self):
     self._draw_background()
@@ -68,11 +70,16 @@ class Button(Shape):
 
   def _draw_button_in_focus_state(self):
     self._draw_background()
+    self._draw_border()
     self._draw_text()
     self._add_blending(self._when_button_in_focus_state_blending)
 
+  def _draw_border(self):
+    pygame.draw.rect(self._surface, self.text_color, self._surface.get_rect(), 4)
+
   def _draw_background(self):
     self._surface.fill(self.background_color, self._surface.get_rect())
+
 
   def _draw_text(self):
     blit_center(self._surface, self._rendered_text)
