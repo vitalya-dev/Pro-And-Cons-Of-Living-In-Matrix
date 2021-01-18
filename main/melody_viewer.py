@@ -22,6 +22,8 @@ class MelodyViewer(Shape):
     self._surface = pygame.surface.Surface(size).convert()
     #================#
     self._melody = melody
+    self._pianokeys = Piano.generate_pianokeys_from_beats(self._melody)
+    #================#
     self._melody_beatbars = self._create_melody_beatbars()
 
   def process(self, events):
@@ -33,15 +35,13 @@ class MelodyViewer(Shape):
     return self._surface.get_width() / melody_length
 
   def _create_melody_beatbars(self):
-    melody_middle_note = math.floor(average([beat[0].note for beat in self._melody]))
-    #================#
     melody_beatbars = []
     for beat in self._melody:
       beatbar_height = self._surface.get_height() / 10
       beatbar_left = beat[0].time * self.time_to_pixel_scale
       beatbar_width = (beat[1].time - beat[0].time) * self.time_to_pixel_scale - 1
-      beatbar_top = (melody_middle_note - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
-      beatbar_text = self._get_pianokey_with_corresponded_note(beat[0].note)[0]
+      beatbar_top = (self._pianokeys['F'] - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
+      beatbar_text = self._pianokeys[beat[0].note]
       #================#
       beatbar = Label(
         beatbar_text, background_color=self.foreground_color, text_color=self.text_color, size=(beatbar_width, beatbar_height), parent=self
@@ -49,11 +49,6 @@ class MelodyViewer(Shape):
       beatbar.position = (beatbar_left, beatbar_top)
       melody_beatbars.append(beatbar)
     return melody_beatbars
-
-  def _get_pianokey_with_corresponded_note(self, note):
-    pianokeys = Piano.generate_pianokeys_from_beats(self._melody)
-    pianokey_with_corresponded_note = find_value(pianokeys.items(), lambda x: x[1] == note)
-    return pianokey_with_corresponded_note
 
   def draw(self):
     self._draw_background()
@@ -65,7 +60,7 @@ class MelodyViewer(Shape):
 
   def _draw_melody(self):
     for beatbar in self._melody_beatbars:
-      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect.topleft)
+      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
     
   def set_colorkey(self, colorkey):
     self._surface.set_colorkey(colorkey)
@@ -92,5 +87,5 @@ if __name__ == '__main__':
     piano.process(events)
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
-    screen.blit(melody_viewer.draw(), melody_viewer.world_space_rect.topleft)
+    screen.blit(melody_viewer.draw(), melody_viewer.world_space_rect)
     pygame.display.update()

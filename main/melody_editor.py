@@ -20,6 +20,7 @@ class MelodyEditor(Shape):
     self.text_color = text_color
     #================#
     self._pianokeys = pianokeys
+    #================#
     self._scale_x = scale_x
     #================#
     self._inputs = []
@@ -98,7 +99,7 @@ class MelodyEditor(Shape):
 
   def _draw_melody(self):
     for beatbar in self._melody_beatbars:
-      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect.topleft)
+      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
 
   def _draw_input(self):
     for input in self._inputs:
@@ -110,7 +111,6 @@ class MelodyEditor(Shape):
       inputbar = pygame.Rect(inputbar_left, inputbar_top, inputbar_width, inputbar_height)
       pygame.draw.rect(self._surface, self.foreground_color, inputbar)
       
-
   def set_colorkey(self, colorkey):
     self._surface.set_colorkey(colorkey)
 
