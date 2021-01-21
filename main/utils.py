@@ -1,3 +1,4 @@
+import math
 import functools
 import operator
 import pygame
@@ -55,3 +56,14 @@ def blit_center(target, source):
 
 def one_eighth_of(val):
   return val / 8.0
+
+
+def same_seq_except_n_elements(seq, n):
+  if n == 0:
+    return seq
+  else:
+    middle = math.floor(len(seq) / 2)
+    left_seq = same_seq_except_n_elements(seq[:middle], math.floor(n/2))
+    right_seq = same_seq_except_n_elements(seq[middle+1:], math.floor((n-1)/2))
+    return left_seq + right_seq
+    
