@@ -17,9 +17,12 @@ class Fruityloops(Shape):
     self._piano = Piano(midioutput, Piano.generate_pianokeys_from_beats(melody))
     self._piano_roll = PianoRoll(midioutput)
     #================#
-    self._melody_viewer = MelodyViewer(melody, size, parent=self)
+    melody_for_viewer = same_seq_except_n_elements(melody, 6)
+    self._melody_viewer = MelodyViewer(melody_for_viewer, size, parent=self)
     #================#
+    melody_for_editor = difference_of_two_seq(melody, melody_for_viewer)
     self._melody_editor = MelodyEditor(
+      melody_for_editor,
       pianokeys=Piano.generate_pianokeys_from_beats(melody),
       scale_x=self._melody_viewer.time_to_pixel_scale,
       foreground_color=RED,

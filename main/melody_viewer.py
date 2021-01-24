@@ -25,9 +25,6 @@ class MelodyViewer(Shape):
     self._pianokeys = Piano.generate_pianokeys_from_beats(self._melody)
     #================#
     self._melody_beatbars = self._create_melody_beatbars()
-    #================#
-    self._show_only_this_beats = 'ALL'
-
 
   def process(self, events):
     pass
@@ -53,9 +50,6 @@ class MelodyViewer(Shape):
       melody_beatbars.append(beatbar)
     return melody_beatbars
 
-  def show_only_this_beats(self, beats_to_show):
-    self._show_only_this_beats = beats_to_show
-
   def draw(self):
     self._draw_background()
     self._draw_melody()
@@ -65,35 +59,7 @@ class MelodyViewer(Shape):
     self._surface.fill(self.background_color)
 
   def _draw_melody(self):
-    if self._show_only_this_beats == 'ALL':
-      self._draw_melody_all_beats()
-    if self._show_only_this_beats == 'EVERY SECOND':
-      self._draw_melody_every_x_beats(2)
-    if self._show_only_this_beats == 'EVERY THIRD':
-      self._draw_melody_every_x_beats(3)
-    if self._show_only_this_beats == 'ALL EXCEPT ONE':
-      self._draw_melody_all_except_n_beats(1)
-    if self._show_only_this_beats == 'ALL EXCEPT TWO':
-      self._draw_melody_all_except_n_beats(2)
-    if self._show_only_this_beats == 'ALL EXCEPT THREE':
-      self._draw_melody_all_except_n_beats(3)
-    if self._show_only_this_beats == 'ALL EXCEPT FOUR':
-      self._draw_melody_all_except_n_beats(4)
-    if self._show_only_this_beats == 'ALL EXCEPT FIFE':
-      self._draw_melody_all_except_n_beats(5)
-    if self._show_only_this_beats == 'ALL EXCEPT SIX':
-      self._draw_melody_all_except_n_beats(6)
-
-  def _draw_melody_all_beats(self):
     for beatbar in self._melody_beatbars:
-      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
-
-  def _draw_melody_every_x_beats(self, x):
-    for beatbar in self._melody_beatbars[::x]:
-      self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
-
-  def _draw_melody_all_except_n_beats(self, n):
-    for beatbar in same_seq_except_n_elements(self._melody_beatbars, n):
       self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
 
   def set_colorkey(self, colorkey):
@@ -112,7 +78,6 @@ if __name__ == '__main__':
   piano = Piano(midioutput, Piano.generate_pianokeys_from_midi(Midi('Breath.mid')))
 
   melody_viewer = MelodyViewer(Midi('Breath.mid').beats(), SCREEN_SIZE)
-  melody_viewer.show_only_this_beats('ALL EXCEPT SIX')
 
   while not done():
     clock.tick()

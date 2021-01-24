@@ -12,12 +12,14 @@ from shape import *
 from label import *
 
 class MelodyEditor(Shape):
-  def __init__(self, pianokeys, scale_x, size, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
+  def __init__(self, melody_to_edit, pianokeys, scale_x, size, background_color=BLACK, foreground_color=WHITE, text_color=GRAY, parent=None):
     super().__init__(parent)
     #================#
     self.background_color = background_color
     self.foreground_color = foreground_color
     self.text_color = text_color
+    #================#
+    self._melody_to_edit = melody_to_edit
     #================#
     self._pianokeys = pianokeys
     #================#

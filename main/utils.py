@@ -67,3 +67,5 @@ def same_seq_except_n_elements(seq, n):
     right_seq = same_seq_except_n_elements(seq[middle+1:], math.floor((n-1)/2))
     return left_seq + right_seq
     
+def difference_of_two_seq(seq1, seq2):
+  return [elem for elem in seq1 if elem not in seq2]
