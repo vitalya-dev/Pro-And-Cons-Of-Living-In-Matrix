@@ -20,13 +20,13 @@ class MelodyEditor(Shape):
     self.pianokeys = {}
     #================#
     self.primary_color = BLACK
-    self.secondary_color = RED
-    self.tertiary_color = BLUE
-    self.quaternary_color = GREEN
-    self.quinary_color = None
-    self.senary_color = None
-    self.septenary_color = None
-    self.octonary_color = None
+    self.secondary_color = BLACK
+    self.tertiary_color = BLACK
+    self.quaternary_color = BLACK
+    self.quinary_color = BLACK
+    self.senary_color = BLACK
+    self.septenary_color = BLACK
+    self.octonary_color = BLACK
     #================#
     self.time_to_pixel_scale = 0
     #================#
@@ -38,8 +38,8 @@ class MelodyEditor(Shape):
   def draw(self):
     self._draw_background()
     self._draw_editbars()
-    self._highlight_active_editbar()
     self._draw_melody()
+    self._highlight_active_editbar()
     return self._surface
 
   def _draw_background(self):
@@ -52,7 +52,8 @@ class MelodyEditor(Shape):
   def _highlight_active_editbar(self):
     if len(self.melody_to_edit) > 0:
       active_beat = self.melody_to_edit[0]
-      self._surface.fill(self.tertiary_color, self._beat_to_editbar(active_beat))
+      blend_color = lerp_color(self.primary_color, BLACK, 0.4)
+      self._surface.fill(blend_color, self._beat_to_editbar(active_beat), special_flags=pygame.BLEND_RGB_ADD)
 
   def _draw_melody(self):
     for beat in self.melody_to_edit:
@@ -74,6 +75,8 @@ class MelodyEditor(Shape):
     beatbar_text = self.pianokeys[beat[0].note]
     #================#
     beatbar = Label(beatbar_text, size=(beatbar_width, beatbar_height), parent=self)
+    beatbar.primary_color = self.tertiary_color
+    beatbar.secondary_color = lerp_color(self.primary_color, BLACK, 0.2)
     beatbar.position = (beatbar_x, beatbar_y)
     return beatbar
 
@@ -93,7 +96,10 @@ if __name__ == '__main__':
   melody_editor = MelodyEditor()
   melody_editor.melody_to_edit=difference_of_two_seq(melody, same_seq_except_n_elements(melody, 6))
   melody_editor.time_to_pixel_scale = 150
-  melody_editor.pianokeys = Piano.generate_pianokeys_from_midi(Midi('Breath.mid'))
+  melody_editor.pianokeys = Piano.generate_pianokeys_from_beats(melody)
+  melody_editor.primary_color=CHARLESTON
+  melody_editor.secondary_color=OLIVE
+  melody_editor.tertiary_color=EBONY
   #================================================================================================#
   while not done():
     clock.tick()

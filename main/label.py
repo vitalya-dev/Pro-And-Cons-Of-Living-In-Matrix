@@ -7,15 +7,20 @@ from utils import *
 from shape import *
 
 class Label(Shape):
-  def __init__(self, text, background_color=BLACK, text_color=GRAY, size=None, parent=None):
+  def __init__(self, text , size=None, parent=None):
     super().__init__(parent)
     #================#
-    self.background_color = background_color
-    self.text_color = text_color
+    self.primary_color = BLACK
+    self.secondary_color = BLACK
+    self.tertiary_color = BLACK
+    self.quaternary_color = BLACK
+    self.quinary_color = BLACK
+    self.senary_color = BLACK
+    self.septenary_color = BLACK
+    self.octonary_color = BLACK
     #================#
     self._font = pygame.font.Font('fonts/FSEX300.ttf', 32)
     self._text = text
-    self._rendered_text = self._font.render(self._text, False, self.text_color)
     #================#
     if size == None:
       size = self._rendered_text.get_size()
@@ -30,10 +35,11 @@ class Label(Shape):
     return self._surface
 
   def _draw_background(self):
-    self._surface.fill(self.background_color)
+    self._surface.fill(self.primary_color)
 
   def _draw_text(self):
-    self._surface.blit(self._rendered_text, self._rendered_text.get_rect(center=self._surface.get_rect().center).topleft)
+    rendered_text = self._font.render(self._text, False, self.secondary_color)
+    blit_center(self._surface, rendered_text)
     
 
 
@@ -46,6 +52,7 @@ if __name__ == '__main__':
   #================================================================================================#
 
   a_label = Label('A', size=(80, 32))
+  a_label.secondary_color = GRAY
   a_label.pivot = (0.5, 0.5)
   a_label.position = screen.get_rect().center
 
@@ -56,7 +63,7 @@ if __name__ == '__main__':
     a_label.process(events)
     #===========================================RENDER==================================================#
     screen.fill(WHITE)
-    screen.blit(a_label.draw(), a_label.world_space_rect.topleft)
+    screen.blit(a_label.draw(), a_label.world_space_rect)
     pygame.display.update()
 
 

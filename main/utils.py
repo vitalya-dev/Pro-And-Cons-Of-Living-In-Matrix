@@ -69,3 +69,10 @@ def same_seq_except_n_elements(seq, n):
     
 def difference_of_two_seq(seq1, seq2):
   return [elem for elem in seq1 if elem not in seq2]
+
+
+def lerp_color(color_1, color_2, t):
+  color_with_float_coeff = tuple_math(color_1, '+', tuple_math(tuple_math(color_2, '-', color_1), '*', t))
+  color_with_int_coeff = tuple(map(math.floor, color_with_float_coeff))
+  return color_with_int_coeff
+
