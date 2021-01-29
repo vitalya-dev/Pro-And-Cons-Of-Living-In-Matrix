@@ -76,3 +76,8 @@ def lerp_color(color_1, color_2, t):
   color_with_int_coeff = tuple(map(math.floor, color_with_float_coeff))
   return color_with_int_coeff
 
+def get_event(events, type):
+  for e in events:
+    if e.type == type: return e
+  return None
+  
