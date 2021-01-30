@@ -55,6 +55,7 @@ class BeatEditor(Shape):
       #================#
       if key in self.piano.keys:
         self._input = {'key': key, 'note': self.piano.keys[key], 'time': time.time(), 'dtime': 0}
+        self.piano.on_key_down(key)
         self._state = 'EDIT'
 
   def _edit_state(self, events):
@@ -72,6 +73,7 @@ class BeatEditor(Shape):
       #================#
       if key == self._input['key']:
         self._input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
+        self.piano.on_key_up(key)
         self._state = 'WAIT'
 
   def _handle_input_is_long_enough(self):
