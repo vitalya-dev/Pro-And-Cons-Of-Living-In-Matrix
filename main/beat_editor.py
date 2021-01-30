@@ -24,7 +24,7 @@ class BeatEditor(Shape):
     self.sec2pixel = SEC2PIXEL
     #================#
     self._input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
-    self._state = 'WAIT'
+    self.state = 'WAIT'
     #================#
     self.primary_color = BLACK
     self.secondary_color = BLACK
@@ -38,11 +38,11 @@ class BeatEditor(Shape):
     self._surface = pygame.surface.Surface(size).convert()
 
   def process(self, events):
-    if self._state == 'WAIT':
+    if self.state == 'WAIT':
       self._wait_state(events)
-    elif self._state == 'EDIT':
+    elif self.state == 'EDIT':
       self._edit_state(events)
-    elif self._state == 'DONE':
+    elif self.state == 'DONE':
       print(self._beat_to_edit)
   
   def _wait_state(self, events):
@@ -56,7 +56,7 @@ class BeatEditor(Shape):
       if key in self.piano.keys:
         self._input = {'key': key, 'note': self.piano.keys[key], 'time': time.time(), 'dtime': 0}
         self.piano.on_key_down(key)
-        self._state = 'EDIT'
+        self.state = 'EDIT'
 
   def _edit_state(self, events):
     self._update_input()
@@ -74,14 +74,14 @@ class BeatEditor(Shape):
       if key == self._input['key']:
         self._input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
         self.piano.on_key_up(key)
-        self._state = 'WAIT'
+        self.state = 'WAIT'
 
   def _handle_input_is_long_enough(self):
     if self._input_is_long_enough():
       self._beat_to_edit[0].note = self._input['note']
       self._beat_to_edit[1].note = self._input['note']
       #================#
-      self._state = 'DONE'
+      self.state = 'DONE'
       
 
   def _input_is_long_enough(self):
@@ -91,14 +91,14 @@ class BeatEditor(Shape):
     return self._beat_to_edit[1].time - self._beat_to_edit[0].time
 
   def draw(self):
-    if self._state == 'WAIT':
+    if self.state == 'WAIT':
       self._draw_background()
       self._draw_editbar()
-    elif self._state == 'EDIT':
+    elif self.state == 'EDIT':
       self._draw_background()
       self._draw_editbar()
       self._draw_beatbar()
-    elif self._state == 'DONE':
+    elif self.state == 'DONE':
       self._draw_background()
     return self._surface
   
