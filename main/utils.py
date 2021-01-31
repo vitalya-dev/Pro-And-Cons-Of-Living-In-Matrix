@@ -1,3 +1,4 @@
+import copy
 import math
 import functools
 import operator
@@ -58,15 +59,6 @@ def one_eighth_of(val):
   return val / 8.0
 
 
-def same_seq_except_n_elements(seq, n):
-  if n == 0:
-    return seq
-  else:
-    middle = math.floor(len(seq) / 2)
-    left_seq = same_seq_except_n_elements(seq[:middle], math.floor(n/2))
-    right_seq = same_seq_except_n_elements(seq[middle+1:], math.floor((n-1)/2))
-    return left_seq + right_seq
-    
 def difference_of_two_seq(seq1, seq2):
   return [elem for elem in seq1 if elem not in seq2]
 
@@ -84,3 +76,20 @@ def get_event(events, type):
 def melody_duration(melody):
   last_beat_in_melody = melody[-1]
   return last_beat_in_melody[1].time
+
+
+def melody_null_n_beats(melody, n):
+  if n == 0:
+    return copy.deepcopy(melody)
+  else:
+    middle = math.floor(len(melody) / 2)
+    #================#
+    middle_beat = copy.deepcopy(melody[middle])
+    middle_beat[0].note = 0
+    middle_beat[1].note = 0
+    #================#
+    left_part_of_melody = melody_null_n_beats(melody[:middle], math.floor(n/2))
+    right_part_of_melody = melody_null_n_beats(melody[middle+1:], math.floor((n-1)/2))
+    return left_part_of_melody + [middle_beat] + right_part_of_melody
+
+    

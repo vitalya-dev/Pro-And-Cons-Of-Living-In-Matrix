@@ -49,6 +49,9 @@ class MelodyViewer(Shape):
       self._draw_beatbar(beat)
 
   def _draw_beatbar(self, beat):
+    if beat[0].note == 0:
+      return
+    #================#
     beatbar_width = (beat[1].time - beat[0].time) * self.sec2pixel - self.padding
     beatbar_height = self._surface.get_height() / 10
     beatbar_x = beat[0].time * self.sec2pixel
@@ -76,7 +79,7 @@ if __name__ == '__main__':
   #================================================================================================#
   melody = Midi('Breath.mid').beats()
   #================#
-  melody_viewer = MelodyViewer(melody=melody, piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(melody)))
+  melody_viewer = MelodyViewer(melody_null_n_beats(melody, 5), Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(melody)))
   melody_viewer.primary_color=CHARLESTON
   melody_viewer.secondary_color=DIM
   melody_viewer.sec2pixel = SCREEN_SIZE[0] / melody_duration(melody)
