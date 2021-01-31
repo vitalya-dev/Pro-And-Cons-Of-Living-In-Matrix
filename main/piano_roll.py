@@ -31,14 +31,13 @@ class PianoRoll(object):
     #================#
     beats_stream = sorted(flatten(beats), key=lambda beat: beat.time)
     for beat in beats_stream:
-      self._play_beat_in_right_tempo(beat)
+      self._try_to_play_beat_in_right_tempo(beat)
       if self._interrupted:
         break;
     #================#
-    if self._interrupted:
-      self.state = 'UNCOMPLETE' if self._interrupted else 'COMPLETE'
+    self.state = 'UNCOMPLETE' if self._interrupted else 'COMPLETE'
 
-  def _play_beat_in_right_tempo(self, beat):
+  def _try_to_play_beat_in_right_tempo(self, beat):
     if beat.note == 0:
       self._interrupted = True
       return

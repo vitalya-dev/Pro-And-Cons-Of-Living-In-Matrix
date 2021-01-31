@@ -81,3 +81,6 @@ def get_event(events, type):
     if e.type == type: return e
   return None
   
+def melody_duration(melody):
+  last_beat_in_melody = melody[-1]
+  return last_beat_in_melody[1].time
