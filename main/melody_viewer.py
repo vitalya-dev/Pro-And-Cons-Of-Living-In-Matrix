@@ -15,7 +15,7 @@ class MelodyViewer(Shape):
   def __init__(self, melody, piano, size=SCREEN_SIZE, parent=None):
     super().__init__(parent)
     #================#
-    self._melody = melody
+    self.melody = melody
     self.piano = piano
     #================#
     self.sec2pixel = SEC2PIXEL
@@ -45,7 +45,7 @@ class MelodyViewer(Shape):
     self._surface.fill(self.primary_color, self._surface.get_rect())
 
   def _draw_melody(self):
-    for beat in self._melody:
+    for beat in self.melody:
       self._draw_beatbar(beat)
 
   def _draw_beatbar(self, beat):
