@@ -36,6 +36,7 @@ class BeatEditor(Shape):
     self.octonary_color = BLACK
     #================#
     self._surface = pygame.surface.Surface(size).convert()
+    self._surface.set_colorkey(BLACK)
 
   def process(self, events):
     if self.state == 'WAIT':
@@ -103,14 +104,14 @@ class BeatEditor(Shape):
     return self._surface
   
   def _draw_background(self):
-    self._surface.fill(self.primary_color, self._surface.get_rect())
+    self._surface.fill(BLACK, self._surface.get_rect())
 
   def _draw_editbar(self):
     editbar_width = (self._beat_to_edit[1].time - self._beat_to_edit[0].time) * self.sec2pixel - 1
     editbar_height = self._surface.get_height()
     editbar_x = self._beat_to_edit[0].time * self.sec2pixel
     editbar_y = 0
-    self._surface.fill(self.secondary_color, (editbar_x, editbar_y, editbar_width, editbar_height))
+    self._surface.fill(self.primary_color, (editbar_x, editbar_y, editbar_width, editbar_height))
 
   def _draw_beatbar(self):
     beatbar_width = (time.time() - self._input['time']) * self.sec2pixel
@@ -120,7 +121,7 @@ class BeatEditor(Shape):
     beatbar_text = self._input['key']
     #================#
     beatbar = Label(beatbar_text, size=(beatbar_width, beatbar_height), parent=self)
-    beatbar.primary_color = self.tertiary_color
+    beatbar.primary_color = self.secondary_color
     beatbar.secondary_color = lerp_color(self.primary_color, BLACK, 0.2)
     beatbar.position = (beatbar_x, beatbar_y)
     #================#
@@ -140,8 +141,7 @@ if __name__ == '__main__':
   #================#
   beat_editor = BeatEditor(beat_to_edit=melody[5], piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(melody)))
   beat_editor.primary_color=CHARLESTON
-  beat_editor.secondary_color=OLIVE
-  beat_editor.tertiary_color=EBONY
+  beat_editor.secondary_color=EBONY
   #================================================================================================#
   while not done():
     clock.tick()
