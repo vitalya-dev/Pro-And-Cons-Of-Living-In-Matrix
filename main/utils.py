@@ -73,23 +73,25 @@ def get_event(events, type):
     if e.type == type: return e
   return None
   
-def melody_duration(melody):
-  last_beat_in_melody = melody[-1]
-  return last_beat_in_melody[1].time
+def beats_duration(beats):
+  last_beat = beats[-1]
+  return last_beat[1].time
 
+def beat_duration(beat):
+  return beat[1].time - beat[0].time
 
-def melody_null_n_beats(melody, n):
+def null_n_beats(beats, n):
   if n == 0:
-    return copy.deepcopy(melody)
+    return copy.deepcopy(beats)
   else:
-    middle = math.floor(len(melody) / 2)
+    middle = math.floor(len(beats) / 2)
     #================#
-    middle_beat = copy.deepcopy(melody[middle])
+    middle_beat = copy.deepcopy(beats[middle])
     middle_beat[0].note = 0
     middle_beat[1].note = 0
     #================#
-    left_part_of_melody = melody_null_n_beats(melody[:middle], math.floor(n/2))
-    right_part_of_melody = melody_null_n_beats(melody[middle+1:], math.floor((n-1)/2))
-    return left_part_of_melody + [middle_beat] + right_part_of_melody
+    left_part_of_beats = null_n_beats(beats[:middle], math.floor(n/2))
+    right_part_of_beats = null_n_beats(beats[middle+1:], math.floor((n-1)/2))
+    return left_part_of_beats + [middle_beat] + right_part_of_beats
 
     

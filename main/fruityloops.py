@@ -1,3 +1,5 @@
+import copy
+
 import pygame
 from pygame.locals import *
 
@@ -18,7 +20,7 @@ class Fruityloops(Shape):
     self._melody = melody
     self._piano = piano
     #================#
-    self._melody_viewer = MelodyViewer(melody, piano, parent=self)
+    self._melody_viewer = MelodyViewer(copy.deepcopy(melody), piano, parent=self)
     self._melody_viewer.sec2pixel = size[0] / melody_duration(melody)
     #================#
     self._beat_editor = None
@@ -71,12 +73,20 @@ class Fruityloops(Shape):
     self._beat_editor.process(events)
     if self._beat_editor.state == 'DONE':
       self.state = 'WAIT'
+      return
+    #================#
+    keydown_event = get_event(events, KEYDOWN)
+    if keydown_event and keydown_event.key == K_SPACE:
+      self._beats_roll.play(self._melody_viewer.melody)
+      self.state = 'PLAY'
 
   def draw(self):
     if self.state == 'WAIT':
       self._draw_melody_viewer()
+      self._draw_progressbar()
     elif self.state == 'PLAY':
       self._draw_melody_viewer()
+      self._draw_progressbar()
     elif self.state == 'EDIT':
       self._draw_melody_viewer()
       self._draw_beat_editor()
@@ -87,6 +97,22 @@ class Fruityloops(Shape):
     self._melody_viewer.secondary_color = self.secondary_color
     #================#
     self._surface.blit(self._melody_viewer.draw(), self._melody_viewer.parent_space_rect)
+
+  def _draw_progressbar(self):
+    current_playing_beat = self._get_current_playing_beat()
+    #================#
+    progressbar_width = (current_playing_beat[1].time - current_playing_beat[0].time) * self._melody_viewer.sec2pixel - 1
+    progressbar_height = self._surface.get_height()
+    progressbar_x = current_playing_beat[0].time * self._melody_viewer.sec2pixel
+    progressbar_y = 0
+    #================#
+    self._surface.fill(self.tertiary_color, (progressbar_x, progressbar_y, progressbar_width, progressbar_height))
+  
+  def _get_current_playing_beat(self):
+    if self._beats_roll.current_playing_beat:
+      return self._beats_roll.current_playing_beat
+    else:
+      return self._melody[0]
 
   def _draw_beat_editor(self):
     self._beat_editor.primary_color = self.tertiary_color

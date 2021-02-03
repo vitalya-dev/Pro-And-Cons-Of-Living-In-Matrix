@@ -12,19 +12,20 @@ from shape import *
 from label import *
 
 class BeatEditor(Shape):
-  def __init__(self, beat_to_edit, piano, size=SCREEN_SIZE, parent=None):
+  def __init__(self, beat, piano, parent=None):
     super().__init__(parent)
     #================#
-    self._beat_to_edit = beat_to_edit
-    self._beat_to_edit[0].note = 0
-    self._beat_to_edit[1].note = 0
+    self.beat = beat
+    self.beat[0].note = 0
+    self.beat[1].note = 0
     #================#
     self.piano = piano
     #================#
     self.sec2pixel = SEC2PIXEL
+    self.pitch2pixel = PITCH2PIXEL
     #================#
-    self._input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
-    self.state = 'WAIT'
+    self.input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
+    self.state = 'IDLE'
     #================#
     self.primary_color = BLACK
     self.secondary_color = BLACK
@@ -35,99 +36,87 @@ class BeatEditor(Shape):
     self.septenary_color = BLACK
     self.octonary_color = BLACK
     #================#
-    self._surface = pygame.surface.Surface(size).convert()
+    self._surface = pygame.surface.Surface((beat_duration(self.beat) * self.sec2pixel, self.pitch2pixel))
     self._surface.set_colorkey(BLACK)
 
   def process(self, events):
-    if self.state == 'WAIT':
-      self._wait_state(events)
+    if self.state == 'IDLE':
+      self._idle_state(events)
     elif self.state == 'EDIT':
       self._edit_state(events)
-    elif self.state == 'DONE':
-      print(self._beat_to_edit)
   
-  def _wait_state(self, events):
-    self._handle_keydown(events)
-
-  def _handle_keydown(self, events):
-    keydown_event = get_event(events, KEYDOWN)
-    if keydown_event:
-      key = chr(keydown_event.key).upper()
+  def _idle_state(self, events):
+    if self._piano_key_down(events):
+      key = self._piano_key_down(events)
       #================#
-      if key in self.piano.keys:
-        self._input = {'key': key, 'note': self.piano.keys[key], 'time': time.time(), 'dtime': 0}
-        self.piano.on_key_down(key)
-        self.state = 'EDIT'
+      self.input = {'key': key, 'note': self.piano.keys[key], 'time': time.time(), 'dtime': 0}
+      self.piano.on_key_down(key)
+      self.state = 'EDIT'
 
   def _edit_state(self, events):
     self._update_input()
-    self._handle_keyup(events)
-    self._handle_input_is_long_enough()
+    #================#
+    if self._input_is_long_enough():
+       self.beat[0].note = self.input['note']
+       self.beat[1].note = self.input['note']
+       #================#
+       self.state = 'IDLE'              
+    elif self._piano_key_up(events):
+      self.piano.on_key_up(self.input['key'])
+      self.state = 'IDLE'
 
-  def _update_input(self):
-    self._input['dtime'] = time.time() - self._input['time']    
 
-  def _handle_keyup(self, events):
+  def _piano_key_down(self, events):
+    keydown_event = get_event(events, KEYDOWN)
+    if keydown_event:
+      key = chr(keydown_event.key).upper()
+      if key in self.piano.keys:
+        return key
+    return None
+
+  def _piano_key_up(self, events):
     keyup_event = get_event(events, KEYUP)
     if keyup_event:
       key = chr(keyup_event.key).upper()
-      #================#
-      if key == self._input['key']:
-        self._input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
-        self.piano.on_key_up(key)
-        self.state = 'WAIT'
+      if key == self.input['key']:
+        return key
+    return None
 
-  def _handle_input_is_long_enough(self):
-    if self._input_is_long_enough():
-      self._beat_to_edit[0].note = self._input['note']
-      self._beat_to_edit[1].note = self._input['note']
-      #================#
-      self.state = 'DONE'
-      
+  def _update_input(self):
+    self.input['dtime'] = time.time() - self.input['time']    
 
   def _input_is_long_enough(self):
-    return self._input['dtime'] > self._beat_to_edit_duration()
-
-  def _beat_to_edit_duration(self):
-    return self._beat_to_edit[1].time - self._beat_to_edit[0].time
+    return self.input['dtime'] > beat_duration(self.beat)
 
   def draw(self):
-    if self.state == 'WAIT':
-      self._draw_background()
-      self._draw_editbar()
-    elif self.state == 'EDIT':
-      self._draw_background()
-      self._draw_editbar()
-      self._draw_beatbar()
-    elif self.state == 'DONE':
-      self._draw_background()
+    if self.state == 'IDLE':
+      self._draw_beat()
+    if self.state == 'EDIT':
+      self._draw_input()
     return self._surface
   
-  def _draw_background(self):
-    self._surface.fill(BLACK, self._surface.get_rect())
 
-  def _draw_editbar(self):
-    editbar_width = (self._beat_to_edit[1].time - self._beat_to_edit[0].time) * self.sec2pixel - 1
-    editbar_height = self._surface.get_height()
-    editbar_x = self._beat_to_edit[0].time * self.sec2pixel
-    editbar_y = 0
-    self._surface.fill(self.primary_color, (editbar_x, editbar_y, editbar_width, editbar_height))
-
-  def _draw_beatbar(self):
-    beatbar_width = (time.time() - self._input['time']) * self.sec2pixel
-    beatbar_height = self._surface.get_height() / 10
-    beatbar_x = self._beat_to_edit[0].time * self.sec2pixel
-    beatbar_y = (self.piano.keys['F'] - self._input['note']) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
-    beatbar_text = self._input['key']
+  def _draw_beat(self):
+    beatbar_width = beat_duration(self.beat) * self.sec2pixel
+    beatbar_height = self.pitch2pixel
+    beatbar_text = self.piano.keys[self.beat[0].note] if self.beat[0].note != 0 else 'Nah'
     #================#
+    self._draw_beatbar(beatbar_text, beatbar_width, beatbar_height)
+      
+  def _draw_input(self):
+    inputbar_width = (time.time() - self.input['time']) * self.sec2pixel
+    inputbar_height = self.pitch2pixel
+    inputbar_text = self.input['key']
+    #================#
+    self._draw_beatbar(inputbar_text, inputbar_width, inputbar_height)
+
+
+  def _draw_beatbar(self, beatbar_text, beatbar_width, beatbar_height):
     beatbar = Label(beatbar_text, size=(beatbar_width, beatbar_height), parent=self)
-    beatbar.primary_color = self.secondary_color
-    beatbar.secondary_color = lerp_color(self.primary_color, BLACK, 0.2)
-    beatbar.position = (beatbar_x, beatbar_y)
+    beatbar.primary_color = self.primary_color
+    beatbar.secondary_color = self.secondary_color
     #================#
     self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
-
-
 
 
 if __name__ == '__main__':
@@ -137,9 +126,9 @@ if __name__ == '__main__':
   screen = pygame.display.set_mode(SCREEN_SIZE)
   clock = pygame.time.Clock()
   #================================================================================================#
-  melody = Midi('Breath.mid').beats()
+  beats = Midi('Breath.mid').beats()
   #================#
-  beat_editor = BeatEditor(beat_to_edit=melody[5], piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(melody)))
+  beat_editor = BeatEditor(beat=beats[5], piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats)))
   beat_editor.primary_color=CHARLESTON
   beat_editor.secondary_color=EBONY
   #================================================================================================#

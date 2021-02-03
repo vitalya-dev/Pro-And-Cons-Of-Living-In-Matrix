@@ -13,46 +13,35 @@ class BeatsRoll(object):
   def __init__(self, midioutput):
     self.midioutput = midioutput
     #================#
-    self.state = 'WAIT'
+    self.state = 'IDLE'
     #================#
-    self.play_when_already_playing_interrupt = False
-    self.zero_beat_interrupt = False
-    self.zero_beat = None
+    self.currently_played_beat = None
+    self.played_beats_stack = []
     #================#
     self._start_time = 0
 
-
   def play(self, beats=None):
-    if self.state == 'PLAYING':
-      self.play_when_already_playing_interrupt = True
-      self.state = 'INTERRUPT'
-    elif self.state in ('WAIT', 'COMPLETE', 'INTERRUPT'): 
-      self.state = 'PLAYING'
+    if self.state == 'IDLE':
+      self.state = 'PLAY'
       threading.Thread(target=self._play_thread, args=(beats,)).start()
     
-
   def _play_thread(self, beats):
     self._start_time = time.time()
-    self.play_when_already_playing_interrupt = False
-    self.zero_beat_interrupt = False
-    self.zero_beat = None
+    self.currently_played_beat = None
+    self.played_beats_stack = []
     #================#
     for beat in beats:
+      self.currently_played_beat = beat
+      #================#
       self._try_to_play_beat_pieces_in_right_tempo(beat[0])
       self._try_to_play_beat_pieces_in_right_tempo(beat[1])
-      if self.zero_beat_interrupt:
-        self.state = 'INTERRUPT'
-        self.zero_beat = beat
-        return
-      if self.play_when_already_playing_interrupt:
-        self.state = 'INTERRUPT'
-        return
+      #================#
+      self.played_beats_stack.append(beat)
     #================#
-    self.state = 'COMPLETE'
+    self.state = 'IDLE'
 
   def _try_to_play_beat_pieces_in_right_tempo(self, beat_pieces):
     if beat_pieces.note == 0:
-      self.zero_beat_interrupt = True
       return
     #================#
     playback_time = time.time() - self._start_time
