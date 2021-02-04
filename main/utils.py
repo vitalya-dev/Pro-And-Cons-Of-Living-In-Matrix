@@ -80,18 +80,14 @@ def beats_duration(beats):
 def beat_duration(beat):
   return beat[1].time - beat[0].time
 
-def null_n_beats(beats, n):
-  if n == 0:
-    return copy.deepcopy(beats)
-  else:
-    middle = math.floor(len(beats) / 2)
-    #================#
-    middle_beat = copy.deepcopy(beats[middle])
-    middle_beat[0].note = 0
-    middle_beat[1].note = 0
-    #================#
-    left_part_of_beats = null_n_beats(beats[:middle], math.floor(n/2))
-    right_part_of_beats = null_n_beats(beats[middle+1:], math.floor((n-1)/2))
-    return left_part_of_beats + [middle_beat] + right_part_of_beats
+def null_beats(beats, index_list):
+  beats = copy.deepcopy(beats)
+  #================#
+  for i in index_list:
+    null_beat = beats[i-1]
+    null_beat[0].note = 0
+    null_beat[1].note = 0
+  #================#
+  return beats
 
-    
+

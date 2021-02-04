@@ -70,7 +70,7 @@ if __name__ == '__main__':
   #================================================================================================#
   beats = Midi('Breath.mid').beats()
   #================#
-  beats_viewer = BeatsViewer(null_n_beats(beats, 5), Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats)))
+  beats_viewer = BeatsViewer(null_beats(beats, [5, 11]), Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats)))
   beats_viewer.primary_color=DIM
   beats_viewer.secondary_color=CHARLESTON
   beats_viewer.sec2pixel = SCREEN_SIZE[0] / beats_duration(beats)
