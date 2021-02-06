@@ -12,12 +12,10 @@ from shape import *
 from label import *
 
 class BeatEditor(Shape):
-  def __init__(self, beat, piano, parent=None):
+  def __init__(self, piano, parent=None):
     super().__init__(parent)
     #================#
-    self.beat = beat
-    self.beat[0].note = 0
-    self.beat[1].note = 0
+    self.beat_to_edit = None
     #================#
     self.piano = piano
     #================#
@@ -36,8 +34,16 @@ class BeatEditor(Shape):
     self.septenary_color = BLACK
     self.octonary_color = BLACK
     #================#
-    self._surface = pygame.surface.Surface((beat_duration(self.beat) * self.sec2pixel, self.pitch2pixel))
+
+  def edit(self, beat):
+    self.beat_to_edit = beat
+    #================#
+    self.input = {'key': 0, 'note': 0, 'time': 0, 'dtime': 0}
+    self.state = 'IDLE'
+    #================#
+    self._surface = pygame.surface.Surface((beat_duration(self.beat_to_edit) * self.sec2pixel, self.pitch2pixel))
     self._surface.set_colorkey(BLACK)
+    
 
   def process(self, events):
     if self.state == 'IDLE':
@@ -57,8 +63,8 @@ class BeatEditor(Shape):
     self._update_input()
     #================#
     if self._input_is_long_enough():
-       self.beat[0].note = self.input['note']
-       self.beat[1].note = self.input['note']
+       self.beat_to_edit[0].note = self.input['note']
+       self.beat_to_edit[1].note = self.input['note']
        #================#
        self.state = 'IDLE'              
     elif self._piano_key_up(events):
@@ -75,18 +81,13 @@ class BeatEditor(Shape):
     return None
 
   def _piano_key_up(self, events):
-    keyup_event = get_event(events, KEYUP)
-    if keyup_event:
-      key = chr(keyup_event.key).upper()
-      if key == self.input['key']:
-        return key
-    return None
+    return is_key_up(self.input['key'], events)
 
   def _update_input(self):
     self.input['dtime'] = time.time() - self.input['time']    
 
   def _input_is_long_enough(self):
-    return self.input['dtime'] > beat_duration(self.beat)
+    return self.input['dtime'] > beat_duration(self.beat_to_edit)
 
   def draw(self):
     if self.state == 'IDLE':
@@ -94,12 +95,11 @@ class BeatEditor(Shape):
     if self.state == 'EDIT':
       self._draw_input()
     return self._surface
-  
 
   def _draw_beat(self):
-    beatbar_width = beat_duration(self.beat) * self.sec2pixel
+    beatbar_width = beat_duration(self.beat_to_edit) * self.sec2pixel
     beatbar_height = self.pitch2pixel
-    beatbar_text = self.piano.keys[self.beat[0].note] if self.beat[0].note != 0 else 'Nah'
+    beatbar_text = self.piano.keys[self.beat_to_edit[0].note] if self.beat_to_edit[0].note != 0 else 'Nah'
     #================#
     self._draw_beatbar(beatbar_text, beatbar_width, beatbar_height)
       
@@ -128,7 +128,8 @@ if __name__ == '__main__':
   #================================================================================================#
   beats = Midi('Breath.mid').beats()
   #================#
-  beat_editor = BeatEditor(beat=beats[5], piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats)))
+  beat_editor = BeatEditor(Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats)))
+  beat_editor.edit(beats[5])
   beat_editor.primary_color=CHARLESTON
   beat_editor.secondary_color=EBONY
   #================================================================================================#

@@ -2,7 +2,9 @@ import copy
 import math
 import functools
 import operator
+
 import pygame
+from pygame.locals import *
 
 
 def done(val=None):
@@ -68,10 +70,21 @@ def lerp_color(color_1, color_2, t):
   color_with_int_coeff = tuple(map(math.floor, color_with_float_coeff))
   return color_with_int_coeff
 
+def filtertype(type, seq):
+  return filter(lambda e: type(e) == type, seq)
+
 def get_event(events, type):
   for e in events:
     if e.type == type: return e
   return None
+
+def is_key_down(key, events):
+  keydown_event = get_event(events, KEYDOWN)
+  return keydown_event and chr(keydown_event.key).casefold() == key.casefold()
+
+def is_key_up(key, events):
+  keyup_event = get_event(events, KEYUP)
+  return keyup_event and chr(keyup_event.key).casefold() == key.casefold() 
   
 def beats_duration(beats):
   last_beat = beats[-1]
@@ -84,10 +97,16 @@ def null_beats(beats, index_list):
   beats = copy.deepcopy(beats)
   #================#
   for i in index_list:
-    null_beat = beats[i-1]
+    null_beat = beats[i]
     null_beat[0].note = 0
     null_beat[1].note = 0
   #================#
   return beats
 
+def is_null_beat(beat):
+  return beat[0].note == 0 and beat[1].note == 0
 
+def convert_to_intervals(seq):
+  intervals_start_points = seq[:-1]
+  intervals_end_points = seq[1:]
+  return list(zip(intervals_start_points, intervals_end_points))

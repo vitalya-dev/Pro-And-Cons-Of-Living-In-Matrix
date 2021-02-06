@@ -44,7 +44,7 @@ class BeatsViewer(Shape):
     return self._surface
 
   def _draw_beatbar(self, beat):
-    if beat[0].note == 0:
+    if is_null_beat(beat):
       return
     #================#
     beatbar_width = (beat[1].time - beat[0].time) * self.sec2pixel - self.padding
