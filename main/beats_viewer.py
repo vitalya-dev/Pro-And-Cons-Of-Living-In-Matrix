@@ -39,18 +39,25 @@ class BeatsViewer(Shape):
     pass
 
   def draw(self):
+    self._draw_background()
+    self._draw_beats()
+    return self._surface
+
+  def _draw_background(self):
+    self._surface.fill(BLACK)
+
+  def _draw_beats(self):
     for beat in self.beats:
       self._draw_beatbar(beat)
-    return self._surface
 
   def _draw_beatbar(self, beat):
     if is_null_beat(beat):
       return
     #================#
-    beatbar_width = (beat[1].time - beat[0].time) * self.sec2pixel - self.padding
+    beatbar_width = beat_duration(beat) * self.sec2pixel - self.padding
     beatbar_height = self.pitch2pixel
-    beatbar_x = beat[0].time * self.sec2pixel
-    beatbar_y = (self.piano.keys['F'] - beat[0].note) * beatbar_height + self._surface.get_height() / 2 - beatbar_height
+    beatbar_x = self.time_to_x(beat[0].time)
+    beatbar_y = self.pitch_to_y(beat[0].note)
     beatbar_text = self.piano.keys[beat[0].note]
     #================#
     beatbar = Label(beatbar_text, size=(beatbar_width, beatbar_height), parent=self)
@@ -60,6 +67,12 @@ class BeatsViewer(Shape):
     #================#
     self._surface.blit(beatbar.draw(), beatbar.parent_space_rect)
   
+  def time_to_x(self, time):
+    return time * self.sec2pixel
+
+  def pitch_to_y(self, pitch):
+    return (self.piano.keys['F'] - pitch) * self.pitch2pixel + self._surface.get_height() / 2 - self.pitch2pixel
+
       
 if __name__ == '__main__':
   #===========================================INIT=================================================#

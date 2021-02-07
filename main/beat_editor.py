@@ -91,10 +91,15 @@ class BeatEditor(Shape):
 
   def draw(self):
     if self.state == 'IDLE':
+      self._draw_background()
       self._draw_beat()
     if self.state == 'EDIT':
+      self._draw_background()
       self._draw_input()
     return self._surface
+
+  def _draw_background(self):
+    self._surface.fill(BLACK)
 
   def _draw_beat(self):
     beatbar_width = beat_duration(self.beat_to_edit) * self.sec2pixel
@@ -109,7 +114,6 @@ class BeatEditor(Shape):
     inputbar_text = self.input['key']
     #================#
     self._draw_beatbar(inputbar_text, inputbar_width, inputbar_height)
-
 
   def _draw_beatbar(self, beatbar_text, beatbar_width, beatbar_height):
     beatbar = Label(beatbar_text, size=(beatbar_width, beatbar_height), parent=self)

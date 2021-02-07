@@ -11,6 +11,8 @@ from shape import *
 from piano import *
 from beats_viewer import *
 from beats_roll import *
+from beat_editor import *
+
 
 class Fruityloops(Shape):
   def __init__(self, beats, piano, size=SCREEN_SIZE, parent=None):
@@ -64,11 +66,19 @@ class Fruityloops(Shape):
       self.state = 'EDIT'
 
   def _process_edit_state(self, events):
+    self._beat_editor.process(events)
+    #================#
+    if self._beat_editor.state == 'EDIT':
+      self._update_beat_editor_position()
+    #================#
     if is_key_down(' ', events):
       self._beats_roll.play(self._puzzle[0])
       self.state = 'PLAY'
-    #================#
-    self._beat_editor.process(events)
+    
+  def _update_beat_editor_position(self):
+    beat_editor_pos_x = self._beats_viewer.time_to_x(self._beat_editor.beat_to_edit[0].time)
+    beat_editor_pos_y = self._beats_viewer.pitch_to_y(self._beat_editor.input['note'])
+    self._beat_editor.position = (beat_editor_pos_x, beat_editor_pos_y)
 
   def draw(self):
     self._draw_background()
@@ -76,13 +86,14 @@ class Fruityloops(Shape):
     if self.state == 'IDLE':
       self._draw_progressbar_in_idle_state()
       self._draw_beats_viewer()
-    if self.state == 'PLAY':
+    elif self.state == 'PLAY':
       self._draw_progressbar_in_play_state()
       self._draw_beats_viewer()
-    if self.state == 'EDIT':
+    elif self.state == 'EDIT':
       self._draw_progressbar_in_edit_state()
       self._draw_beats_viewer()
-      self._draw_beats_editor()
+      if self._beat_editor.state == 'EDIT':
+        self._draw_beat_editor()
     #================#
     return self._surface
 
@@ -95,8 +106,11 @@ class Fruityloops(Shape):
     #================#
     self._surface.blit(self._beats_viewer.draw(), self._beats_viewer.parent_space_rect)
 
-  def _draw_beats_editor(self):
-    pass
+  def _draw_beat_editor(self):
+    self._beat_editor.primary_color = self.secondary_color
+    self._beat_editor.secondary_color = self.tertiary_color
+    #================#
+    self._surface.blit(self._beat_editor.draw(), self._beat_editor.parent_space_rect)
 
   def _draw_progressbar_in_idle_state(self):
     self._draw_progressbar_using_beat(self._puzzle[0][0])
