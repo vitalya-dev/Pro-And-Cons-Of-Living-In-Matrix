@@ -18,18 +18,20 @@ class BeatsRoll(object):
     self.currently_played_beat = None
     self.played_beats_stack = []
     #================#
+    self._rewind = 0
     self._start_time = 0
 
   def play(self, beats=None):
     if self.state == 'IDLE':
       self.state = 'PLAY'
       threading.Thread(target=self._play_thread, args=(beats,)).start()
-    
+  
   def _play_thread(self, beats):
     self._start_time = time.time()
     self.currently_played_beat = None
     self.played_beats_stack = []
     #================#
+    self._rewind_if_beats_delayed(beats)
     for beat in beats:
       self.currently_played_beat = beat
       #================#
@@ -40,13 +42,18 @@ class BeatsRoll(object):
     #================#
     self.state = 'IDLE'
 
+  def _rewind_if_beats_delayed(self, beats):
+    self.rewind = beats[0][0].time if len(beats) > 0 else 0
+
   def _try_to_play_beat_pieces_in_right_tempo(self, beat_pieces):
     if beat_pieces.note == 0:
       return
     #================#
-    playback_time = time.time() - self._start_time
-    if beat_pieces.time > playback_time:
-      time.sleep(beat_pieces.time - playback_time)
+    playback_time = time.time() - self._start_time 
+    total_time = playback_time + self.rewind
+    #================#
+    if beat_pieces.time > total_time:
+      time.sleep(beat_pieces.time - total_time)
     self.midioutput.send(beat_pieces)
 
 

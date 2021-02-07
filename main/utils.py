@@ -78,13 +78,23 @@ def get_event(events, type):
     if e.type == type: return e
   return None
 
+def is_keycode_down(keycode, events):
+  keydown_event = get_event(events, KEYDOWN)
+  return keydown_event and keydown_event.key == keycode
+
+def is_keycode_up(keycode, events):
+  keyup_event = get_event(events, KEYUP)
+  return keyup_event and keyup_event.key == keycode 
+  
 def is_key_down(key, events):
   keydown_event = get_event(events, KEYDOWN)
   return keydown_event and chr(keydown_event.key).casefold() == key.casefold()
 
 def is_key_up(key, events):
   keyup_event = get_event(events, KEYUP)
-  return keyup_event and chr(keyup_event.key).casefold() == key.casefold() 
+  return keyup_event and chr(keyup_event.key).casefold() == key.casefold()
+
+
   
 def beats_duration(beats):
   last_beat = beats[-1]

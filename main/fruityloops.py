@@ -19,6 +19,7 @@ class Fruityloops(Shape):
     super().__init__(parent)
     #================#
     self._puzzle = self._split_beats_by_null_beat(beats)
+    self._puzzle_progress = 0
     self._piano = piano
     #================#
     self.state = 'IDLE'
@@ -57,7 +58,7 @@ class Fruityloops(Shape):
 
   def _process_idle_state(self, events):
     if is_key_down(' ', events):
-      self._beats_roll.play(self._puzzle[0])
+      self._beats_roll.play(self._puzzle[self._puzzle_progress])
       self.state = 'PLAY'
 
   def _process_play_state(self, events):
@@ -71,9 +72,12 @@ class Fruityloops(Shape):
     if self._beat_editor.state == 'EDIT':
       self._update_beat_editor_position()
     #================#
-    if is_key_down(' ', events):
-      self._beats_roll.play(self._puzzle[0])
+    if is_keycode_down(K_SPACE, events):
+      self._beats_roll.play(self._puzzle[self._puzzle_progress])
       self.state = 'PLAY'
+    if is_keycode_down(K_RETURN, events):
+      self._puzzle_progress += 1
+      self.state = 'IDLE'
     
   def _update_beat_editor_position(self):
     beat_editor_pos_x = self._beats_viewer.time_to_x(self._beat_editor.beat_to_edit[0].time)
@@ -113,7 +117,7 @@ class Fruityloops(Shape):
     self._surface.blit(self._beat_editor.draw(), self._beat_editor.parent_space_rect)
 
   def _draw_progressbar_in_idle_state(self):
-    self._draw_progressbar_using_beat(self._puzzle[0][0])
+    self._draw_progressbar_using_beat(self._puzzle[self._puzzle_progress][0])
     
   def _draw_progressbar_in_play_state(self):
     self._draw_progressbar_using_beat(self._beats_roll.currently_played_beat)
