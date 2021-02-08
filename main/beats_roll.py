@@ -43,14 +43,14 @@ class BeatsRoll(object):
     self.state = 'IDLE'
 
   def _rewind_if_beats_delayed(self, beats):
-    self.rewind = beats[0][0].time if len(beats) > 0 else 0
+    self._rewind = beats[0][0].time if len(beats) > 0 else 0
 
   def _try_to_play_beat_pieces_in_right_tempo(self, beat_pieces):
     if beat_pieces.note == 0:
       return
     #================#
     playback_time = time.time() - self._start_time 
-    total_time = playback_time + self.rewind
+    total_time = playback_time + self._rewind
     #================#
     if beat_pieces.time > total_time:
       time.sleep(beat_pieces.time - total_time)
