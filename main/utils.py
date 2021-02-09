@@ -100,8 +100,9 @@ def is_keycode_pressed(keycode):
 
   
 def beats_duration(beats):
+  first_beat = beats[0]
   last_beat = beats[-1]
-  return last_beat[1].time
+  return last_beat[1].time - first_beat[0].time
 
 def beat_duration(beat):
   return beat[1].time - beat[0].time

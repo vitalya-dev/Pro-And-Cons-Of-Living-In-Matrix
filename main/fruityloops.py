@@ -105,6 +105,7 @@ class Fruityloops(Shape):
 
   def draw(self):
     self._draw_background()
+    self._draw_beats_splitted_current_part_background()
     #================#
     if self.state == 'IDLE':
       self._draw_progressbar_in_idle_state()
@@ -123,10 +124,20 @@ class Fruityloops(Shape):
   def _draw_background(self):
     self._surface.fill(self.primary_color)
 
+  def _draw_beats_splitted_current_part_background(self):
+    beats_splitted_current_part = self._beats_splitted[self._beats_splitted_current_part_index]
+    #================#
+    bscp_background_width = beats_duration(beats_splitted_current_part) * self._beats_viewer.sec2pixel
+    bscp_background_height = self._surface.get_height()
+    bscp_background_x = beats_splitted_current_part[0][0].time * self._beats_viewer.sec2pixel
+    bscp_background_y = 0
+    bscp_background_color = lerp_color(self.primary_color, BLACK, 0.05)
+    #================#
+    self._surface.fill(bscp_background_color, (bscp_background_x, bscp_background_y, bscp_background_width, bscp_background_height))
+
   def _draw_beats_viewer(self):
     self._beats_viewer.primary_color = self.secondary_color
     self._beats_viewer.secondary_color = self.tertiary_color
-    #================#
     self._surface.blit(self._beats_viewer.draw(), self._beats_viewer.parent_space_rect)
 
   def _draw_beat_editor(self):
