@@ -94,6 +94,9 @@ def is_key_up(key, events):
   keyup_event = get_event(events, KEYUP)
   return keyup_event and chr(keyup_event.key).casefold() == key.casefold()
 
+def is_keycode_pressed(keycode):
+  return pygame.key.get_pressed()[keycode]
+
 
   
 def beats_duration(beats):

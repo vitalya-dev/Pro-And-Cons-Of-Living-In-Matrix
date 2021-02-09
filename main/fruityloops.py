@@ -59,19 +59,20 @@ class Fruityloops(Shape):
       self._process_edit_state(events)
 
   def _process_idle_state(self, events):
-    if is_key_down(' ', events) and self._beats_splitted_all_parts_is_solved():
+    if is_keycode_down(K_SPACE, events) and is_keycode_pressed(K_LSHIFT) and len(self._beats_solved) > 0:
       self._beats_roll.play(self._beats_solved)
       self.state = 'PLAY'
-    elif is_key_down(' ', events) and not self._beats_splitted_all_parts_is_solved():
+    elif is_keycode_down(K_SPACE, events) and not is_keycode_pressed(K_LSHIFT):
       self._beats_roll.play(self._beats_splitted[self._beats_splitted_current_part_index])
       self.state = 'PLAY'
 
   def _process_play_state(self, events):
-    if self._beats_roll.state == 'IDLE' and self._beats_splitted_all_parts_is_solved():
+    if self._beats_roll.state == 'IDLE' and self._beats_roll.played_beats_stack == self._beats_solved:
       self.state = 'IDLE'
-    elif self._beats_roll.state == 'IDLE' and not self._beats_splitted_all_parts_is_solved():
-      self._beat_editor.edit(self._beats_roll.played_beats_stack[-1])
-      self.state = 'EDIT'
+    elif self._beats_roll.state == 'IDLE' and self._beats_roll.played_beats_stack != self._beats_solved:
+       self._beat_editor.edit(self._beats_roll.played_beats_stack[-1])
+       self.state = 'EDIT'
+    
 
   def _process_edit_state(self, events):
     self._beat_editor.process(events)
@@ -79,10 +80,13 @@ class Fruityloops(Shape):
     if self._beat_editor.state == 'EDIT':
       self._update_beat_editor_position()
     #================#
-    if is_keycode_down(K_SPACE, events):
+    if is_keycode_down(K_SPACE, events) and is_keycode_pressed(K_LSHIFT):
+      self._beats_roll.play(self._beats_solved + self._beats_splitted[self._beats_splitted_current_part_index])
+      self.state = 'PLAY'
+    elif is_keycode_down(K_SPACE, events) and not is_keycode_pressed(K_LSHIFT):
       self._beats_roll.play(self._beats_splitted[self._beats_splitted_current_part_index])
       self.state = 'PLAY'
-    if is_keycode_down(K_RETURN, events):
+    elif is_keycode_down(K_RETURN, events):
       self._beats_solved += self._beats_splitted[self._beats_splitted_current_part_index]
       self._beats_splitted_goto_next_part()
       self.state = 'IDLE'
