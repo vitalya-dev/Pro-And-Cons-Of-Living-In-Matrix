@@ -59,7 +59,10 @@ class Fruityloops(Shape):
       self._process_edit_state(events)
 
   def _process_idle_state(self, events):
-    if is_keycode_down(K_SPACE, events) and is_keycode_pressed(K_LSHIFT) and len(self._beats_solved) > 0:
+    if is_keycode_down(K_SPACE, events) and self._beats_splitted_all_parts_is_solved():
+      self._beats_roll.play(self._beats_solved)
+      self.state = 'COMPLETE'
+    elif is_keycode_down(K_SPACE, events) and is_keycode_pressed(K_LSHIFT) and len(self._beats_solved) > 0:
       self._beats_roll.play(self._beats_solved)
       self.state = 'PLAY'
     elif is_keycode_down(K_SPACE, events) and not is_keycode_pressed(K_LSHIFT):
@@ -69,11 +72,10 @@ class Fruityloops(Shape):
   def _process_play_state(self, events):
     if self._beats_roll.state == 'IDLE' and self._beats_roll.played_beats_stack == self._beats_solved:
       self.state = 'IDLE'
-    elif self._beats_roll.state == 'IDLE' and self._beats_roll.played_beats_stack != self._beats_solved:
+    elif self._beats_roll.state == 'IDLE':
        self._beat_editor.edit(self._beats_roll.played_beats_stack[-1])
        self.state = 'EDIT'
-    
-
+  
   def _process_edit_state(self, events):
     self._beat_editor.process(events)
     #================#
@@ -105,19 +107,24 @@ class Fruityloops(Shape):
 
   def draw(self):
     self._draw_background()
-    self._draw_beats_splitted_current_part_background()
     #================#
     if self.state == 'IDLE':
+      self._draw_beats_splitted_current_part_background()
       self._draw_progressbar_in_idle_state()
       self._draw_beats_viewer()
     elif self.state == 'PLAY':
+      self._draw_beats_splitted_current_part_background()
       self._draw_progressbar_in_play_state()
       self._draw_beats_viewer()
     elif self.state == 'EDIT':
+      self._draw_beats_splitted_current_part_background()
       self._draw_progressbar_in_edit_state()
       self._draw_beats_viewer()
       if self._beat_editor.state == 'EDIT':
         self._draw_beat_editor()
+    elif self.state == 'COMPLETE':
+      self._draw_progressbar_in_play_state()
+      self._draw_beats_viewer()
     #================#
     return self._surface
 
@@ -180,7 +187,7 @@ if __name__ == '__main__':
   fruityloops.tertiary_color=JET
   #================================================================================================#
   while not done():
-    clock.tick()
+    clock.tick(60)
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
     fruityloops.process(events)
