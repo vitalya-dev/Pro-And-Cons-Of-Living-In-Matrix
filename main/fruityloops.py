@@ -1,3 +1,4 @@
+import pickle
 import copy
 
 import pygame
@@ -15,14 +16,14 @@ from beat_editor import *
 
 
 class Fruityloops(Shape):
-  def __init__(self, beats, piano, size=SCREEN_SIZE, parent=None):
+  def __init__(self, beats_to_solve, answer, piano, size=SCREEN_SIZE, parent=None):
     super().__init__(parent)
     #================#
-    self._beats_splitted = self._split_beats_by_null_beat(beats)
+    self._beats_splitted = self._split_beats_by_null_beat(beats_to_solve)
     self._beats_splitted_current_part_index = 0
     self._beats_solved = []
     #================#
-    self._piano = piano
+    self._answer = answer
     #================#
     self.state = 'IDLE'
     #================#
@@ -35,15 +36,23 @@ class Fruityloops(Shape):
     self.septenary_color = BLACK
     self.octonary_color = BLACK
     #================#
-    self._beats_viewer = BeatsViewer(beats, piano, parent=self)
-    self._beats_viewer.sec2pixel = size[0] / beats_duration(beats)
+    self._beats_viewer = BeatsViewer(beats_to_solve, piano, parent=self)
+    self._beats_viewer.sec2pixel = size[0] / beats_duration(beats_to_solve)
     #================#
     self._beat_editor = BeatEditor(piano, parent=self)
     self._beat_editor.sec2pixel = self._beats_viewer.sec2pixel
     #================#
-    self.beats_roll = BeatsRoll(self._piano.midioutput)
+    self.beats_roll = BeatsRoll(piano.midioutput)
     #================#
     self._surface = pygame.surface.Surface(size).convert()
+
+  def reset(self):
+    for beats in self._beats_splitted:
+      null_beat(beats[-1])
+    self._beats_splitted_current_part_index = 0
+    self._beats_solved = []
+    #================#
+    self.state = 'IDLE'
 
   def _split_beats_by_null_beat(self, beats):
     null_beat_indexes = [i for i, beat in enumerate(beats, start=1) if is_null_beat(beat)]
@@ -61,7 +70,10 @@ class Fruityloops(Shape):
   def _process_idle_state(self, events):
     if is_keycode_down(K_SPACE, events) and self._beats_splitted_all_parts_is_solved():
       self.beats_roll.play(self._beats_solved)
-      self.state = 'COMPLETE'
+      if self._beats_solved_is_right():
+        self.state = 'COMPLETE'
+      else:
+        self.state = 'FAIL'
     elif is_keycode_down(K_SPACE, events) and is_keycode_pressed(K_LSHIFT) and len(self._beats_solved) > 0:
       self.beats_roll.play(self._beats_solved)
       self.state = 'PLAY'
@@ -105,6 +117,9 @@ class Fruityloops(Shape):
     beat_editor_pos_y = self._beats_viewer.pitch_to_y(self._beat_editor.input['note'])
     self._beat_editor.position = (beat_editor_pos_x, beat_editor_pos_y)
 
+  def _beats_solved_is_right(self):
+    return pickle.dumps(self._beats_solved) == self._answer
+
   def draw(self):
     self._draw_background()
     #================#
@@ -122,7 +137,7 @@ class Fruityloops(Shape):
       self._draw_beats_viewer()
       if self._beat_editor.state == 'EDIT':
         self._draw_beat_editor()
-    elif self.state == 'COMPLETE':
+    elif self.state == 'COMPLETE' or self.state == 'FAIL':
       self._draw_progressbar_in_play_state()
       self._draw_beats_viewer()
     #================#
@@ -181,7 +196,11 @@ if __name__ == '__main__':
   #================================================================================================#
   beats = Midi('Breath.mid').beats()
   #================#
-  fruityloops = Fruityloops(null_beats(beats, [5, 11, -1]), Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats)))
+  fruityloops = Fruityloops(
+    beats_to_solve=null_beats(beats, [5, 11, -1]),
+    answer=pickle.dumps(beats),
+    piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats))
+  )
   fruityloops.primary_color=CHARLESTON
   fruityloops.secondary_color=EBONY
   fruityloops.tertiary_color=JET

@@ -111,11 +111,13 @@ def null_beats(beats, index_list):
   beats = copy.deepcopy(beats)
   #================#
   for i in index_list:
-    null_beat = beats[i]
-    null_beat[0].note = 0
-    null_beat[1].note = 0
+    null_beat(beats[i])
   #================#
   return beats
+
+def null_beat(beat):
+  beat[0].note = 0
+  beat[1].note = 0
 
 def is_null_beat(beat):
   return beat[0].note == 0 and beat[1].note == 0
