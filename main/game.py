@@ -6,6 +6,7 @@ from utils import *
 from midi import * 
 
 from fruityloops import *
+from transition import *
 
 if __name__ == '__main__':
   #===========================================INIT=================================================#
@@ -39,25 +40,33 @@ if __name__ == '__main__':
       piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(beats))
     )
   )
- #================#
   for level in levels:
     level.primary_color = CHARLESTON
     level.secondary_color = EBONY
     level.tertiary_color = JET
-  #================#
   current_level_index = 0
+  #================#
+  transition = Transition()
+  transition.fade_speed = 80
+  transition.primary_color=WHITE
   #================================================================================================#
+  main_loop_state = 'GAMEPLAY'
+  #================#
   while not done():
     clock.tick(60)
     #===========================================PROCESS=================================================#
     events = pygame.event.get()
-    levels[current_level_index].process(events)
     #================#
-    if levels[current_level_index].state == 'COMPLETE' and levels[current_level_index].beats_roll.playing_progress > 80:
-      current_level_index += 1
-    if levels[current_level_index].state == 'FAIL' and levels[current_level_index].beats_roll.playing_progress > 80:
-      levels[current_level_index].reset()
+    if main_loop_state == 'GAMEPLAY':
+      levels[current_level_index].process(events)
+      if levels[current_level_index].state == 'COMPLETE':
+        main_loop_state = 'TRANSITION TO NEXT'
+        transition.start()
+      if levels[current_level_index].state == 'FAIL':
+        main_loop_state = 'TRANSITION TO RESSET'
+    elif main_loop_state == 'TRANSITION TO NEXT':
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
-    screen.blit(levels[current_level_index].draw(), levels[current_level_index].world_space_rect)
+    if main_loop_state == 'GAMEPLAY':
+      screen.blit(levels[current_level_index].draw(), levels[current_level_index].world_space_rect)
     pygame.display.update()
