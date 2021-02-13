@@ -45,9 +45,11 @@ if __name__ == '__main__':
     level.secondary_color = EBONY
     level.tertiary_color = JET
   current_level_index = 0
+  next_level_index = current_level_index
   #================#
   transition = Transition()
-  transition.fade_speed = 80
+  transition.fadein_speed = 100
+  transition.fadeout_speed = 200
   transition.primary_color=WHITE
   #================================================================================================#
   main_loop_state = 'GAMEPLAY'
@@ -60,13 +62,26 @@ if __name__ == '__main__':
     if main_loop_state == 'GAMEPLAY':
       levels[current_level_index].process(events)
       if levels[current_level_index].state == 'COMPLETE':
-        main_loop_state = 'TRANSITION TO NEXT'
+        main_loop_state = 'TRANSITION'
+        next_level_index = current_level_index + 1
         transition.start()
-      if levels[current_level_index].state == 'FAIL':
-        main_loop_state = 'TRANSITION TO RESSET'
-    elif main_loop_state == 'TRANSITION TO NEXT':
+      elif levels[current_level_index].state == 'FAIL':
+        main_loop_state = 'TRANSITION'
+        next_level_index = current_level_index
+        transition.start()
+    elif main_loop_state == 'TRANSITION':
+      transition.process(events)
+      if transition.state == 'COMPLETE':
+        main_loop_state = 'GAMEPLAY'
+        current_level_index = next_level_index
     #===========================================RENDER==================================================#
     screen.fill(BLACK)
     if main_loop_state == 'GAMEPLAY':
       screen.blit(levels[current_level_index].draw(), levels[current_level_index].world_space_rect)
+    elif main_loop_state == 'TRANSITION':
+      if transition.state == 'FADE IN':
+        screen.blit(levels[current_level_index].draw(), levels[current_level_index].world_space_rect)
+      if transition.state == 'FADE OUT':
+        screen.blit(levels[next_level_index].draw(), levels[next_level_index].world_space_rect)
+      screen.blit(transition.draw(), transition.world_space_rect)
     pygame.display.update()

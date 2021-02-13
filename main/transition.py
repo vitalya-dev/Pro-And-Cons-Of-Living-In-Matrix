@@ -12,7 +12,8 @@ class Transition(Shape):
   def __init__(self, size=SCREEN_SIZE, parent=None):
     super().__init__(parent)
     #================#
-    self.fade_speed = 0
+    self.fadein_speed = 0
+    self.fadeout_speed = 0
     #================#
     self.state = 'IDLE'
     #================#
@@ -44,7 +45,7 @@ class Transition(Shape):
     return time.time() - some_point_in_time
 
   def _fade_in_state(self, events):
-    alpha = self._time_since(self._start_time_of_fade_in) * self.fade_speed
+    alpha = self._time_since(self._start_time_of_fade_in) * self.fadein_speed
     if alpha < 255:
       self._surface.set_alpha(alpha)
     else:
@@ -52,11 +53,11 @@ class Transition(Shape):
       self.state = 'FADE OUT'
 
   def _fade_out_state(self, events):
-    alpha = 255 - self._time_since(self._start_time_of_fade_out) * self.fade_speed
+    alpha = 255 - self._time_since(self._start_time_of_fade_out) * self.fadeout_speed
     if alpha > 0:
       self._surface.set_alpha(alpha)
     else:
-      self.state = 'IDLE'
+      self.state = 'COMPLETE'
 
   def draw(self):
     self._surface.fill(self.primary_color)
@@ -70,7 +71,8 @@ if __name__ == '__main__':
   clock = pygame.time.Clock()
   #================================================================================================#
   transition = Transition()
-  transition.fade_speed = 80
+  transition.fadein_speed = 80
+  transition.fadeout_speed = 160
   transition.primary_color=BLACK
   transition.start()
   #================================================================================================#
