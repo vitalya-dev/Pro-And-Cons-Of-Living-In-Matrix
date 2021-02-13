@@ -5,6 +5,7 @@ from constants import *
 from utils import *
 from midi import * 
 
+from songs import *
 from fruityloops import *
 from transition import *
 
@@ -16,28 +17,26 @@ if __name__ == '__main__':
   clock = pygame.time.Clock()
   midi_output = mido.open_output(None)
   #================================================================================================#
-  beats = Midi('Breath.mid').beats()
-  #================#
   levels = []
   levels.append(
     Fruityloops(
-      beats_to_solve=null_beats(beats, [5, 11, -1]),
-      answer=pickle.dumps(beats),
-      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(beats))
+      beats_to_solve=null_beats(breath_mid, [5, 11, -1]),
+      answer=pickle.dumps(breath_mid),
+      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(breath_mid))
     )
   )
   levels.append(
     Fruityloops(
-      beats_to_solve=null_beats(beats, [3, 8, -1]),
-      answer=pickle.dumps(beats),
-      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(beats))
+      beats_to_solve=null_beats(breath_mid, [3, 8, -1]),
+      answer=pickle.dumps(breath_mid),
+      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(breath_mid))
     )
   )
   levels.append(
     Fruityloops(
-      beats_to_solve=null_beats(beats, [4, 13, -1]),
-      answer=pickle.dumps(beats),
-      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(beats))
+      beats_to_solve=null_beats(breath_mid, [4, 13, -1]),
+      answer=pickle.dumps(breath_mid),
+      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(breath_mid))
     )
   )
   for level in levels:
