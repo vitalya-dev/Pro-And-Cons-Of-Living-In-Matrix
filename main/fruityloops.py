@@ -199,7 +199,7 @@ if __name__ == '__main__':
   fruityloops = Fruityloops(
     beats_to_solve=null_beats(beats, [5, 11, -1]),
     answer=pickle.dumps(beats),
-    piano=Piano(mido.open_output(None), Piano.generate_pianokeys_from_beats(beats))
+    piano=Piano.grand_piano(mido.open_output(None))
   )
   fruityloops.primary_color=CHARLESTON
   fruityloops.secondary_color=EBONY

@@ -22,21 +22,21 @@ if __name__ == '__main__':
     Fruityloops(
       beats_to_solve=null_beats(breath_mid, [5, 11, -1]),
       answer=pickle.dumps(breath_mid),
-      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(breath_mid))
+      piano=Piano.grand_piano(midi_output)
     )
   )
   levels.append(
     Fruityloops(
       beats_to_solve=null_beats(breath_mid, [3, 8, -1]),
       answer=pickle.dumps(breath_mid),
-      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(breath_mid))
+      piano=Piano.grand_piano(midi_output)
     )
   )
   levels.append(
     Fruityloops(
       beats_to_solve=null_beats(breath_mid, [4, 13, -1]),
       answer=pickle.dumps(breath_mid),
-      piano=Piano(midi_output, Piano.generate_pianokeys_from_beats(breath_mid))
+      piano=Piano.grand_piano(midi_output)
     )
   )
   for level in levels:
@@ -80,7 +80,8 @@ if __name__ == '__main__':
     elif main_loop_state == 'TRANSITION':
       if transition.state == 'FADE IN':
         screen.blit(levels[current_level_index].draw(), levels[current_level_index].world_space_rect)
+        screen.blit(transition.draw(), transition.world_space_rect)
       if transition.state == 'FADE OUT':
         screen.blit(levels[next_level_index].draw(), levels[next_level_index].world_space_rect)
-      screen.blit(transition.draw(), transition.world_space_rect)
+        screen.blit(transition.draw(), transition.world_space_rect)
     pygame.display.update()

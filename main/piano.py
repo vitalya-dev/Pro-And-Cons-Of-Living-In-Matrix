@@ -51,6 +51,28 @@ class Piano(object):
       middle_note+3: 'L',
     }
 
+  @staticmethod
+  def grand_piano(midioutput):
+    grand_piano_keys = {
+      'F': 51,
+      'D': 50,
+      'S': 49,
+      'A': 48,
+      'J': 52,
+      'K': 53,
+      'L': 54,
+      51: 'F',
+      50: 'D',
+      49: 'S',
+      48: 'A',
+      52: 'J',
+      53: 'K',
+      54: 'L'
+     }
+    return Piano(midioutput, grand_piano_keys)
+    
+
+
 
 if __name__ == '__main__':
   midioutput = mido.open_output(None)
